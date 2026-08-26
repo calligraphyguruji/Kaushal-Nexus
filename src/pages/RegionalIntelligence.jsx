@@ -1,13 +1,11 @@
 import {
   Map,
   Users,
-  BriefcaseBusiness,
   TrendingUp,
   ArrowUpRight,
   AlertTriangle,
   CheckCircle2,
   MapPin,
-  Building2,
   Target,
   BrainCircuit,
   BarChart3,

@@ -17,8 +17,6 @@ import {
   insights,
 } from "../data/dashboardData";
 
-import StatCard from "../components/StatCard";
-
 import {
   LineChart,
   Line,

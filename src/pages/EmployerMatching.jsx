@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Building2,
   Sparkles,
-  Target,
   BrainCircuit,
   BarChart3,
 } from "lucide-react";
