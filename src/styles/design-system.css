@@ -1,0 +1,22 @@
+:root {
+  --kn-primary: #312e81;
+  --kn-primary-dark: #1e1b4b;
+
+  --kn-accent: #f59e0b;
+
+  --kn-success: #059669;
+  --kn-warning: #d97706;
+  --kn-danger: #e11d48;
+
+  --kn-background: #f8fafc;
+  --kn-surface: #ffffff;
+
+  --kn-text: #0f172a;
+  --kn-muted: #64748b;
+  --kn-border: #e2e8f0;
+
+  --kn-radius-sm: 8px;
+  --kn-radius-md: 12px;
+  --kn-radius-lg: 16px;
+  --kn-radius-xl: 20px;
+}
