@@ -416,7 +416,7 @@ These outcomes are aspirational goals the platform **is designed to** support â€
 | _TBD_ | _TBD_ |
 | _TBD_ | _TBD_ |
 
-**Team:** GenZCoders
+**Team:** Vedaris
 
 ---
 
