@@ -9,11 +9,13 @@ export default function Topbar({ onMenuClick }) {
   const currentHour = new Date().getHours();
 
   const greeting =
-    currentHour < 12
+    currentHour >= 4 && currentHour < 12
       ? "Good morning"
-      : currentHour < 17
+      : currentHour >= 12 && currentHour < 17
       ? "Good afternoon"
-      : "Good evening";
+      : currentHour >= 17 && currentHour < 21
+      ? "Good evening"
+      : "Good night";
 
   const today = new Date();
 
