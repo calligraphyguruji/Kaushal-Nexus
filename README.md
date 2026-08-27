@@ -13,7 +13,7 @@ Longitudinal skilling outcomes and impact measurement for India's skilling ecosy
 [![Status](https://img.shields.io/badge/Status-Prototype-amber)]()
 [![SIH 2026](https://img.shields.io/badge/SIH-2026-1E3A8A)]()
 
-[Live Demo](#) · [Repository](#) · [Problem Statement](#-problem-statement) · [Roadmap](#-roadmap)
+[Repository](https://github.com/calligraphyguruji/Kaushal-Nexus.git) · [Problem Statement](#-problem-statement-sih26135) · [Architecture](#-platform-architecture) · [Roadmap](#-roadmap)
 
 ---
 
@@ -230,8 +230,13 @@ kaushalnexus/
 ├── src/
 │   ├── assets/
 │   ├── components/
+│   │   ├── ActionModal.jsx
+│   │   ├── IntelligenceCard.jsx
+│   │   ├── PageHeader.jsx
+│   │   ├── SectionHeader.jsx
 │   │   ├── Sidebar.jsx
 │   │   ├── StatCard.jsx
+│   │   ├── StatusBadge.jsx
 │   │   └── Topbar.jsx
 │   ├── data/
 │   │   ├── dashboardData.js
@@ -246,6 +251,7 @@ kaushalnexus/
 │   │   ├── ImpactDashboard.jsx
 │   │   ├── LearnerIntelligence.jsx
 │   │   ├── RegionalIntelligence.jsx
+│   │   ├── Settings.jsx
 │   │   └── SkillGapIntelligence.jsx
 │   ├── styles/
 │   │   └── design-system.css
@@ -328,12 +334,14 @@ The app will be available at the local URL printed in your terminal (Vite's defa
 
 **Implemented**
 - [x] Dashboard shell & responsive layout
-- [x] Learner Intelligence UI
-- [x] Skill Gap UI
-- [x] Regional Intelligence UI
-- [x] Employer Matching UI
-- [x] Overview / Impact Dashboard UI
-- [x] Design system & component library (Sidebar, Topbar, StatCard)
+- [x] Learner 360° Intelligence UI
+- [x] Skill Gap Intelligence Matrix & Shortage Analysis
+- [x] Regional Intelligence & District Performance Matrix
+- [x] Employer Network & Multi-Signal Job Matching
+- [x] Overview / Impact Dashboard & Longitudinal Funnel
+- [x] Platform Governance & Longitudinal Settings
+- [x] Design system & Component library (Sidebar, Topbar, StatCard, StatusBadge, PageHeader, SectionHeader, IntelligenceCard, ActionModal)
+- [x] Brand system & Minimalist UI Polish
 
 **Planned**
 - [ ] Backend API layer
@@ -346,7 +354,6 @@ The app will be available at the local URL printed in your terminal (Vite's defa
 - [ ] AI recommendation engine
 - [ ] ML-based employer matching
 - [ ] Advanced impact analytics
-- [ ] Settings module completion
 - [ ] Production deployment
 
 ---
