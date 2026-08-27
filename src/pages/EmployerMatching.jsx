@@ -1,483 +1,378 @@
+import { useState } from "react";
 import {
   BriefcaseBusiness,
   MapPin,
-  Users,
-  TrendingUp,
   ArrowUpRight,
-  CheckCircle2,
   Building2,
-  Sparkles,
-  BrainCircuit,
-  BarChart3,
+  Search,
 } from "lucide-react";
 
 import {
   matchingSummary,
   jobMatches,
   employerDemand,
-  matchInsights,
 } from "../data/employerData";
 
+import PageHeader from "../components/PageHeader";
+import SectionHeader from "../components/SectionHeader";
 import StatCard from "../components/StatCard";
+import StatusBadge from "../components/StatusBadge";
+import IntelligenceCard from "../components/IntelligenceCard";
+import ActionModal from "../components/ActionModal";
 
 export default function EmployerMatching() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedJobModal, setSelectedJobModal] = useState(null);
+  const [isEmployerNetworkModalOpen, setIsEmployerNetworkModalOpen] = useState(false);
+
+  const filteredJobs = jobMatches.filter((job) => {
+    return (
+      job.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.location.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
+
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
+      {/* =====================================================
+          PAGE HEADER
+      ====================================================== */}
+      <PageHeader
+        badge="Employer Alignment Engine"
+        badgeVariant="indigo"
+        title="Employer Network & Placement Matching"
+        description="Matching job-ready certified beneficiaries with verified employer hiring mandates based on skill alignment, location proximity, and readiness scores."
+        breadcrumbs={["National Platform", "Employer Matching"]}
+        actions={
+          <button
+            type="button"
+            onClick={() => setIsEmployerNetworkModalOpen(true)}
+            className="group inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-slate-800 active:scale-[0.98]"
+          >
+            <Building2 size={14} />
+            <span>1,420 Partner Organizations</span>
+            <ArrowUpRight size={12} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </button>
+        }
+      />
 
-      {/* Header */}
-      <section className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-indigo-700">
-            Employment Intelligence
-          </p>
-
-          <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">
-            Employer Matching
-          </h1>
-
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-            Connect job-ready learners with relevant opportunities using
-            skills, role requirements and location signals.
-          </p>
-        </div>
-
-        <button className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-indigo-950 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-900">
-          <Building2 size={16} />
-          Employer Network
-          <ArrowUpRight size={14} />
-        </button>
-
-      </section>
-
-
-      {/* Matching Stats */}
-      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-
-        {matchingSummary.map((stat) => (
+      {/* =====================================================
+          1. MATCHING KPI CARDS
+      ====================================================== */}
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {matchingSummary.map((stat, idx) => (
           <StatCard
             key={stat.title}
-            {...stat}
+            title={stat.title}
+            value={stat.value}
+            change={stat.change}
+            trend={stat.trend}
+            period={stat.period}
+            subtitle={stat.subtitle}
+            highlight={stat.highlight}
+            tone={idx === 2 ? "success" : idx === 1 ? "info" : "neutral"}
           />
         ))}
-
       </section>
 
+      {/* =====================================================
+          2. RECOMMENDED MATCHES & EMPLOYER DEMAND
+      ====================================================== */}
+      <section className="grid gap-6 xl:grid-cols-12">
+        {/* Recommended Opportunities List (8 Cols) */}
+        <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 xl:col-span-8 flex flex-col justify-between">
+          <div>
+            <SectionHeader
+              title="Verified Hiring Mandates & Learner Match Alignment"
+              subtitle="Algorithmically ranked opportunities matching certified cohort readiness"
+              actions={
+                <div className="relative">
+                  <Search
+                    size={13}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search roles or companies..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="h-8 w-52 rounded-md border border-slate-200 bg-slate-50/80 pl-8 pr-2.5 text-xs text-slate-800 focus:border-blue-400 focus:bg-white focus:outline-none"
+                  />
+                </div>
+              }
+            />
 
-      {/* Main Matching Intelligence */}
-      <section className="grid gap-5 xl:grid-cols-[1.35fr_0.9fr]">
-
-        {/* Recommended Opportunities */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] sm:p-7">
-
-          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-indigo-700">
-                AI Matching
-              </p>
-
-              <h2 className="mt-1.5 font-bold text-slate-900">
-                Recommended Opportunities
-              </h2>
-
-              <p className="mt-1 text-xs leading-5 text-slate-500">
-                Jobs ranked by learner skill alignment
-              </p>
-            </div>
-
-            <button className="flex w-fit items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-50">
-              View all
-              <ArrowUpRight size={14} />
-            </button>
-
-          </div>
-
-
-          <div className="space-y-4">
-
-            {jobMatches.map((job) => (
-              <div
-                key={`${job.company}-${job.role}`}
-                className="group rounded-2xl border border-slate-100 p-5 transition duration-200 hover:-translate-y-0.5 hover:border-indigo-100 hover:shadow-[0_4px_12px_rgba(15,23,42,0.05)]"
-              >
-
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-
-                  <div className="flex min-w-0 gap-4">
-
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
-                      <BriefcaseBusiness size={19} />
-                    </div>
-
-                    <div className="min-w-0">
-
-                      <h3 className="text-sm font-bold text-slate-900">
-                        {job.role}
-                      </h3>
-
-                      <p className="mt-1 text-xs font-semibold text-slate-500">
-                        {job.company}
-                      </p>
-
-                      <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-400">
-
-                        <span className="flex items-center gap-1.5">
-                          <MapPin size={13} />
-                          {job.location}
-                        </span>
-
-                        <span>
-                          {job.salary}
-                        </span>
-
-                        <span>
-                          {job.openings} openings
-                        </span>
-
+            <div className="mt-4 space-y-3">
+              {filteredJobs.length === 0 ? (
+                <div className="py-8 text-center text-xs text-slate-500">
+                  No verified hiring mandates found matching "{searchQuery}".
+                </div>
+              ) : (
+                filteredJobs.map((job) => (
+                  <div
+                    key={job.id}
+                    className="rounded-xl border border-slate-200/80 bg-white p-4 sm:p-5 transition-all hover:border-slate-300"
+                  >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex min-w-0 gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-50 border border-slate-200/80 text-blue-700 font-bold text-sm">
+                        <BriefcaseBusiness size={18} />
                       </div>
 
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                            {job.role}
+                          </h3>
+                          <StatusBadge variant="neutral" size="sm">
+                            {job.openings} Openings
+                          </StatusBadge>
+                        </div>
+
+                        <p className="mt-0.5 text-xs font-medium text-slate-600">
+                          {job.company} · <span className="text-slate-400">{job.companyType}</span>
+                        </p>
+
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                          <span className="flex items-center gap-1">
+                            <MapPin size={12} className="text-slate-400" />
+                            {job.location} ({job.workType})
+                          </span>
+                          <span>·</span>
+                          <span className="font-semibold text-slate-900 tabular-nums">
+                            {job.salary}
+                          </span>
+                          <span>·</span>
+                          <span className="text-[11px] text-slate-400">
+                            Posted {job.postedDate}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
+                    {/* Match Score Indicator */}
+                    <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-bold text-blue-700 tabular-nums">
+                          {job.match}%
+                        </span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                          Match
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-semibold text-emerald-700">
+                        High Fit ({job.matchBreakdown.skillAlignment}% Skills)
+                      </span>
+                    </div>
                   </div>
 
+                  {/* Skills Tag Row */}
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      Verified Skills:
+                    </span>
+                    {job.matchedSkills.map((s) => (
+                      <span
+                        key={s}
+                        className="rounded-full bg-emerald-50 border border-emerald-200/80 px-2 py-0.2 text-[10px] font-semibold text-emerald-800"
+                      >
+                        ✓ {s}
+                      </span>
+                    ))}
+                    {job.missingSkills.map((s) => (
+                      <span
+                        key={s}
+                        className="rounded-full bg-amber-50 border border-amber-200/80 px-2 py-0.2 text-[10px] font-semibold text-amber-800"
+                      >
+                        Gap: {s}
+                      </span>
+                    ))}
+                  </div>
 
-                  {/* Match Score */}
-                  <div className="flex shrink-0 items-center gap-3 sm:block sm:text-right">
-
-                    <div className="text-2xl font-extrabold text-indigo-950">
-                      {job.match}%
-                    </div>
-
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
-                      Match
+                  {/* Rationale & Action Footer */}
+                  <div className="mt-3 border-t border-slate-100 pt-2.5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-[11px] text-slate-600 leading-normal">
+                      <strong>Why this match:</strong> {job.rationale}
                     </p>
 
-                  </div>
-
-                </div>
-
-
-                {/* Skills */}
-                <div className="mt-5 flex flex-wrap gap-2">
-
-                  {job.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-700"
+                    <button
+                      type="button"
+                      onClick={() => setSelectedJobModal(job)}
+                      className="group inline-flex shrink-0 items-center gap-1 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 transition active:scale-[0.98]"
                     >
-                      {skill}
-                    </span>
-                  ))}
-
-                </div>
-
-
-                {/* Match Footer */}
-                <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
-
-                    <CheckCircle2 size={14} />
-
-                    Strong skill alignment
-
+                      <span>Match Dossier</span>
+                      <ArrowUpRight size={12} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </button>
                   </div>
-
-                  <button className="flex w-fit items-center gap-1.5 rounded-lg bg-indigo-950 px-3 py-2 text-xs font-bold text-white transition hover:bg-indigo-900">
-
-                    View Match
-
-                    <ArrowUpRight size={13} />
-
-                  </button>
-
                 </div>
-
-              </div>
-            ))}
-
+              )))}
+            </div>
           </div>
 
+          <div className="mt-4 border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-500 font-medium">
+            <span>Showing {filteredJobs.length} active high-match openings</span>
+            <span className="font-semibold text-blue-700">100% PF & Salary Compliance Verified</span>
+          </div>
         </div>
 
+        {/* Employer Skill Demand Rankings (4 Cols) */}
+        <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 xl:col-span-4 flex flex-col justify-between">
+          <div>
+            <SectionHeader
+              title="Employer Demand Index"
+              subtitle="Most requested competencies across active hiring mandates"
+            />
 
-        {/* Employer Demand */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] sm:p-7">
-
-          <div className="flex items-start justify-between">
-
-            <div>
-
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-indigo-700">
-                Employer Signals
-              </p>
-
-              <h2 className="mt-1.5 font-bold text-slate-900">
-                Employer Skill Demand
-              </h2>
-
-              <p className="mt-1 text-xs leading-5 text-slate-500">
-                Most requested skills across tracked openings
-              </p>
-
-            </div>
-
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700">
-              <BarChart3 size={17} />
-            </div>
-
-          </div>
-
-
-          <div className="mt-7 space-y-5">
-
-            {employerDemand.map((skill, index) => (
-              <div key={skill.skill}>
-
-                <div className="mb-2 flex items-center justify-between">
-
-                  <div className="flex min-w-0 items-center gap-3">
-
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-xs font-bold text-indigo-700">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-
-                    <span className="truncate text-sm font-semibold text-slate-700">
-                      {skill.skill}
-                    </span>
-
+            <div className="mt-4 divide-y divide-slate-100">
+              {employerDemand.map((item, idx) => (
+                <div key={item.skill} className="py-3 first:pt-0 last:pb-0">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-slate-400">
+                        0{idx + 1}
+                      </span>
+                      <span className="font-semibold text-slate-800">{item.skill}</span>
+                    </div>
+                    <span className="font-bold text-blue-700 tabular-nums">{item.demand}%</span>
                   </div>
 
-                  <span className="ml-3 text-xs font-extrabold text-indigo-800">
-                    {skill.demand}%
-                  </span>
+                  <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className="h-full rounded-full bg-blue-700 transition-all"
+                      style={{ width: `${item.demand}%` }}
+                    />
+                  </div>
 
+                  <div className="mt-1 flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                    <span>Category: {item.category}</span>
+                    <span>High Priority</span>
+                  </div>
                 </div>
-
-                <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
-
-                  <div
-                    className="h-full rounded-full bg-indigo-800 transition-all duration-500"
-                    style={{
-                      width: `${skill.demand}%`,
-                    }}
-                  />
-
-                </div>
-
-              </div>
-            ))}
-
-          </div>
-
-
-          {/* Demand Insight */}
-          <div className="mt-8 rounded-xl border border-amber-100 bg-amber-50/60 p-4">
-
-            <div className="flex items-start gap-3">
-
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-                <TrendingUp size={16} />
-              </div>
-
-              <div>
-
-                <p className="text-sm font-bold text-amber-950">
-                  Demand signal
-                </p>
-
-                <p className="mt-1 text-xs leading-5 text-amber-900/70">
-                  SQL and Python are currently the strongest requirements
-                  across Data Analyst opportunities.
-                </p>
-
-              </div>
-
+              ))}
             </div>
-
           </div>
 
+          <div className="mt-4 rounded-lg bg-blue-50/70 border border-blue-200/80 p-2.5 text-xs text-blue-950 font-medium text-center">
+            SQL & Python appear in 91% of data job descriptions.
+          </div>
         </div>
-
       </section>
 
+      {/* =====================================================
+          3. HOW THE MATCHING ENGINE OPERATES
+      ====================================================== */}
+      <section className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6">
+        <SectionHeader
+          title="Multi-Signal Employer Matching Architecture"
+          subtitle="How KaushalNexus matches candidate capabilities to verified industry requirements"
+        />
 
-      {/* How Matching Works */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] sm:p-7">
-
-        <div className="flex items-start gap-4">
-
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
-            <Sparkles size={18} />
-          </div>
-
-          <div>
-
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-indigo-700">
-              Matching Engine
-            </p>
-
-            <h2 className="mt-1.5 font-bold text-slate-900">
-              How KaushalNexus Matches Learners
-            </h2>
-
-            <p className="mt-1 text-xs leading-5 text-slate-500">
-              Matching considers multiple employment signals
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
           {[
             {
-              icon: Users,
-              title: "Skill Alignment",
-              text: "Compare verified learner skills with job requirements.",
+              title: "Verified Skill Alignment",
+              weight: "50% Weightage",
+              desc: "Matches verified assessment scores and NCVET capstones against required role competencies.",
             },
             {
-              icon: MapPin,
-              title: "Location Fit",
-              text: "Prioritize opportunities accessible to the learner.",
+              title: "Geospatial & Commute Proximity",
+              weight: "30% Weightage",
+              desc: "Prioritizes district and transit accessibility to maximize 6-month employment retention.",
             },
             {
-              icon: TrendingUp,
-              title: "Demand Signals",
-              text: "Use current employer demand to improve recommendations.",
+              title: "Readiness & Employer Velocity",
+              weight: "20% Weightage",
+              desc: "Factors in interview turnaround speed, candidate portfolio quality, and historical cohort placement.",
             },
-          ].map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <div
-                key={item.title}
-                className="group rounded-xl border border-slate-100 bg-slate-50 p-5 transition hover:border-indigo-100 hover:bg-indigo-50/40"
-              >
-
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-indigo-700 shadow-sm">
-                  <Icon size={17} />
-                </div>
-
-                <h3 className="mt-4 text-sm font-bold text-slate-900">
-                  {item.title}
-                </h3>
-
-                <p className="mt-1 text-xs leading-5 text-slate-500">
-                  {item.text}
-                </p>
-
+          ].map((item) => (
+            <div key={item.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-4">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-900">{item.title}</span>
+                <span className="rounded-full bg-blue-50 border border-blue-200 px-2 py-0.2 text-[10px] font-semibold text-blue-800">
+                  {item.weight}
+                </span>
               </div>
-            );
-          })}
-
-        </div>
-
-      </section>
-
-
-      {/* Matching Insights */}
-      <section>
-
-        <div className="mb-5">
-
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-indigo-700">
-            Employment Ecosystem
-          </p>
-
-          <h2 className="mt-1.5 font-bold text-slate-900">
-            Matching Insights
-          </h2>
-
-          <p className="mt-1 text-xs leading-5 text-slate-500">
-            Signals from the current employment ecosystem
-          </p>
-
-        </div>
-
-
-        <div className="grid gap-5 md:grid-cols-3">
-
-          {matchInsights.map((insight) => (
-            <div
-              key={insight.title}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(15,23,42,0.06)]"
-            >
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-                <CheckCircle2 size={17} />
-              </div>
-
-              <h3 className="mt-4 text-sm font-bold text-slate-900">
-                {insight.title}
-              </h3>
-
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                {insight.description}
+              <p className="mt-2 text-xs leading-relaxed text-slate-600">
+                {item.desc}
               </p>
-
             </div>
           ))}
-
         </div>
-
       </section>
 
+      {/* =====================================================
+          4. AI INTELLIGENCE PANEL
+      ====================================================== */}
+      <IntelligenceCard
+        category="Corporate Pipeline Engine"
+        title="Immediate Shortlisting for Data Analytics Cohort"
+        description="TechNova Solutions & InsightWorks have 14 combined open positions for Junior Data Analysts. 18 candidates in Noida and Lucknow cohorts meet the 90%+ match threshold and are ready for placement dispatch."
+        confidence="95.6% Placement Conversion Probability"
+        sampleSize="18 Candidates · 2 Enterprise Partners"
+        actionText="Dispatch Shortlist"
+        onAction={() => alert("Candidate shortlist dispatched to TechNova Solutions and InsightWorks.")}
+      />
 
-      {/* AI Matching Insight */}
-      <section className="rounded-2xl bg-indigo-950 p-6 text-white shadow-sm sm:p-7">
-
-        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-
-          <div className="flex items-start gap-4">
-
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10">
-
-              <BrainCircuit
-                size={20}
-                className="text-amber-400"
-              />
-
+      {/* =====================================================
+          ACTION MODALS
+      ====================================================== */}
+      <ActionModal
+        isOpen={!!selectedJobModal}
+        onClose={() => setSelectedJobModal(null)}
+        title={selectedJobModal ? `Match Breakdown: ${selectedJobModal.role}` : "Match Dossier"}
+        subtitle={selectedJobModal ? `${selectedJobModal.company} · ${selectedJobModal.location}` : ""}
+        confirmText="Submit Candidate Batch"
+        onConfirm={() => {
+          alert(`Candidate batch successfully submitted to ${selectedJobModal?.company}.`);
+        }}
+      >
+        {selectedJobModal && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-3 gap-2 text-center text-xs">
+              <div className="rounded-lg bg-slate-50 p-2.5 border border-slate-200">
+                <span className="text-slate-500">Skill Alignment</span>
+                <p className="text-sm font-bold text-blue-700 tabular-nums">
+                  {selectedJobModal.matchBreakdown.skillAlignment}%
+                </p>
+              </div>
+              <div className="rounded-lg bg-slate-50 p-2.5 border border-slate-200">
+                <span className="text-slate-500">Location Fit</span>
+                <p className="text-sm font-bold text-emerald-700 tabular-nums">
+                  {selectedJobModal.matchBreakdown.locationFit}%
+                </p>
+              </div>
+              <div className="rounded-lg bg-slate-50 p-2.5 border border-slate-200">
+                <span className="text-slate-500">Readiness Fit</span>
+                <p className="text-sm font-bold text-slate-900 tabular-nums">
+                  {selectedJobModal.matchBreakdown.readinessFit}%
+                </p>
+              </div>
             </div>
 
-
-            <div>
-
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-indigo-300">
-                AI Matching Insight
-              </p>
-
-              <h2 className="mt-1.5 text-lg font-bold">
-                Strong matches are emerging for data and full-stack roles.
-              </h2>
-
-              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-indigo-200">
-                Current employer demand indicates strong opportunities for
-                learners with SQL, Python, React and full-stack development
-                skills. Prioritizing these capabilities can improve
-                successful employer matching.
-              </p>
-
+            <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-200">
+              <p className="font-semibold text-slate-900">Hiring Manager Contact:</p>
+              <p className="text-slate-600">{selectedJobModal.hiringContact}</p>
+              <p className="text-slate-600 mt-1">Salary Range: {selectedJobModal.salary} (PF & Medical Included)</p>
             </div>
-
           </div>
+        )}
+      </ActionModal>
 
-
-          <button className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-indigo-950 transition hover:bg-indigo-50">
-
-            View Recommendation
-
-            <ArrowUpRight size={16} />
-
-          </button>
-
-        </div>
-
-      </section>
-
+      <ActionModal
+        isOpen={isEmployerNetworkModalOpen}
+        onClose={() => setIsEmployerNetworkModalOpen(false)}
+        title="National Employer Partner Directory"
+        subtitle="1,420 Active Corporate & MSME Hiring Partners"
+        confirmText="Download Partner MOU Dossier"
+        onConfirm={() => {
+          alert("Employer Partner Network Dossier downloaded.");
+        }}
+      >
+        <p className="text-xs text-slate-600">
+          The KaushalNexus Employer Network spans 1,420 organizations with active MOUs across IT & ITeS, Automotive Manufacturing, Logistics, Renewable Energy, and Healthcare services.
+        </p>
+      </ActionModal>
     </div>
   );
 }

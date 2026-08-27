@@ -1,22 +1,45 @@
 :root {
-  --kn-primary: #312e81;
-  --kn-primary-dark: #1e1b4b;
+  /* Brand Primary: Authoritative Navy / Bharat Deep Slate */
+  --kn-primary: #0f172a;
+  --kn-primary-dark: #020617;
+  --kn-primary-light: #1e293b;
 
-  --kn-accent: #f59e0b;
+  /* Accent: Institutional Trust Blue */
+  --kn-accent: #2563eb;
+  --kn-accent-dark: #1d4ed8;
+  --kn-accent-light: #dbeafe;
 
+  /* Semantic State Tokens */
   --kn-success: #059669;
-  --kn-warning: #d97706;
-  --kn-danger: #e11d48;
+  --kn-success-bg: #ecfdf5;
+  --kn-success-border: #a7f3d0;
 
+  --kn-warning: #d97706;
+  --kn-warning-bg: #fffbeb;
+  --kn-warning-border: #fde68a;
+
+  --kn-danger: #e11d48;
+  --kn-danger-bg: #fff1f2;
+  --kn-danger-border: #fecdd3;
+
+  --kn-info: #0284c7;
+  --kn-info-bg: #f0f9ff;
+  --kn-info-border: #bae6fd;
+
+  /* Surfaces & Neutrals */
   --kn-background: #f8fafc;
   --kn-surface: #ffffff;
+  --kn-surface-muted: #f1f5f9;
 
-  --kn-text: #0f172a;
-  --kn-muted: #64748b;
+  --kn-text-primary: #0f172a;
+  --kn-text-secondary: #475569;
+  --kn-text-muted: #94a3b8;
   --kn-border: #e2e8f0;
+  --kn-border-subtle: #f1f5f9;
 
-  --kn-radius-sm: 8px;
-  --kn-radius-md: 12px;
-  --kn-radius-lg: 16px;
-  --kn-radius-xl: 20px;
+  /* Precision Radii */
+  --kn-radius-sm: 6px;
+  --kn-radius-md: 10px;
+  --kn-radius-lg: 14px;
+  --kn-radius-xl: 18px;
 }

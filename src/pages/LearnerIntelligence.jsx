@@ -1,516 +1,452 @@
+import { useState } from "react";
 import {
   Search,
   MapPin,
   GraduationCap,
-  BriefcaseBusiness,
   BrainCircuit,
   CheckCircle2,
-  AlertTriangle,
-  ArrowUpRight,
-  CalendarDays,
   Award,
+  ShieldCheck,
+  UserCheck,
+  Clock,
+  ArrowUpRight,
 } from "lucide-react";
 
-const learner = {
-  name: "Aman Kumar Mishra",
-  id: "KN-2026-00482",
-  program: "Full Stack Development",
-  location: "Uttar Pradesh",
-  readiness: 82,
-  employment: "Seeking",
-  progress: 89,
-  modules: "18 / 20",
-};
-
-const skills = [
-  { name: "React", score: 92 },
-  { name: "JavaScript", score: 88 },
-  { name: "Java", score: 86 },
-  { name: "Node.js", score: 81 },
-];
-
-const gaps = [
-  {
-    name: "Cloud Computing",
-    level: "High",
-    width: "82%",
-  },
-  {
-    name: "AWS",
-    level: "Medium",
-    width: "58%",
-  },
-  {
-    name: "System Design",
-    level: "Medium",
-    width: "48%",
-  },
-];
-
-const timeline = [
-  {
-    title: "Program Enrolled",
-    date: "Jan 2026",
-    status: "completed",
-  },
-  {
-    title: "Training Started",
-    date: "Feb 2026",
-    status: "completed",
-  },
-  {
-    title: "Certification",
-    date: "Jul 2026",
-    status: "completed",
-  },
-  {
-    title: "Employment",
-    date: "In progress",
-    status: "current",
-  },
-];
+import { learnersList } from "../data/learnerData";
+import PageHeader from "../components/PageHeader";
+import SectionHeader from "../components/SectionHeader";
+import StatusBadge from "../components/StatusBadge";
+import IntelligenceCard from "../components/IntelligenceCard";
+import ActionModal from "../components/ActionModal";
 
 export default function LearnerIntelligence() {
+  const [selectedLearnerId, setSelectedLearnerId] = useState(learnersList[0].id);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isDossierModalOpen, setIsDossierModalOpen] = useState(false);
+  const [isInterventionModalOpen, setIsInterventionModalOpen] = useState(false);
+
+  const currentLearner =
+    learnersList.find((l) => l.id === selectedLearnerId) || learnersList[0];
+
+  const filteredLearners = learnersList.filter((l) => {
+    const matchesSearch =
+      l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      l.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      l.program.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
+
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
+      {/* =====================================================
+          PAGE HEADER
+      ====================================================== */}
+      <PageHeader
+        badge="Beneficiary 360° Intelligence"
+        badgeVariant="indigo"
+        title="Learner Dossier & Competency Tracker"
+        description="Individual-level tracking of verified skills, assessment scores, detected skill gaps, employment readiness, and longitudinal career progression."
+        breadcrumbs={["National Platform", "Learner Intelligence"]}
+        actions={
+          <button
+            type="button"
+            onClick={() => setIsDossierModalOpen(true)}
+            className="group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-blue-700 active:scale-[0.98]"
+          >
+            <Award size={14} />
+            <span>Verify NCVET Credential</span>
+            <ArrowUpRight size={12} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </button>
+        }
+      />
 
-      {/* Header */}
-      <section className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-indigo-700">
-            Learner Intelligence
-          </p>
-
-          <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">
-            Learner 360°
-          </h1>
-
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-            Track individual skill development, training progress,
-            readiness and employment outcomes.
-          </p>
-        </div>
-
-        <div className="relative w-full md:w-72">
-
-          <Search
-            size={17}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-
-          <input
-            type="text"
-            placeholder="Search learner..."
-            className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm outline-none transition focus:border-indigo-300 focus:ring-4 focus:ring-indigo-50"
-          />
-
-        </div>
-
-      </section>
-
-
-      {/* Learner Profile */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
-
-        <div className="p-6 sm:p-7">
-
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-
-            <div className="flex items-start gap-4">
-
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-indigo-950 text-lg font-bold text-white">
-                AK
-              </div>
-
-              <div>
-
-                <div className="flex flex-wrap items-center gap-3">
-
-                  <h2 className="text-xl font-bold text-slate-950">
-                    {learner.name}
-                  </h2>
-
-                  <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
-                    Ready to work
-                  </span>
-
-                </div>
-
-                <p className="mt-1 text-xs text-slate-400">
-                  Learner ID: {learner.id}
-                </p>
-
-                <div className="mt-4 flex flex-wrap gap-4">
-
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                    <GraduationCap size={15} />
-                    {learner.program}
-                  </span>
-
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                    <MapPin size={15} />
-                    {learner.location}
-                  </span>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            {/* Readiness */}
-            <div className="flex items-center gap-7">
-
-              <div className="text-right">
-
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
-                  Readiness Score
-                </p>
-
-                <p className="mt-1 text-3xl font-extrabold text-indigo-950">
-                  {learner.readiness}
-                  <span className="text-sm font-semibold text-slate-400">
-                    /100
-                  </span>
-                </p>
-
-              </div>
-
-              <div className="h-12 w-px bg-slate-200" />
-
-              <div>
-
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
-                  Employment
-                </p>
-
-                <p className="mt-1 flex items-center gap-2 text-sm font-bold text-amber-700">
-                  <BriefcaseBusiness size={16} />
-                  {learner.employment}
-                </p>
-
-              </div>
-
-            </div>
-
+      {/* =====================================================
+          1. COHORT SELECTOR & QUICK BROWSER
+      ====================================================== */}
+      <section className="rounded-xl border border-slate-200/80 bg-white p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <UserCheck size={15} className="text-blue-600" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-600">
+              Select Beneficiary Profile for Inspection:
+            </span>
           </div>
 
+          <div className="relative w-full sm:w-64">
+            <Search
+              size={13}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              type="text"
+              placeholder="Search candidate name or ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-8 w-full rounded-md border border-slate-200 bg-slate-50/80 pl-8 pr-3 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none"
+            />
+          </div>
         </div>
 
-      </section>
-
-
-      {/* Intelligence Cards */}
-      <section className="grid gap-5 lg:grid-cols-3">
-
-        {/* Skills */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
-
-          <div className="flex items-start justify-between">
-
-            <div>
-              <h2 className="font-bold text-slate-900">
-                Verified Skills
-              </h2>
-
-              <p className="mt-1 text-xs text-slate-500">
-                Current competency levels
-              </p>
+        {/* Learner Switcher Cards */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {filteredLearners.length === 0 ? (
+            <div className="w-full py-4 text-center text-xs text-slate-500">
+              No beneficiary records found matching "{searchQuery}".
             </div>
+          ) : (
+            filteredLearners.map((learner) => {
+              const isSelected = learner.id === currentLearner.id;
 
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700">
-              <BrainCircuit size={17} />
-            </div>
-
-          </div>
-
-          <div className="mt-6 space-y-5">
-
-            {skills.map((skill) => (
-              <div key={skill.name}>
-
-                <div className="mb-2 flex justify-between">
-
-                  <span className="text-sm font-semibold text-slate-700">
-                    {skill.name}
-                  </span>
-
-                  <span className="text-xs font-bold text-indigo-800">
-                    {skill.score}%
-                  </span>
-
-                </div>
-
-                <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
-
+              return (
+                <button
+                  key={learner.id}
+                  type="button"
+                  onClick={() => setSelectedLearnerId(learner.id)}
+                  className={`flex items-center gap-2.5 rounded-lg border p-2 text-left transition-colors ${
+                    isSelected
+                      ? "border-slate-900 bg-slate-50 text-slate-950 font-semibold"
+                      : "border-slate-200/80 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 font-medium"
+                  }`}
+                >
                   <div
-                    className="h-full rounded-full bg-indigo-800"
-                    style={{ width: `${skill.score}%` }}
-                  />
-
-                </div>
-
-              </div>
-            ))}
-
-          </div>
-
-        </div>
-
-
-        {/* Skill Gaps */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
-
-          <div className="flex items-start justify-between">
-
-            <div>
-              <h2 className="font-bold text-slate-900">
-                Skill Gaps
-              </h2>
-
-              <p className="mt-1 text-xs text-slate-500">
-                Areas requiring intervention
-              </p>
-            </div>
-
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
-              <AlertTriangle size={17} />
-            </div>
-
-          </div>
-
-          <div className="mt-6 space-y-5">
-
-            {gaps.map((gap) => (
-              <div key={gap.name}>
-
-                <div className="mb-2 flex items-center justify-between">
-
-                  <span className="text-sm font-semibold text-slate-700">
-                    {gap.name}
-                  </span>
-
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                      gap.level === "High"
-                        ? "bg-rose-50 text-rose-700"
-                        : "bg-amber-50 text-amber-700"
-                    }`}
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[11px] font-bold text-white ${learner.avatarBg}`}
                   >
-                    {gap.level}
-                  </span>
-
-                </div>
-
-                <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
-
-                  <div
-                    className="h-full rounded-full bg-amber-500"
-                    style={{ width: gap.width }}
-                  />
-
-                </div>
-
-              </div>
-            ))}
-
-          </div>
-
-        </div>
-
-
-        {/* Training Progress */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
-
-          <div className="flex items-start justify-between">
-
-            <div>
-              <h2 className="font-bold text-slate-900">
-                Training Progress
-              </h2>
-
-              <p className="mt-1 text-xs text-slate-500">
-                Program completion
-              </p>
-            </div>
-
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-              <Award size={17} />
-            </div>
-
-          </div>
-
-          <div className="mt-7">
-
-            <div className="flex items-end justify-between">
-
-              <span className="text-4xl font-extrabold text-slate-950">
-                {learner.progress}%
-              </span>
-
-              <span className="text-xs font-medium text-slate-400">
-                {learner.modules} modules
-              </span>
-
-            </div>
-
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
-
-              <div
-                className="h-full rounded-full bg-emerald-600"
-                style={{ width: `${learner.progress}%` }}
-              />
-
-            </div>
-
-            <div className="mt-4 flex items-center gap-2 text-xs font-medium text-emerald-700">
-
-              <CheckCircle2 size={14} />
-
-              On track for completion
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      {/* Learner Journey */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(15,23,42,0.04)] sm:p-7">
-
-        <div className="flex items-start justify-between">
-
-          <div>
-            <h2 className="font-bold text-slate-900">
-              Learner Journey
-            </h2>
-
-            <p className="mt-1 text-xs text-slate-500">
-              Progress from enrollment to employment
-            </p>
-          </div>
-
-          <CalendarDays
-            size={18}
-            className="text-slate-400"
-          />
-
-        </div>
-
-
-        <div className="mt-9 grid grid-cols-1 gap-7 md:grid-cols-4 md:gap-0">
-
-          {timeline.map((item, index) => {
-
-            const completed = item.status === "completed";
-            const current = item.status === "current";
-
-            return (
-              <div
-                key={item.title}
-                className="relative flex gap-4 md:block"
-              >
-
-                {/* Connector */}
-                {index < timeline.length - 1 && (
-                  <div className="absolute left-[15px] top-8 h-full w-px bg-slate-200 md:left-1/2 md:top-[15px] md:h-px md:w-full" />
-                )}
-
-                <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white md:mx-auto">
-
-                  <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-full border-2 ${
-                      completed
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-600"
-                        : current
-                        ? "border-amber-500 bg-amber-50 text-amber-600"
-                        : "border-slate-300 bg-white text-slate-300"
-                    }`}
-                  >
-                    {completed ? (
-                      <CheckCircle2 size={14} />
-                    ) : (
-                      <div className="h-2 w-2 rounded-full bg-current" />
-                    )}
+                    {learner.initials}
                   </div>
 
-                </div>
-
-                <div className="md:mt-4 md:text-center">
-
-                  <p className="text-sm font-bold text-slate-800">
-                    {item.title}
-                  </p>
-
-                  <p
-                    className={`mt-1 text-xs ${
-                      current
-                        ? "font-semibold text-amber-600"
-                        : "text-slate-400"
-                    }`}
-                  >
-                    {item.date}
-                  </p>
-
-                </div>
-
-              </div>
-            );
-          })}
-
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold truncate max-w-[130px] text-slate-900">
+                        {learner.name}
+                      </span>
+                      <StatusBadge
+                        variant={
+                          learner.statusTone === "success"
+                            ? "success"
+                            : learner.statusTone === "warning"
+                            ? "warning"
+                            : learner.statusTone === "danger"
+                            ? "danger"
+                            : "info"
+                        }
+                        size="sm"
+                      >
+                        {learner.readiness}%
+                      </StatusBadge>
+                    </div>
+                    <p className="text-[10px] text-slate-500 truncate max-w-[170px]">
+                      {learner.program}
+                    </p>
+                  </div>
+                </button>
+              );
+            })
+          )}
         </div>
-
       </section>
 
-
-      {/* AI Recommendation */}
-      <section className="rounded-2xl bg-indigo-950 p-6 text-white shadow-sm sm:p-7">
-
-        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-
+      {/* =====================================================
+          2. SELECTED LEARNER 360° MASTER HEADER CARD
+      ====================================================== */}
+      <section className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          {/* Candidate Info */}
           <div className="flex items-start gap-4">
-
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10">
-              <BrainCircuit
-                size={20}
-                className="text-amber-400"
-              />
+            <div
+              className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white shadow-xs ${currentLearner.avatarBg}`}
+            >
+              {currentLearner.initials}
             </div>
 
-            <div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-xl font-bold tracking-tight text-slate-950">
+                  {currentLearner.name}
+                </h2>
+                <StatusBadge
+                  variant={
+                    currentLearner.statusTone === "success"
+                      ? "success"
+                      : currentLearner.statusTone === "warning"
+                      ? "warning"
+                      : currentLearner.statusTone === "danger"
+                      ? "danger"
+                      : "info"
+                  }
+                  size="sm"
+                  dot
+                >
+                  {currentLearner.status}
+                </StatusBadge>
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/80">
+                  <ShieldCheck size={12} />
+                  Aadhaar & NCVET Verified
+                </span>
+              </div>
 
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-indigo-300">
-                AI Recommendation
-              </p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                <span className="font-mono font-semibold text-slate-700">
+                  ID: {currentLearner.id}
+                </span>
+                <span>·</span>
+                <span className="flex items-center gap-1 text-slate-600">
+                  <GraduationCap size={13} className="text-slate-400" />
+                  {currentLearner.education}
+                </span>
+                <span>·</span>
+                <span className="flex items-center gap-1 text-slate-600">
+                  <MapPin size={13} className="text-slate-400" />
+                  {currentLearner.location}
+                </span>
+              </div>
 
-              <h2 className="mt-1.5 text-lg font-bold">
-                Prioritize cloud skills before employer matching.
-              </h2>
-
-              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-indigo-200">
-                Closing the identified cloud competency gap could
-                improve this learner's employment readiness and
-                broaden the eligible employer pool.
-              </p>
-
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700">
+                  {currentLearner.nsqfLevel}
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  Training Center: <strong className="text-slate-700">{currentLearner.provider}</strong>
+                </span>
+              </div>
             </div>
-
           </div>
 
-          <button className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-indigo-950 transition hover:bg-indigo-50">
-            View Recommendation
-            <ArrowUpRight size={16} />
-          </button>
+          {/* Readiness & Progress Key Metrics */}
+          <div className="flex flex-wrap items-center gap-6 border-t border-slate-100 pt-4 lg:border-t-0 lg:pt-0">
+            <div className="text-center sm:text-right">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                Employment Readiness
+              </p>
+              <div className="mt-0.5 flex items-baseline justify-center sm:justify-end gap-1">
+                <span className="text-3xl font-bold tracking-tight text-blue-700 tabular-nums">
+                  {currentLearner.readiness}
+                </span>
+                <span className="text-xs font-semibold text-slate-400">/100</span>
+              </div>
+              <span className="text-[10px] font-semibold text-emerald-700">
+                Top 15% in Sector Cohort
+              </span>
+            </div>
 
+            <div className="hidden h-10 w-px bg-slate-200 sm:block" />
+
+            <div className="text-center sm:text-right">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                Training Progress
+              </p>
+              <div className="mt-0.5 flex items-baseline justify-center sm:justify-end gap-1">
+                <span className="text-3xl font-bold tracking-tight text-slate-950 tabular-nums">
+                  {currentLearner.progress}%
+                </span>
+              </div>
+              <span className="text-[10px] text-slate-500 font-medium">
+                {currentLearner.modulesCompleted} Modules ({currentLearner.trainingHours})
+              </span>
+            </div>
+          </div>
         </div>
-
       </section>
 
+      {/* =====================================================
+          3. THREE-COLUMN INTELLIGENCE BREAKDOWN
+      ====================================================== */}
+      <section className="grid gap-6 lg:grid-cols-3">
+        {/* Verified Skills Dossier */}
+        <div className="rounded-xl border border-slate-200/80 bg-white p-5 flex flex-col justify-between">
+          <div>
+            <SectionHeader
+              title="Verified Competencies"
+              subtitle="Skills assessed & authenticated by accredited bodies"
+              badge={
+                <StatusBadge variant="success" size="sm">
+                  {currentLearner.skills.length} Verified
+                </StatusBadge>
+              }
+            />
+
+            <div className="mt-4 divide-y divide-slate-100">
+              {currentLearner.skills.map((skill) => (
+                <div key={skill.name} className="py-2.5 first:pt-0 last:pb-0">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-800">{skill.name}</span>
+                    <span className="font-bold text-blue-700 tabular-nums">{skill.score}%</span>
+                  </div>
+
+                  <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className="h-full rounded-full bg-blue-700 transition-all"
+                      style={{ width: `${skill.score}%` }}
+                    />
+                  </div>
+
+                  <div className="mt-1 flex items-center justify-between text-[10px] text-slate-400">
+                    <span>{skill.verifiedBy}</span>
+                    <span className="font-semibold text-slate-600">{skill.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between font-mono">
+            <span>Credential ID: {currentLearner.credentialId}</span>
+          </div>
+        </div>
+
+        {/* Detected Skill Gaps & Deficits */}
+        <div className="rounded-xl border border-slate-200/80 bg-white p-5 flex flex-col justify-between">
+          <div>
+            <SectionHeader
+              title="Detected Skill Gaps"
+              subtitle="Shortages hindering immediate employer match"
+              badge={
+                <StatusBadge variant="warning" size="sm">
+                  {currentLearner.gaps.length} Actionable Gaps
+                </StatusBadge>
+              }
+            />
+
+            <div className="mt-4 divide-y divide-slate-100">
+              {currentLearner.gaps.map((gap) => (
+                <div key={gap.name} className="py-3 first:pt-0 last:pb-0">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-900">{gap.name}</span>
+                    <StatusBadge variant="danger" size="sm">
+                      {gap.level} Priority
+                    </StatusBadge>
+                  </div>
+
+                  <p className="mt-1.5 text-[11px] text-slate-600 leading-relaxed">
+                    <strong>Impact:</strong> {gap.impact}
+                  </p>
+                </div>
+              ))}
+
+              {currentLearner.gaps.length === 0 && (
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 text-center text-xs text-emerald-800">
+                  <CheckCircle2 size={22} className="mx-auto mb-1 text-emerald-600" />
+                  No critical skill gaps detected. Candidate is fully aligned with market demand.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsInterventionModalOpen(true)}
+            className="mt-4 w-full flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-100 transition-colors"
+          >
+            <BrainCircuit size={14} className="text-amber-600" />
+            <span>Generate Targeted Bridge Module</span>
+          </button>
+        </div>
+
+        {/* Longitudinal Career Timeline */}
+        <div className="rounded-xl border border-slate-200/80 bg-white p-5 flex flex-col justify-between">
+          <div>
+            <SectionHeader
+              title="Longitudinal Career Journey"
+              subtitle="From enrollment to 6-month employment milestone"
+            />
+
+            <div className="mt-4 space-y-3">
+              {currentLearner.timeline.map((step, idx) => {
+                const isCompleted = step.status === "completed";
+                const isCurrent = step.status === "current";
+
+                return (
+                  <div key={step.title} className="relative flex gap-3">
+                    {/* Line Connector */}
+                    {idx < currentLearner.timeline.length - 1 && (
+                      <div className="absolute left-[11px] top-5 h-full w-px bg-slate-200" />
+                    )}
+
+                    <div className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white">
+                      {isCompleted ? (
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                          <CheckCircle2 size={13} />
+                        </div>
+                      ) : isCurrent ? (
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-700">
+                          <Clock size={13} />
+                        </div>
+                      ) : (
+                        <div className="h-3.5 w-3.5 rounded-full border border-slate-300 bg-white" />
+                      )}
+                    </div>
+
+                    <div className="min-w-0 pb-1.5">
+                      <p className="text-xs font-semibold text-slate-900">{step.title}</p>
+                      <p className="text-[10px] text-slate-400">{step.date}</p>
+                      {step.note && (
+                        <p className="mt-0.5 text-[11px] text-slate-600 leading-tight">
+                          {step.note}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-2 text-[10px] text-slate-400 border-t border-slate-100 pt-2 flex items-center justify-between font-medium">
+            <span>Next Verification: 6M Check</span>
+            <span className="font-semibold text-slate-700">EPFO Synced</span>
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================
+          4. AI RECOMMENDATION DOSSIER
+      ====================================================== */}
+      <IntelligenceCard
+        category="Targeted Learner Action"
+        title={currentLearner.recommendation.action}
+        description={`Matching confidence with ${currentLearner.recommendation.targetCompany} increases to 96% upon completing recommended bridge modules. Expected starting CTC: ${currentLearner.recommendation.potentialWage}.`}
+        confidence="96.4% Match Probability"
+        sampleSize={`Benchmarked against 840 ${currentLearner.role} placements`}
+        actionText="Allocate Bridge Credit"
+        onAction={() => setIsInterventionModalOpen(true)}
+      />
+
+      {/* =====================================================
+          ACTION MODALS
+      ====================================================== */}
+      <ActionModal
+        isOpen={isDossierModalOpen}
+        onClose={() => setIsDossierModalOpen(false)}
+        title="NCVET Credential Verification Certificate"
+        subtitle={`Candidate ID: ${currentLearner.id} · NSQF Verified`}
+        confirmText="Download Verified PDF Certificate"
+        onConfirm={() => {
+          alert(`Official NCVET Verification Dossier for ${currentLearner.name} downloaded.`);
+        }}
+      >
+        <div className="space-y-3">
+          <div className="rounded-lg bg-slate-50 p-3 text-xs border border-slate-200">
+            <p className="font-bold text-slate-900">{currentLearner.name}</p>
+            <p className="text-slate-600">Program: {currentLearner.program}</p>
+            <p className="text-slate-600">Credential ID: {currentLearner.credentialId}</p>
+            <p className="text-emerald-700 font-semibold mt-1">Status: Authenticated on National Skills Registry (NSR)</p>
+          </div>
+        </div>
+      </ActionModal>
+
+      <ActionModal
+        isOpen={isInterventionModalOpen}
+        onClose={() => setIsInterventionModalOpen(false)}
+        title="Allocate Individual Bridge Upskilling Module"
+        subtitle={`Candidate: ${currentLearner.name}`}
+        confirmText="Enroll in Specialization Track"
+        onConfirm={() => {
+          alert(`Bridge module allocated to ${currentLearner.name} training portal.`);
+        }}
+      >
+        <p className="text-xs text-slate-600">
+          This action assigns a 20-hour lab specialization credit to {currentLearner.name} to close the detected competency deficit before candidate submission to partner employers.
+        </p>
+      </ActionModal>
     </div>
   );
 }

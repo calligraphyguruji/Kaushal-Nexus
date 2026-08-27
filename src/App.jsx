@@ -12,6 +12,7 @@ import RegionalIntelligence from "./pages/RegionalIntelligence";
 import EmployerMatching from "./pages/EmployerMatching";
 import LearnerIntelligence from "./pages/LearnerIntelligence";
 import SkillGapIntelligence from "./pages/SkillGapIntelligence";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -63,6 +64,15 @@ function App() {
           <Route
             path="/matching"
             element={<EmployerMatching />}
+          />
+
+
+          {/* =========================
+              SETTINGS
+          ========================== */}
+          <Route
+            path="/settings"
+            element={<Settings />}
           />
 
 
