@@ -33,7 +33,7 @@ Learners → Skills → Training Progress → Skill Gaps → Regional Intelligen
 
 ---
 
-## 🧩 Problem Statement
+## 🧩 Problem Statement (SIH26135)
 
 Most skilling and training programs — government-run or private — are evaluated using **enrolment and completion metrics**. This creates a measurement gap that Problem Statement 135 is designed to close:
 
@@ -412,9 +412,12 @@ These outcomes are aspirational goals the platform **is designed to** support �
 
 | Name | Role |
 |---|---|
-| _TBD_ | _TBD_ |
-| _TBD_ | _TBD_ |
-| _TBD_ | _TBD_ |
+| Aman Mishra | Team Lead |
+| Satyam Jaiswal | Software Developer |
+| Anand Maurya | Web Developer |
+| Ritesh Kumar Patel | Vibe Coder |
+| Aaliya Fatima | Ideation Lead |
+| Ayushi Baliyan | Ideation Management |
 
 **Team:** Vedaris
 
