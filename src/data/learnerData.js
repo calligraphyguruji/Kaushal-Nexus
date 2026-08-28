@@ -94,8 +94,8 @@ export const learnersList = [
   },
   {
     id: "KN-2026-00561",
-    name: "Rahul Verma",
-    initials: "RV",
+    name: "Ritesh Kumar Patel",
+    initials: "RP",
     avatarBg: "bg-slate-800",
     role: "Cloud Infrastructure Associate",
     targetRole: "DevOps & Cloud Associate",
