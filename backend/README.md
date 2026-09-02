@@ -21,7 +21,7 @@
 ## 📁 Directory Structure
 
 ```text
-kaushalnexus-backend/
+backend/
 ├── src/
 │   ├── main.py                   # FastAPI application factory, middlewares & lifespan
 │   ├── api/
@@ -78,7 +78,7 @@ kaushalnexus-backend/
 
 ### Step 1: Create Virtual Environment
 ```bash
-cd kaushalnexus-backend
+cd backend
 python3.12 -m venv .venv
 source .venv/bin/activate
 ```

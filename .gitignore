@@ -8,7 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+frontend/node_modules/
 dist
+frontend/dist/
 dist-ssr
 *.local
 .env
@@ -19,10 +21,17 @@ dist-ssr
 # Python & Virtual Environments
 __pycache__/
 *.py[cod]
+*.pyc
 *$py.class
 .venv/
+backend/.venv/
 venv/
 .pytest_cache/
+.coverage
+htmlcov/
+backend/generated_reports/*.pdf
+backend/generated_reports/*.csv
+generated_reports/
 
 # Editor directories and files
 .vscode/*

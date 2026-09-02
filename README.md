@@ -230,49 +230,62 @@ KaushalNexus integrates **Google Gemini AI** (via `GEMINI_API_KEY` on the FastAP
 ## 📁 Project Structure
 
 ```
-kaushalnexus/
-├── src/
-│   ├── assets/
-│   ├── components/
-│   │   ├── ActionModal.jsx
-│   │   ├── IntelligenceCard.jsx
-│   │   ├── PageHeader.jsx
-│   │   ├── SectionHeader.jsx
-│   │   ├── Sidebar.jsx
-│   │   ├── StatCard.jsx
-│   │   ├── StatusBadge.jsx
-│   │   └── Topbar.jsx
-│   ├── data/
-│   │   ├── dashboardData.js
-│   │   ├── employerData.js
-│   │   ├── learnerData.js
-│   │   ├── regionalData.js
-│   │   └── skillGapData.js
-│   ├── layouts/
-│   │   └── DashboardLayout.jsx
-│   ├── pages/
-│   │   ├── EmployerMatching.jsx
-│   │   ├── ImpactDashboard.jsx
-│   │   ├── LearnerIntelligence.jsx
-│   │   ├── RegionalIntelligence.jsx
-│   │   ├── Settings.jsx
-│   │   └── SkillGapIntelligence.jsx
-│   ├── styles/
-│   │   └── design-system.css
-│   ├── App.css
-│   ├── App.jsx
-│   ├── index.css
-│   └── main.jsx
+KaushalNexus/
+├── frontend/
+│   ├── src/
+│   │   ├── __tests__/
+│   │   ├── api/
+│   │   ├── assets/
+│   │   ├── auth/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── data/
+│   │   ├── hooks/
+│   │   ├── layouts/
+│   │   ├── pages/
+│   │   ├── styles/
+│   │   ├── utils/
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── public/
+│   ├── .env.example
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── vercel.json
+│   └── vite.config.js
+├── backend/
+│   ├── alembic/
+│   ├── scripts/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── core/
+│   │   ├── middleware/
+│   │   ├── ml/
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   ├── workers/
+│   │   ├── main.py
+│   │   └── seed.py
+│   ├── tests/
+│   ├── .env.example
+│   ├── alembic.ini
+│   ├── docker-compose.yml
+│   ├── Dockerfile
+│   ├── entrypoint.sh
+│   ├── pytest.ini
+│   ├── README.md
+│   └── requirements.txt
 ├── .gitignore
-├── eslint.config.js
-├── index.html
-├── package.json
-├── package-lock.json
-├── README.md
-└── vite.config.js
+├── .env.example
+└── README.md
 ```
 
-> Data currently powers the UI from static files in `src/data/` (`dashboardData.js`, `employerData.js`, `learnerData.js`, `regionalData.js`, `skillGapData.js`). This will be replaced by live API/database-backed data as the backend is built out.
+> Data currently powers the UI from static files in `frontend/src/data/` (`dashboardData.js`, `employerData.js`, `learnerData.js`, `regionalData.js`, `skillGapData.js`). This will be replaced by live API/database-backed data as the backend is built out.
 
 ---
 
@@ -306,7 +319,7 @@ Design tokens live in `src/styles/design-system.css`, layered with Tailwind CSS 
 ### 1. Backend Setup (FastAPI + NPMAI AI Ecosystem)
 
 ```bash
-cd kaushalnexus-backend
+cd backend
 
 # 1. Create and activate virtual environment (Python 3.12+)
 python3 -m venv .venv
@@ -331,13 +344,14 @@ pytest tests
 uvicorn src.main:app --reload --port 8000
 ```
 
-
 FastAPI Swagger Docs will be available at: `http://localhost:8000/docs`
 
 ### 2. Frontend Setup (React + Vite)
 
 ```bash
-# In the root repository directory
+cd frontend
+
+# Install dependencies (if not already installed)
 npm install
 
 # Start Vite dev server
