@@ -5,8 +5,13 @@ import {
   Navigate,
 } from "react-router-dom";
 
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 
+import LearnerHome from "./pages/LearnerHome";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import ImpactDashboard from "./pages/ImpactDashboard";
 import RegionalIntelligence from "./pages/RegionalIntelligence";
 import EmployerMatching from "./pages/EmployerMatching";
@@ -17,82 +22,100 @@ import Settings from "./pages/Settings";
 function App() {
   return (
     <BrowserRouter>
-
-      <DashboardLayout>
-
+      <AuthProvider>
         <Routes>
+          {/* Public Learner Landing Page */}
+          <Route path="/" element={<LearnerHome />} />
 
-          {/* =========================
-              OVERVIEW
-          ========================== */}
+          {/* Public Auth Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Protected Application Routes */}
           <Route
             path="/dashboard"
-            element={<ImpactDashboard />}
-          />
-
-
-          {/* =========================
-              LEARNER INTELLIGENCE
-          ========================== */}
-          <Route
-            path="/learner"
-            element={<LearnerIntelligence />}
-          />
-
-
-          {/* =========================
-              SKILL GAP
-          ========================== */}
-          <Route
-            path="/skill-gap"
-            element={<SkillGapIntelligence />}
-          />
-
-
-          {/* =========================
-              REGIONAL INTELLIGENCE
-          ========================== */}
-          <Route
-            path="/regional"
-            element={<RegionalIntelligence />}
-          />
-
-
-          {/* =========================
-              EMPLOYER NETWORK
-          ========================== */}
-          <Route
-            path="/matching"
-            element={<EmployerMatching />}
-          />
-
-
-          {/* =========================
-              SETTINGS
-          ========================== */}
-          <Route
-            path="/settings"
-            element={<Settings />}
-          />
-
-
-          {/* =========================
-              DEFAULT
-          ========================== */}
-          <Route
-            path="*"
             element={
-              <Navigate
-                to="/dashboard"
-                replace
-              />
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ImpactDashboard />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
 
+          <Route
+            path="/learner"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <LearnerIntelligence />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/learner/:learnerId"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <LearnerIntelligence />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/skill-gap"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <SkillGapIntelligence />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/regional"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <RegionalIntelligence />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/matching"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <EmployerMatching />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Settings />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Default Fallback Redirect */}
+          <Route
+            path="*"
+            element={<Navigate to="/" replace />}
+          />
         </Routes>
-
-      </DashboardLayout>
-
+      </AuthProvider>
     </BrowserRouter>
   );
 }

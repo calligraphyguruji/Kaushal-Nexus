@@ -5,11 +5,14 @@ import "./index.css";
 import "./App.css";
 import "./styles/design-system.css";
 
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 import App from "./App.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <App />
-    <Analytics />
+    <ThemeProvider>
+      <App />
+      <Analytics />
+    </ThemeProvider>
   </StrictMode>
 );

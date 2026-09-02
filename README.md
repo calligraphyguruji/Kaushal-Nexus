@@ -177,49 +177,53 @@ The **Employer Matching** module is currently a **conceptual/UI-level implementa
 
 ---
 
-## 🤖 AI / Intelligence Layer
+## 🤖 AI / Intelligence Layer & Google Gemini API Integration
 
-AI is intended to play a supporting role across the platform, conceptually:
+KaushalNexus integrates **Google Gemini AI** (via `GEMINI_API_KEY` on the FastAPI backend) to deliver **AI-Powered Learner Intelligence & Skill Gap Diagnostics**.
 
-- Identifying patterns in learner and training data
-- Detecting emerging or worsening skill gaps
-- Recommending targeted interventions to institutions and learners
-- Improving the accuracy of employer–learner matching
-- Highlighting priority regions that need attention
+- **Google Gemini REST API**: Connects to `gemini-3.7-flash` (or `gemini-2.5-flash` / configurable) using native structured JSON mode (`response_mime_type: "application/json"`).
+- **Diagnostic Gap Identification**: Compares verified candidate competencies against live employer demand to isolate high-priority deficits.
+- **Personalized Phased Roadmaps**: Generates 3-phase modular learning trajectories with specific lab exercises, durations, and benchmark outcomes.
+- **Explainable Rationale**: Articulates why each skill gap matters for enterprise hiring mandates.
+- **Targeted Lab Projects**: Recommends practical hands-on implementations to build recruiter-ready portfolios.
+- **Job Readiness Milestones**: Estimates time-to-readiness and aligns candidates with suitable employment roles.
+- **Privacy & Grounding**: Input data is sanitized to strip PII. AI outputs are strictly grounded on actual candidate records without fabricating database statistics.
 
-| | Status |
-|---|---|
-| **Currently implemented (prototype)** | Dashboard UI/UX for all AI-facing panels (recommendations, readiness scores, skill-gap views) using mock/static data |
-| **Planned intelligence capabilities** | Actual skill-gap detection models, recommendation engine, ML-based employer matching, predictive analytics |
-
-To be explicit: **no AI model is currently deployed or running in this repository.** All "AI recommendation" surfaces in the current build are UI representations of the intended capability.
+| Feature | Provider / Model | Status | Endpoint |
+|---|---|---|---|
+| **AI Skill Gap & Roadmap** | Google Gemini (`gemini-3.7-flash` configurable) | ✅ Active | `POST /api/v1/ai/skill-gap-analysis` |
+| **Semantic Vector Matching** | TF-IDF & Cosine Distance Engine | ✅ Active | `POST /api/v1/ml/skill-similarity` |
+| **Starting Compensation Predictor** | Ridge Regression Wage Estimator | ✅ Active | `POST /api/v1/ml/predict-wage` |
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Currently Implemented
+### Frontend
 
 | Layer | Technology | Version |
 |---|---|---|
 | Frontend Framework | React | ^19.2.8 |
 | Build Tool | Vite | ^8.2.2 |
-| Styling | Tailwind CSS (via `@tailwindcss/vite` plugin) + custom stylesheets (`design-system.css`, `App.css`, `index.css`) |
+| Styling | Tailwind CSS (via `@tailwindcss/vite`) + Design System | ^4.3.3 |
 | Routing | React Router DOM | ^7.18.2 |
 | Data Visualization | Recharts | ^3.10.1 |
 | Icons | Lucide React | ^1.34.0 |
-| Linting | ESLint (`eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`) | ^10.9.0 |
-| Language | JavaScript (JSX) | — |
+| HTTP Client | Axios (with JWT interceptors & token rotation) | ^1.20.0 |
 
-### Planned / Future Architecture
+### Backend & AI Service
 
-| Layer | Technology (planned) |
-|---|---|
-| Backend / API | Not yet implemented |
-| Database | Not yet implemented |
-| Authentication | Not yet implemented |
-| ML / Recommendation Engine | Not yet implemented |
-| Deployment | Not yet finalized |
+| Layer | Technology | Version |
+|---|---|---|
+| Backend Framework | FastAPI | ^0.115.0 |
+| ASGI Server | Uvicorn | ^0.32.0 |
+| AI Service | **Google Gemini API** (`gemini-3.7-flash` / `gemini-2.5-flash`) | Live + Deterministic fallback |
+| Validation | Pydantic v2 & Pydantic Settings | ^2.9.0 |
+| Database | PostgreSQL (asyncpg connection pool) + SQLAlchemy 2.0 | ^2.0.35 |
+| Cache & Task Broker | Redis + Celery | ^5.2.0 |
+
+
+
 
 ---
 
@@ -297,25 +301,50 @@ Design tokens live in `src/styles/design-system.css`, layered with Tailwind CSS 
 
 ---
 
-## 🚀 Installation
+## 🚀 Installation & Running
+
+### 1. Backend Setup (FastAPI + NPMAI AI Ecosystem)
 
 ```bash
-# Clone the repository
-git clone <repository-url>
+cd kaushalnexus-backend
 
-# Navigate into the project
-cd kaushalnexus
+# 1. Create and activate virtual environment (Python 3.12+)
+python3 -m venv .venv
+source .venv/bin/activate
 
-# Install dependencies
+# 2. Install backend dependencies (including NPMAI)
+pip install -r requirements.txt
+# Or directly: pip install npmai
+
+# 3. Configure environment variables
+cp .env.example .env
+
+# NPMAI Configuration in .env:
+# NPMAI_MODEL=llama3.2   (options: llama3.2, mistral, gemma2, phi3, qwen2.5, deepseek-r1)
+# NPMAI_TEMPERATURE=0.3
+# NPMAI_AUTO_FALLBACK=true
+
+# 4. Run tests
+pytest tests
+
+# 5. Start the FastAPI development server
+uvicorn src.main:app --reload --port 8000
+```
+
+
+FastAPI Swagger Docs will be available at: `http://localhost:8000/docs`
+
+### 2. Frontend Setup (React + Vite)
+
+```bash
+# In the root repository directory
 npm install
 
-# Start the development server
+# Start Vite dev server
 npm run dev
 ```
 
-The app will be available at the local URL printed in your terminal (Vite's default is `http://localhost:5173/`).
-
-> No environment variables are currently required to run the frontend prototype.
+The frontend dashboard will be available at: `http://localhost:5173/`
 
 ---
 
@@ -326,22 +355,25 @@ The app will be available at the local URL printed in your terminal (Vite's defa
 | `npm run dev` | `vite` | Starts the Vite development server |
 | `npm run build` | `vite build` | Creates a production build |
 | `npm run preview` | `vite preview` | Serves the production build locally for preview |
-| `npm run lint` | `eslint .` | Runs ESLint across the project using `eslint.config.js` |
+| `npm run lint` | `eslint .` | Runs ESLint across the project |
+| `pytest` | `pytest tests` | Executes all 113+ backend unit & integration tests |
 
 ---
 
 ## 🗺️ Roadmap
 
 **Implemented**
-- [x] Dashboard shell & responsive layout
-- [x] Learner 360° Intelligence UI
-- [x] Skill Gap Intelligence Matrix & Shortage Analysis
+- [x] Google Gemini AI Skill Gap Analysis & Personalized Learning Roadmap (`@ai-sdk/google` + FastAPI)
+- [x] Learner 360° Intelligence UI with AI Skill Intelligence section
+- [x] Skill Gap Intelligence Matrix & Shortage Analysis with AI Cohort Diagnostics
 - [x] Regional Intelligence & District Performance Matrix
 - [x] Employer Network & Multi-Signal Job Matching
-- [x] Overview / Impact Dashboard & Longitudinal Funnel
-- [x] Platform Governance & Longitudinal Settings
-- [x] Design system & Component library (Sidebar, Topbar, StatCard, StatusBadge, PageHeader, SectionHeader, IntelligenceCard, ActionModal)
-- [x] Brand system & Minimalist UI Polish
+- [x] Longitudinal 3M/6M/12M Retention Checkpoints & EPFO verification adapter
+- [x] ML Layer (TF-IDF semantic skill similarity & Ridge regression wage prediction)
+- [x] JWT Authentication with refresh token rotation & RBAC
+- [x] Design system & Component library (Sidebar, Topbar, StatCard, StatusBadge, PageHeader, SectionHeader, IntelligenceCard, ActionModal, AISkillIntelligence)
+- [x] PDF & CSV Dossier Exporters
+
 
 **Planned**
 - [ ] Backend API layer

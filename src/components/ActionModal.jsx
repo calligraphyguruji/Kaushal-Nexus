@@ -21,43 +21,43 @@ export default function ActionModal({
       />
 
       {/* Dialog */}
-      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl transition-all">
+      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl transition-all dark:border-slate-800 dark:bg-slate-900 dark:shadow-slate-950/70">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-slate-100 p-5">
+        <div className="flex items-start justify-between border-b border-slate-100 p-5 dark:border-slate-800">
           <div>
             <div className="flex items-center gap-2">
               <StatusBadge variant="indigo" size="sm">
                 Policy & Execution Engine
               </StatusBadge>
             </div>
-            <h3 className="mt-1.5 text-base font-bold text-slate-900 sm:text-lg">
+            <h3 className="mt-1.5 text-base font-bold text-slate-900 sm:text-lg dark:text-slate-100">
               {title}
             </h3>
             {subtitle && (
-              <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>
             )}
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-5 text-xs sm:text-sm text-slate-600">
+        <div className="p-5 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
           {children}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2.5 border-t border-slate-100 bg-slate-50/60 px-5 py-3.5">
+        <div className="flex items-center justify-end gap-2.5 border-t border-slate-100 bg-slate-50/60 px-5 py-3.5 dark:border-slate-800 dark:bg-slate-950/60">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+            className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             Close
           </button>
@@ -68,7 +68,7 @@ export default function ActionModal({
                 if (onConfirm) onConfirm();
                 onClose();
               }}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition active:scale-[0.98]"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition active:scale-[0.98] dark:bg-blue-600 dark:hover:bg-blue-500"
             >
               <CheckCircle2 size={14} />
               {confirmText}

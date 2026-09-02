@@ -6,7 +6,7 @@ export default function DashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900 transition-colors duration-150 dark:bg-slate-950 dark:text-slate-100 dark:selection:bg-blue-950 dark:selection:text-blue-200">
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

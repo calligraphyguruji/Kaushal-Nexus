@@ -2,6 +2,8 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   font-family: "Plus Jakarta Sans", sans-serif;
 
@@ -11,6 +13,11 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+:root.dark {
+  color: #f8fafc;
+  background: #090d16;
 }
 
 * {
@@ -26,6 +33,13 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: #f8fafc;
+  color: #0f172a;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark body {
+  background: #090d16;
+  color: #f8fafc;
 }
 
 button,
@@ -37,4 +51,22 @@ textarea {
 
 button {
   cursor: pointer;
+}
+
+/* Dark mode input autofill and consistency rules */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover, 
+.dark input:-webkit-autofill:focus,
+.dark select:-webkit-autofill,
+.dark select:-webkit-autofill:hover,
+.dark select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #f8fafc;
+  -webkit-box-shadow: 0 0 0px 1000px #1e293b inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Ensure native select dropdown options follow theme background and text */
+.dark select option {
+  background-color: #1e293b;
+  color: #f8fafc;
 }

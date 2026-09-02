@@ -1,0 +1,159 @@
+services:
+  # ============================================================================
+  # 1. FastAPI Application Server
+  # ============================================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kaushalnexus_api
+    restart: unless-stopped
+    command: api
+    ports:
+      - "${PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - HOST=0.0.0.0
+      - PORT=8000
+      - WORKERS=${WORKERS:-2}
+      - POSTGRES_SERVER=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-kaushal_admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-kaushal_secret}
+      - POSTGRES_DB=${POSTGRES_DB:-kaushalnexus_db}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-kaushal_admin}:${POSTGRES_PASSWORD:-kaushal_secret}@postgres:5432/${POSTGRES_DB:-kaushalnexus_db}
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - RUN_MIGRATIONS=${RUN_MIGRATIONS:-true}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ============================================================================
+  # 2. Celery Distributed Background Worker
+  # ============================================================================
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kaushalnexus_celery_worker
+    restart: unless-stopped
+    command: worker
+    env_file:
+      - .env
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - POSTGRES_SERVER=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-kaushal_admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-kaushal_secret}
+      - POSTGRES_DB=${POSTGRES_DB:-kaushalnexus_db}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-kaushal_admin}:${POSTGRES_PASSWORD:-kaushal_secret}@postgres:5432/${POSTGRES_DB:-kaushalnexus_db}
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - CELERY_CONCURRENCY=${CELERY_CONCURRENCY:-4}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ============================================================================
+  # 3. PostgreSQL Database Server (PostGIS-enabled)
+  # ============================================================================
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: kaushalnexus_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kaushal_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kaushal_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-kaushalnexus_db}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kaushal_admin} -d ${POSTGRES_DB:-kaushalnexus_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================================
+  # 4. Redis Cache & Celery Broker
+  # ============================================================================
+  redis:
+    image: redis:7.4-alpine
+    container_name: kaushalnexus_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================================
+  # 5. Standalone Database Migration Runner (Alembic)
+  # ============================================================================
+  migration:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kaushalnexus_migration
+    command: migrate
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-kaushal_admin}:${POSTGRES_PASSWORD:-kaushal_secret}@postgres:5432/${POSTGRES_DB:-kaushalnexus_db}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - migration
+      - tools
+
+  # ============================================================================
+  # 6. Standalone Database Seeder Runner (Demo Data)
+  # ============================================================================
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kaushalnexus_seeder
+    command: seed
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-kaushal_admin}:${POSTGRES_PASSWORD:-kaushal_secret}@postgres:5432/${POSTGRES_DB:-kaushalnexus_db}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - seed
+      - tools
+
+# ==============================================================================
+# Persistent Named Volumes
+# ==============================================================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

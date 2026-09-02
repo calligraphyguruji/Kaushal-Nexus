@@ -1,0 +1,46 @@
+# Git & CI/CD
+.git
+.gitignore
+.github
+.gitlab
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+
+# IDEs & OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs & Temporary files
+*.log
+logs/
+tmp/
+temp/
+
+# Environment configurations (Secrets should not be baked into image)
+.env
+.env.local
+.env.*.local
