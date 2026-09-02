@@ -81,7 +81,7 @@ export default function LearnerHome() {
       description:
         "Sign up in seconds, link your vocational training center or academic background, and set your target career trajectory.",
       points: [
-        "Aadhaar / DigiLocker integration",
+        "Integration-ready Aadhaar / DigiLocker adapters",
         "Target sector & wage preference",
         "PMKK / ITI / University sync",
       ],
@@ -1223,7 +1223,7 @@ export default function LearnerHome() {
           <div className="mt-10 flex flex-col items-center justify-between border-t border-slate-200/80 pt-6 sm:flex-row dark:border-slate-800">
             <p>© 2026 KaushalNexus · National Skilling & Longitudinal Employment Platform. All rights reserved.</p>
             <p className="mt-2 text-[11px] sm:mt-0">
-              Official Platform · Compliant with Digital Personal Data Protection (DPDP) Act
+              SIH Demonstration Prototype · Consent-Based &amp; DPDP-Aligned Data Governance
             </p>
           </div>
         </div>

@@ -382,7 +382,7 @@ The frontend dashboard will be available at: `http://localhost:5173/`
 - [x] Skill Gap Intelligence Matrix & Shortage Analysis with AI Cohort Diagnostics
 - [x] Regional Intelligence & District Performance Matrix
 - [x] Employer Network & Multi-Signal Job Matching
-- [x] Longitudinal 3M/6M/12M Retention Checkpoints & EPFO verification adapter
+- [x] Longitudinal 3M/6M/12M Retention Checkpoints & EPFO verification sandbox adapter (integration-ready)
 - [x] ML Layer (TF-IDF semantic skill similarity & Ridge regression wage prediction)
 - [x] JWT Authentication with refresh token rotation & RBAC
 - [x] Design system & Component library (Sidebar, Topbar, StatCard, StatusBadge, PageHeader, SectionHeader, IntelligenceCard, ActionModal, AISkillIntelligence)

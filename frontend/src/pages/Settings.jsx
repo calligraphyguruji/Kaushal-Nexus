@@ -189,6 +189,22 @@ export default function Settings() {
             Privileged
           </span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabChange("privacy")}
+          className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-semibold transition ${
+            activeTab === "privacy"
+              ? "border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-400"
+              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+          }`}
+        >
+          <Lock size={14} />
+          <span>Privacy & Consent</span>
+          <span className="rounded-full bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 text-[9px] font-bold text-emerald-700 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-300">
+            DPDP-Aligned
+          </span>
+        </button>
       </div>
 
       {syncStatusMsg && (
@@ -329,43 +345,43 @@ export default function Settings() {
         <div className="space-y-6">
           <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
             <SectionHeader
-              title="Institutional Data Pipelines & APIs"
-              subtitle="Real-time verification sources powering the KaushalNexus intelligence pipeline."
+              title="Institutional Data Pipelines & Adapters"
+              subtitle="Integration-ready verification architecture with sandbox/mock adapters for demonstration."
             />
 
             <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800">
               {[
                 {
                   name: "UIDAI / Aadhaar Beneficiary Verification",
-                  type: "Identity Authentication",
-                  status: "Connected · 99.4% Match",
-                  variant: "success",
+                  type: "Identity Authentication (Sandbox Adapter)",
+                  status: "Mock Adapter Active",
+                  variant: "info",
                   canTrigger: false,
                 },
                 {
                   name: "NCVET National Qualification Register (NQR)",
                   type: "Curriculum & NSQF Alignment",
-                  status: "Connected · Version 2026.1",
+                  status: "Aligned Qualification Model",
                   variant: "success",
                   canTrigger: false,
                 },
                 {
                   name: "EPFO & National Career Service (NCS)",
                   type: "Longitudinal Employment & PF Verification",
-                  status: "Active Webhook",
-                  variant: "success",
+                  status: "Sandbox Adapter (Demo Sync)",
+                  variant: "indigo",
                   canTrigger: permissions.canRunEPFOSync,
-                  triggerLabel: "Trigger EPFO Sync",
+                  triggerLabel: "Trigger EPFO Mock Sync",
                   onTrigger: handleTriggerEPFOSync,
                   loading: epfoSyncLoading,
                 },
                 {
                   name: "Skill India Digital (SID) Central Registry",
                   type: "Candidate Enrolment & Training Center Feed",
-                  status: "Hourly Polling",
+                  status: "Sandbox Pipeline Active",
                   variant: "indigo",
                   canTrigger: permissions.canRunSIDSync,
-                  triggerLabel: "Trigger SID Sync",
+                  triggerLabel: "Trigger SID Mock Sync",
                   onTrigger: handleTriggerSIDSync,
                   loading: sidSyncLoading,
                 },
@@ -523,6 +539,108 @@ export default function Settings() {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Tab 4: Privacy & Consent Governance */}
+      {activeTab === "privacy" && (
+        <div className="space-y-6">
+          <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-5 dark:border-slate-800">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+                    <ShieldCheck size={18} />
+                  </span>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                    Beneficiary Consent & Data Privacy Governance
+                  </h3>
+                </div>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  KaushalNexus incorporates privacy controls aligned with relevant DPDP principles, including consent, purpose limitation, data minimization and accountability. Candidate consents are explicitly tracked with purpose-limitation, immutable audit timestamps, and automated revocation compliance.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-300">
+                <Check size={12} /> DPDP Act Aligned
+              </span>
+            </div>
+
+            {/* Tracking Authorization Matrix */}
+            <div className="mt-6">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+                Tracking Permission Categories & Enforcement Rules
+              </h4>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">
+                      Follow-Up Communication
+                    </span>
+                    <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200">
+                      Active Guardrail
+                    </span>
+                  </div>
+                  <p className="mt-2 text-[11px] text-slate-600 dark:text-slate-400">
+                    Governs automated 30, 90, 180, and 365-day milestone outreach. If consent is revoked, all dispatch queues immediately skip candidate outreach.
+                  </p>
+                  <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-500">
+                    <Clock size={11} /> <span>Revocation latency: &lt;10ms (Synchronous check)</span>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">
+                      Wage Progression Verification
+                    </span>
+                    <span className="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:bg-blue-900/60 dark:text-blue-200">
+                      Range-Based Minimization
+                    </span>
+                  </div>
+                  <p className="mt-2 text-[11px] text-slate-600 dark:text-slate-400">
+                    Protects sensitive compensation details. Employs wage brackets and percentage deltas rather than granular transaction ledger pulls.
+                  </p>
+                  <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-500">
+                    <Lock size={11} /> <span>Anonymized in aggregated state metrics</span>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">
+                      Micro-Enterprise & Self-Employment
+                    </span>
+                    <span className="rounded bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800 dark:bg-purple-900/60 dark:text-purple-200">
+                      Field Verified
+                    </span>
+                  </div>
+                  <p className="mt-2 text-[11px] text-slate-600 dark:text-slate-400">
+                    Tracks entrepreneurial ventures, Udyam MSME credentials, and revenue bands with dual-signature assessor sign-off.
+                  </p>
+                  <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-500">
+                    <Check size={11} /> <span>Dual verification audit trail enabled</span>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">
+                      Epistemic AI Inference Standard
+                    </span>
+                    <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:bg-amber-900/60 dark:text-amber-200">
+                      Strict Guardrail
+                    </span>
+                  </div>
+                  <p className="mt-2 text-[11px] text-slate-600 dark:text-slate-400">
+                    Ensures AI models express correlations (&quot;associated with&quot;, &quot;observed pattern&quot;) without asserting unsubstantiated causality in candidate dossiers.
+                  </p>
+                  <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-500">
+                    <AlertCircle size={11} /> <span>Non-causal phrasing enforced</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

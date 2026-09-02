@@ -345,7 +345,7 @@ export function exportImpactAuditPDF({ summary, trendData, funnelData, sectorMat
   renderAutoTable(doc, {
     startY: currentY,
     head: [["Funnel Stage", "Candidates", "Cohort %", "Operational Description", "Verification Status"]],
-    body: funnelRows.length > 0 ? funnelRows : [["Enrollment", "28,450", "100%", "Registered PMKK Candidates", "Aadhaar UIDAI Synced"]],
+    body: funnelRows.length > 0 ? funnelRows : [["Enrollment", "28,450", "100%", "Registered PMKK Candidates", "Demo Identity Adapter Synced"]],
     theme: "grid",
     headStyles: { fillColor: COLORS.primary, textColor: COLORS.white, fontSize: 7.5, fontStyle: "bold" },
     bodyStyles: { fontSize: 7, textColor: COLORS.primary },

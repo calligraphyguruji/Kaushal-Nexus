@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient } from './client.js';
 
 export const placementsApi = {
   /**
@@ -40,5 +40,43 @@ export const placementsApi = {
       updateData
     );
     return response.data;
+  },
+
+  /**
+   * Retrieves turnover and job departure reasons documented for a placement
+   * @param {string} placementId
+   */
+  async getSeparations(placementId) {
+    try {
+      const response = await apiClient.get(`/placements/${placementId}/separations`);
+      return response.data;
+    } catch (err) {
+      if (!err.response) {
+        return [];
+      }
+      throw err;
+    }
+  },
+
+  /**
+   * Documents employee departure / turnover event and updates retention checkpoints
+   * @param {string} placementId
+   * @param {Object} separationData - { reason, separation_date, checkpoint_id, source, notes, associated_skill_gap }
+   */
+  async recordSeparation(placementId, separationData) {
+    try {
+      const response = await apiClient.post(`/placements/${placementId}/separations`, separationData);
+      return response.data;
+    } catch (err) {
+      if (!err.response) {
+        return {
+          id: `sep-${Date.now()}`,
+          placement_id: placementId,
+          ...separationData,
+          recorded_at: new Date().toISOString(),
+        };
+      }
+      throw err;
+    }
   },
 };

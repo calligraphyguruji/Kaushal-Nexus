@@ -107,6 +107,7 @@ celery_app.conf.update(
         "src.workers.epfo_sync_task.*": {"queue": "epfo_queue"},
         "src.workers.sid_pipeline.*": {"queue": "sid_queue"},
         "src.workers.report_generator.*": {"queue": "reports_queue"},
+        "src.workers.followup_task.*": {"queue": "default"},
         "src.workers.celery_app.*": {"queue": "default"},
     },
 )
@@ -117,6 +118,7 @@ celery_app.autodiscover_tasks(
         "src.workers.epfo_sync_task",
         "src.workers.sid_pipeline",
         "src.workers.report_generator",
+        "src.workers.followup_task",
     ],
     force=True,
 )

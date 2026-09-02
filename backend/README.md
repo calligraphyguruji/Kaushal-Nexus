@@ -1,6 +1,6 @@
 # KaushalNexus Backend API
 
-> Production-ready National Skill-to-Employment Intelligence Platform backend built with **Python 3.12**, **FastAPI**, **SQLAlchemy 2.x (Async)**, **PostgreSQL (PostGIS)**, **Pydantic v2**, **Redis**, and **Celery**.
+> Integration-ready prototype for National Skill-to-Employment Intelligence Platform backend built with **Python 3.12**, **FastAPI**, **SQLAlchemy 2.x (Async)**, **PostgreSQL (PostGIS)**, **Pydantic v2**, **Redis**, and **Celery**.
 
 ---
 
@@ -14,7 +14,7 @@
 - **Background Worker Processing**: [Celery](https://docs.celeryq.dev/)
 - **Machine Learning Layer**: [scikit-learn](https://scikit-learn.org/) & [NumPy](https://numpy.org/) (TF-IDF & Ridge Regression)
 - **Security & RBAC**: JWT Access & Refresh token rotation, bcrypt hashing, correlation IDs, security headers, sliding-window rate limiting, and immutable audit logs.
-- **Testing**: [pytest](https://docs.pytest.org/) + `pytest-asyncio` + `httpx` (106 automated tests)
+- **Testing**: [pytest](https://docs.pytest.org/) + `pytest-asyncio` + `httpx` (148 automated tests)
 
 ---
 
@@ -37,7 +37,7 @@ backend/
 │   │       ├── regional.py       # District divergence & priority clusters
 │   │       ├── skill_gaps.py     # Competency deficit analytics & interventions
 │   │       ├── tasks.py          # Background worker triggers & status tracking
-│   │       ├── verification.py   # External verification gateways (Aadhaar, EPFO, SID)
+│   │       ├── verification.py   # External verification sandbox adapters (Aadhaar, EPFO, SID)
 │   │       └── endpoints/
 │   │           ├── auth.py       # Authentication, registration & refresh tokens
 │   │           └── health.py     # Health checks & telemetry
@@ -56,7 +56,7 @@ backend/
 │   ├── models/                   # SQLAlchemy ORM entity models
 │   ├── schemas/                  # Pydantic validation schemas & DTOs
 │   ├── services/                 # Business logic service layer & external adapters
-│   └── workers/                  # Celery tasks (EPFO sync, SID pipeline, report generator)
+│   └── workers/                  # Celery tasks (EPFO mock sync, SID sandbox pipeline, reports, follow-ups)
 ├── alembic/                      # Database migration versions
 ├── tests/                        # Pytest test suite (106 unit & integration tests)
 ├── .env.example                  # Environment configuration template
@@ -123,7 +123,7 @@ alembic history --verbose
 
 ## 3. 🌱 Seeding Deterministic Demo Data
 
-KaushalNexus includes a comprehensive deterministic generator that populates realistic national skilling data across institutional RBAC roles, 31 Indian districts, training centers, competencies, 140 candidate dossiers, corporate mandates, placements, and longitudinal retention checkpoints.
+KaushalNexus includes a comprehensive deterministic generator that populates realistic demonstration data across institutional RBAC roles, 31 Indian districts, training centers, competencies, 140 candidate dossiers, corporate mandates, placements, and longitudinal retention checkpoints for SIH evaluation.
 
 ```bash
 # Seed local database via CLI
@@ -170,7 +170,7 @@ docker compose ps
 
 ## 5. 🧪 Running Automated Tests
 
-The backend includes a comprehensive 106-test pytest suite covering unit logic, RBAC policies, API integration, and asynchronous workers.
+The backend includes a comprehensive 148-test pytest suite covering unit logic, RBAC policies, API integration, longitudinal follow-ups, consents, and asynchronous workers.
 
 ```bash
 # Run complete test suite

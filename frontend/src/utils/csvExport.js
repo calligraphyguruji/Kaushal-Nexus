@@ -240,7 +240,7 @@ export function exportImpactOutcomesCSV(summary, trendData, funnelData, period =
       Metric: "Verified Placements",
       Value: Number(summary.total_placed || 0).toLocaleString(),
       Unit: "Count",
-      Context: "Aadhaar & EPFO Linked",
+      Context: "Verification Adapter Linked (Demo)",
     });
     rows.push({
       Category: "Executive KPI",

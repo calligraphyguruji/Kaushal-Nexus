@@ -166,6 +166,10 @@ class LearnerService:
                 selectinload(Learner.district),
                 selectinload(Learner.training_center),
                 selectinload(Learner.skills).selectinload(LearnerSkill.competency),
+                selectinload(Learner.consents),
+                selectinload(Learner.follow_ups),
+                selectinload(Learner.self_employment_outcomes),
+                selectinload(Learner.non_placement_reasons),
             )
         )
         result = await db.execute(stmt)
@@ -237,6 +241,53 @@ class LearnerService:
             skills=skills_dto,
             detected_gaps=detected_gaps,
             career_timeline=timeline,
+            consents=[
+                {
+                    "id": str(c.id),
+                    "consent_type": c.consent_type,
+                    "purpose": c.purpose,
+                    "granted": c.granted,
+                    "granted_at": c.granted_at.isoformat() if c.granted_at else None,
+                    "revoked_at": c.revoked_at.isoformat() if c.revoked_at else None,
+                    "version": c.version,
+                }
+                for c in (learner.consents or [])
+            ],
+            follow_ups=[
+                {
+                    "id": str(fu.id),
+                    "follow_up_type": fu.follow_up_type,
+                    "scheduled_at": fu.scheduled_at.isoformat() if fu.scheduled_at else None,
+                    "status": fu.status,
+                    "channel": fu.channel,
+                    "response_status": fu.response_status,
+                }
+                for fu in (learner.follow_ups or [])
+            ],
+            self_employment_outcomes=[
+                {
+                    "id": str(se.id),
+                    "enterprise_name": se.enterprise_name,
+                    "business_activity": se.business_activity,
+                    "sector": se.sector,
+                    "start_date": se.start_date.isoformat() if se.start_date else None,
+                    "monthly_income_range": se.monthly_income_range,
+                    "business_status": se.business_status,
+                    "verification_status": se.verification_status,
+                }
+                for se in (learner.self_employment_outcomes or [])
+            ],
+            non_placement_reasons=[
+                {
+                    "id": str(np.id),
+                    "reason": np.reason,
+                    "source": np.source,
+                    "recorded_at": np.recorded_at.isoformat() if np.recorded_at else None,
+                    "notes": np.notes,
+                    "associated_skill_code": np.associated_skill_code,
+                }
+                for np in (learner.non_placement_reasons or [])
+            ],
             created_at=learner.created_at,
             updated_at=learner.updated_at,
         )

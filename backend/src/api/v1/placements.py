@@ -14,8 +14,13 @@ from src.schemas.placement_dto import (
     RetentionCheckpointDTO,
     RetentionCheckpointUpdateDTO,
 )
+from src.schemas.outcome_dto import (
+    PlacementSeparationCreateDTO,
+    PlacementSeparationResponseDTO,
+)
 from src.schemas.user import UserRole
 from src.services.audit_service import audit_service
+from src.services.outcome_tracking_service import outcome_tracking_service
 from src.services.placement_service import placement_service
 
 router = APIRouter()
@@ -145,6 +150,58 @@ async def update_retention_checkpoint(
             "checkpoint_type": checkpoint_type,
             "is_active_at_checkpoint": res.is_active_at_checkpoint,
             "wage_increment_percentage": res.wage_increment_percentage,
+        },
+    )
+    return res
+
+
+@router.get(
+    "/{placement_id}/separations",
+    response_model=List[PlacementSeparationResponseDTO],
+    status_code=status.HTTP_200_OK,
+    summary="List Placement Separation / Attrition Records",
+    description="Retrieves turnover and job departure reasons documented for a placement.",
+)
+async def get_placement_separations(
+    placement_id: uuid.UUID = Path(..., description="Unique placement UUID"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+) -> List[PlacementSeparationResponseDTO]:
+    """Retrieves placement separation records."""
+    return await outcome_tracking_service.get_placement_separations(
+        db=db, placement_id=placement_id, user=current_user
+    )
+
+
+@router.post(
+    "/{placement_id}/separations",
+    response_model=PlacementSeparationResponseDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Record Job Separation / Attrition Event",
+    description="Documents employee departure (better opportunity, low salary, skill mismatch) and updates retention checkpoints.",
+)
+async def record_placement_separation(
+    placement_id: uuid.UUID = Path(..., description="Unique placement UUID"),
+    sep_in: PlacementSeparationCreateDTO = ...,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*RETENTION_UPDATE_ROLES)),
+) -> PlacementSeparationResponseDTO:
+    """Records job separation and marks placement as separated."""
+    res = await outcome_tracking_service.record_placement_separation(
+        db=db, placement_id=placement_id, req=sep_in, user=current_user
+    )
+    await audit_service.log_action(
+        db=db,
+        action="ATTRITION_RECORDED",
+        resource_type="PLACEMENT",
+        resource_id=str(placement_id),
+        actor=current_user,
+        status="SUCCESS",
+        details={
+            "reason": res.reason.value,
+            "separation_date": res.separation_date.isoformat(),
+            "checkpoint_id": str(res.checkpoint_id) if res.checkpoint_id else None,
+            "associated_skill_gap": res.associated_skill_gap,
         },
     )
     return res

@@ -292,7 +292,7 @@ export default function RegionalIntelligence() {
               trend="up"
               period="conversion rate"
               subtitle={`${totalCertified.toLocaleString()} NCVET certified`}
-              highlight="Aadhaar-EPFO Linked"
+              highlight="Verification Adapter Linked"
               tone="success"
             />
 
@@ -301,9 +301,9 @@ export default function RegionalIntelligence() {
               value={`${avgRetentionRate}%`}
               change="180-Day Milestone"
               trend="up"
-              period="EPFO verified"
-              subtitle="Continuous contribution audit"
-              highlight="Longitudinal Compliance"
+              period="retention audited"
+              subtitle="180-day retention verified (EPFO mock adapter)"
+              highlight="Longitudinal Tracking (Demo)"
               tone="warning"
             />
 

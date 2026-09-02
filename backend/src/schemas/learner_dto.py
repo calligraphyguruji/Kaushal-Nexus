@@ -131,6 +131,12 @@ class Learner360ResponseDTO(BaseModel):
     detected_gaps: List[DetectedSkillGapDTO]
     career_timeline: List[CareerTimelineMilestoneDTO]
 
+    # Longitudinal Outcomes & Privacy
+    consents: Optional[List[Dict[str, Any]]] = None
+    follow_ups: Optional[List[Dict[str, Any]]] = None
+    self_employment_outcomes: Optional[List[Dict[str, Any]]] = None
+    non_placement_reasons: Optional[List[Dict[str, Any]]] = None
+
     created_at: datetime
     updated_at: datetime
 

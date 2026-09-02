@@ -6,7 +6,7 @@ export const dashboardStats = [
     trend: "up",
     period: "vs last quarter",
     subtitle: "Across 42 active skilling districts",
-    highlight: "94.2% verified Aadhaar linkage",
+    highlight: "Demo dataset: 94.2% linkage",
   },
   {
     title: "Training Completion Rate",
@@ -22,7 +22,7 @@ export const dashboardStats = [
     value: "68.7%",
     change: "+8.4%",
     trend: "up",
-    period: "vs national baseline",
+    period: "demonstration cohort",
     subtitle: "16,886 placed in verified roles",
     highlight: "Target: 75.0% by Q4 2026",
   },
@@ -31,8 +31,8 @@ export const dashboardStats = [
     value: "81.3%",
     change: "+5.1%",
     trend: "up",
-    period: "longitudinal tracking",
-    subtitle: "13,728 sustained employment",
+    period: "demonstration cohort",
+    subtitle: "13,728 retained (demo record)",
     highlight: "Avg starting wage: ₹22,400/mo",
   },
 ];
@@ -41,7 +41,7 @@ export const conversionPipeline = [
   { stage: "Enrolled", count: 28450, rate: "100%", description: "Total registered across 6 sectors" },
   { stage: "Completed Training", count: 25600, rate: "90.0%", description: "Completed min. 400 hrs curriculum" },
   { stage: "Certified", count: 24580, rate: "86.4%", description: "Passed third-party assessment" },
-  { stage: "Employed", count: 16886, rate: "68.7%", description: "Placed with verified employer PF/offer" },
+  { stage: "Employed", count: 16886, rate: "68.7%", description: "Placed in employer role (demonstration record)" },
   { stage: "6M Retained", count: 13728, rate: "81.3%", description: "Active employment after 180 days" },
 ];
 

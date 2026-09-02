@@ -19,6 +19,11 @@ import {
   Briefcase,
   UserX,
   Download,
+  PhoneCall,
+  Send,
+  Building2,
+  UserMinus,
+  Plus,
 } from "lucide-react";
 
 import { learnersApi } from "../api/learners";
@@ -125,6 +130,41 @@ export default function LearnerIntelligence() {
   const [checkpointCTC, setCheckpointCTC] = useState(4.5);
   const [checkpointRemarks, setCheckpointRemarks] = useState("");
 
+  // Longitudinal Outcome States
+  const [followUpsList, setFollowUpsList] = useState([]);
+  const [selfEmpList, setSelfEmpList] = useState([]);
+  const [nonPlacementList, setNonPlacementList] = useState([]);
+  const [consentsList, setConsentsList] = useState([]);
+  const [separationsList, setSeparationsList] = useState([]);
+
+  // Longitudinal Outcome Modals
+  const [isScheduleFollowUpModalOpen, setIsScheduleFollowUpModalOpen] = useState(false);
+  const [followUpType, setFollowUpType] = useState("30_DAY");
+  const [followUpChannel, setFollowUpChannel] = useState("IN_APP");
+  const [followUpNotes, setFollowUpNotes] = useState("");
+
+  const [isRecordResponseModalOpen, setIsRecordResponseModalOpen] = useState(false);
+  const [targetFollowUpId, setTargetFollowUpId] = useState(null);
+  const [responseStatus, setResponseStatus] = useState("EMPLOYED");
+  const [responseNotes, setResponseNotes] = useState("");
+
+  const [isSelfEmpModalOpen, setIsSelfEmpModalOpen] = useState(false);
+  const [selfEmpName, setSelfEmpName] = useState("");
+  const [selfEmpActivity, setSelfEmpActivity] = useState("");
+  const [selfEmpSector, setSelfEmpSector] = useState("Power & Clean Energy");
+  const [selfEmpIncome, setSelfEmpIncome] = useState("₹20,000 - ₹35,000");
+  const [selfEmpNotes, setSelfEmpNotes] = useState("");
+
+  const [isNonPlacementModalOpen, setIsNonPlacementModalOpen] = useState(false);
+  const [nonPlacementReason, setNonPlacementReason] = useState("SKILL_GAP");
+  const [nonPlacementSkillCode, setNonPlacementSkillCode] = useState("COMP-GENAI-01");
+  const [nonPlacementNotes, setNonPlacementNotes] = useState("");
+
+  const [isSeparationModalOpen, setIsSeparationModalOpen] = useState(false);
+  const [separationReason, setSeparationReason] = useState("BETTER_OPPORTUNITY");
+  const [separationDate, setSeparationDate] = useState(new Date().toISOString().split("T")[0]);
+  const [separationNotes, setSeparationNotes] = useState("");
+
   // Sync route / URL parameters when route changes
   useEffect(() => {
     const routeParamId = learnerId || routeId || searchParams.get("id");
@@ -203,9 +243,20 @@ export default function LearnerIntelligence() {
       setRetentionAudit(null);
 
       await authApi.ensureAuthenticated();
-      const [dossier, placementList] = await Promise.all([
+      const [
+        dossier,
+        placementList,
+        consentsRes,
+        followUpsRes,
+        selfEmpRes,
+        nonPlcRes,
+      ] = await Promise.all([
         learnersApi.getById(id),
         placementsApi.getByLearnerId(id).catch(() => []),
+        learnersApi.getConsents(id).catch(() => []),
+        learnersApi.getFollowUps(id).catch(() => []),
+        learnersApi.getSelfEmployment(id).catch(() => []),
+        learnersApi.getNonPlacementReasons(id).catch(() => []),
       ]);
 
       if (!dossier || !dossier.id) {
@@ -219,14 +270,21 @@ export default function LearnerIntelligence() {
       setDossierNotFound(false);
       setDossierForbidden(false);
       setPlacements(placementList || []);
+      setConsentsList(consentsRes || dossier.consents || []);
+      setFollowUpsList(followUpsRes || dossier.follow_ups || []);
+      setSelfEmpList(selfEmpRes || dossier.self_employment_outcomes || []);
+      setNonPlacementList(nonPlcRes || dossier.non_placement_reasons || []);
 
       if (placementList && placementList.length > 0) {
-        const audit = await placementsApi
-          .getRetentionAudit(placementList[0].id)
-          .catch(() => null);
+        const [audit, seps] = await Promise.all([
+          placementsApi.getRetentionAudit(placementList[0].id).catch(() => null),
+          placementsApi.getSeparations(placementList[0].id).catch(() => []),
+        ]);
         setRetentionAudit(audit);
+        setSeparationsList(seps || []);
       } else {
         setRetentionAudit(null);
+        setSeparationsList([]);
       }
     } catch (err) {
       console.error(`Failed to fetch dossier for learner ${id}:`, err);
@@ -337,6 +395,116 @@ export default function LearnerIntelligence() {
       await fetchLearnerDossier(selectedLearnerId);
     } catch (err) {
       alert(`Checkpoint update failed: ${getErrorMessage(err)}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleScheduleFollowUp = async () => {
+    if (!currentLearner) return;
+    try {
+      setActionLoading(true);
+      const scheduledDate = new Date(Date.now() + 30 * 86400000).toISOString();
+      await learnersApi.scheduleFollowUp(currentLearner.id, {
+        follow_up_type: followUpType,
+        scheduled_at: scheduledDate,
+        channel: followUpChannel,
+        notes: followUpNotes || undefined,
+      });
+      setIsScheduleFollowUpModalOpen(false);
+      setFollowUpNotes("");
+      setActionSuccessMsg(`✅ Scheduled ${followUpType} follow-up via ${followUpChannel} for ${currentLearner.full_name}.`);
+      await fetchLearnerDossier(selectedLearnerId);
+    } catch (err) {
+      alert(`Follow-up scheduling failed: ${getErrorMessage(err)}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRecordResponse = async () => {
+    if (!currentLearner || !targetFollowUpId) return;
+    try {
+      setActionLoading(true);
+      await learnersApi.recordFollowUpResponse(currentLearner.id, targetFollowUpId, {
+        response_status: responseStatus,
+        notes: responseNotes || undefined,
+      });
+      setIsRecordResponseModalOpen(false);
+      setTargetFollowUpId(null);
+      setResponseNotes("");
+      setActionSuccessMsg(`✅ Outcome response recorded: ${responseStatus} for ${currentLearner.full_name}.`);
+      await fetchLearnerDossier(selectedLearnerId);
+    } catch (err) {
+      alert(`Recording response failed: ${getErrorMessage(err)}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCreateSelfEmployment = async () => {
+    if (!currentLearner || !selfEmpName.trim()) return;
+    try {
+      setActionLoading(true);
+      await learnersApi.createSelfEmployment(currentLearner.id, {
+        enterprise_name: selfEmpName.trim(),
+        business_activity: selfEmpActivity.trim() || "Trade Operations",
+        sector: selfEmpSector,
+        district_id: currentLearner.district_id || "UP-VARANASI",
+        start_date: new Date().toISOString().split("T")[0],
+        monthly_income_range: selfEmpIncome,
+        notes: selfEmpNotes || undefined,
+      });
+      setIsSelfEmpModalOpen(false);
+      setSelfEmpName("");
+      setSelfEmpActivity("");
+      setSelfEmpNotes("");
+      setActionSuccessMsg(`✅ Self-employment venture '${selfEmpName}' registered for ${currentLearner.full_name}.`);
+      await fetchLearnerDossier(selectedLearnerId);
+    } catch (err) {
+      alert(`Self-employment registration failed: ${getErrorMessage(err)}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRecordNonPlacement = async () => {
+    if (!currentLearner) return;
+    try {
+      setActionLoading(true);
+      await learnersApi.recordNonPlacementReason(currentLearner.id, {
+        reason: nonPlacementReason,
+        source: "TRAINING_PROVIDER",
+        notes: nonPlacementNotes || undefined,
+        associated_skill_code: nonPlacementReason === "SKILL_GAP" ? nonPlacementSkillCode : undefined,
+      });
+      setIsNonPlacementModalOpen(false);
+      setNonPlacementNotes("");
+      setActionSuccessMsg(`✅ Non-placement bottleneck '${nonPlacementReason}' logged for ${currentLearner.full_name}.`);
+      await fetchLearnerDossier(selectedLearnerId);
+    } catch (err) {
+      alert(`Failed to log non-placement reason: ${getErrorMessage(err)}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRecordSeparation = async () => {
+    if (!activePlacement) return;
+    try {
+      setActionLoading(true);
+      await placementsApi.recordSeparation(activePlacement.id, {
+        reason: separationReason,
+        separation_date: separationDate,
+        source: "EMPLOYER",
+        notes: separationNotes || undefined,
+      });
+      setIsSeparationModalOpen(false);
+      setSeparationNotes("");
+      setActionSuccessMsg(`✅ Job separation recorded for ${currentLearner.full_name}. Placement updated to Separated.`);
+      await fetchLearnerDossier(selectedLearnerId);
+    } catch (err) {
+      alert(`Failed to record separation: ${getErrorMessage(err)}`);
     } finally {
       setActionLoading(false);
     }
@@ -647,7 +815,18 @@ export default function LearnerIntelligence() {
                   {currentLearner.ncvet_credential_id && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 dark:border-emerald-800/70 dark:bg-emerald-950/40 dark:text-emerald-300">
                       <ShieldCheck size={12} />
-                      Aadhaar & NCVET Verified
+                      NCVET Verified (Aadhaar Mock Adapter)
+                    </span>
+                  )}
+                  {consentsList && consentsList.some((c) => c.granted) ? (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-blue-200/80 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-800 dark:border-blue-800/70 dark:bg-blue-950/40 dark:text-blue-300">
+                      <ShieldCheck size={12} />
+                      Consent-Based Tracking (DPDP-Aligned)
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
+                      <Clock size={12} />
+                      Consent Pending
                     </span>
                   )}
                 </div>
@@ -744,8 +923,7 @@ export default function LearnerIntelligence() {
                 </h3>
               </div>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Continuous tracking of candidate joined date, starting vs current CTC, and 3M, 6M,
-                12M EPFO remittances.
+                Tracking candidate joined date, starting vs current CTC, and 3M, 6M, 12M retention checkpoints (demonstrated via mock EPFO adapter).
               </p>
             </div>
 
@@ -754,6 +932,16 @@ export default function LearnerIntelligence() {
                 <ShieldCheck size={13} className="text-blue-600 dark:text-blue-400" />
                 ⚡ Simulated Mock EPFO Adapter Active
               </span>
+              {activePlacement.status !== "Separated" && permissions.canUpdateRetention && (
+                <button
+                  type="button"
+                  onClick={() => setIsSeparationModalOpen(true)}
+                  className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300"
+                >
+                  <UserMinus size={12} />
+                  Log Job Departure / Turnover
+                </button>
+              )}
             </div>
           </div>
 
@@ -849,6 +1037,207 @@ export default function LearnerIntelligence() {
                 )}
               </div>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* =====================================================
+          2.5 LONGITUDINAL OUTCOMES, FOLLOW-UPS & BOTTLENECKS
+      ====================================================== */}
+      {currentLearner && (
+        <section className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+            <div>
+              <div className="flex items-center gap-2">
+                <Clock size={16} className="text-indigo-600 dark:text-indigo-400" />
+                <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">
+                  Longitudinal Follow-Ups, Self-Employment &amp; Diagnostic Tracking
+                </h3>
+              </div>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                End-to-end post-training outcomes: Scheduled milestone surveys, entrepreneurship ventures, and non-placement root-cause diagnostics.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsScheduleFollowUpModalOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-300"
+              >
+                <Send size={12} /> Schedule Follow-Up
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSelfEmpModalOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-purple-200 bg-purple-50 px-2.5 py-1.5 text-xs font-semibold text-purple-700 hover:bg-purple-100 dark:border-purple-900 dark:bg-purple-950/50 dark:text-purple-300"
+              >
+                <Building2 size={12} /> Record Self-Employment
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsNonPlacementModalOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300"
+              >
+                <AlertCircle size={12} /> Log Non-Placement Reason
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-6 lg:grid-cols-3">
+            {/* Card 1: Longitudinal Follow-Up Milestones */}
+            <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-800">
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  Follow-Up Milestones ({followUpsList.length})
+                </span>
+                <span className="text-[10px] text-slate-400">30D / 90D / 180D / 365D</span>
+              </div>
+
+              <div className="mt-3 space-y-2.5">
+                {followUpsList.length === 0 ? (
+                  <p className="text-center py-4 text-xs text-slate-400">
+                    No outreach follow-ups scheduled yet.
+                  </p>
+                ) : (
+                  followUpsList.map((fu) => (
+                    <div
+                      key={fu.id}
+                      className="rounded border border-slate-200 bg-white p-2.5 text-xs dark:border-slate-700 dark:bg-slate-900"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900 dark:text-slate-100">
+                          {fu.follow_up_type} Milestone
+                        </span>
+                        <StatusBadge
+                          variant={
+                            fu.status === "COMPLETED"
+                              ? "success"
+                              : fu.status === "SENT"
+                              ? "info"
+                              : fu.status === "SKIPPED"
+                              ? "danger"
+                              : "warning"
+                          }
+                          size="sm"
+                        >
+                          {fu.status}
+                        </StatusBadge>
+                      </div>
+                      <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
+                        <span>Channel: {fu.channel}</span>
+                        <span>{fu.scheduled_at?.split("T")[0]}</span>
+                      </div>
+                      {fu.response_status && (
+                        <p className="mt-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                          Outcome: {fu.response_status}
+                        </p>
+                      )}
+                      {fu.status !== "COMPLETED" && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTargetFollowUpId(fu.id);
+                            setIsRecordResponseModalOpen(true);
+                          }}
+                          className="mt-2 w-full rounded border border-slate-200 bg-slate-50 py-0.5 text-[10px] font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                        >
+                          Record Feedback / Response
+                        </button>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Card 2: Self-Employment & Micro-Enterprises */}
+            <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-800">
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  Micro-Enterprise Ventures ({selfEmpList.length})
+                </span>
+                <span className="text-[10px] text-slate-400">Field &amp; Document Verified</span>
+              </div>
+
+              <div className="mt-3 space-y-2.5">
+                {selfEmpList.length === 0 ? (
+                  <p className="text-center py-4 text-xs text-slate-400">
+                    No self-employment records documented.
+                  </p>
+                ) : (
+                  selfEmpList.map((se) => (
+                    <div
+                      key={se.id}
+                      className="rounded border border-slate-200 bg-white p-2.5 text-xs dark:border-slate-700 dark:bg-slate-900"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900 dark:text-slate-100 truncate max-w-[150px]">
+                          {se.enterprise_name}
+                        </span>
+                        <StatusBadge
+                          variant={se.verification_status?.includes("VERIFIED") ? "success" : "neutral"}
+                          size="sm"
+                        >
+                          {se.verification_status || "Reported"}
+                        </StatusBadge>
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-slate-600 dark:text-slate-400">
+                        {se.business_activity} · {se.sector}
+                      </p>
+                      <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
+                        <span>Income: {se.monthly_income_range || "₹15,000 - ₹25,000"}</span>
+                        <span>Since: {se.start_date}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Card 3: Non-Placement Diagnostic Bottlenecks */}
+            <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-800">
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  Non-Placement Factors ({nonPlacementList.length})
+                </span>
+                <span className="text-[10px] text-slate-400">Diagnostic Root-Causes</span>
+              </div>
+
+              <div className="mt-3 space-y-2.5">
+                {nonPlacementList.length === 0 ? (
+                  <p className="text-center py-4 text-xs text-slate-400">
+                    No non-placement bottlenecks documented.
+                  </p>
+                ) : (
+                  nonPlacementList.map((np) => (
+                    <div
+                      key={np.id}
+                      className="rounded border border-slate-200 bg-white p-2.5 text-xs dark:border-slate-700 dark:bg-slate-900"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-amber-700 dark:text-amber-400">
+                          {np.reason}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          {np.recorded_at?.split("T")[0]}
+                        </span>
+                      </div>
+                      {np.associated_skill_code && (
+                        <p className="mt-1 font-mono text-[10px] text-blue-600 dark:text-blue-400">
+                          Competency: {np.associated_skill_code}
+                        </p>
+                      )}
+                      {np.notes && (
+                        <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-400">
+                          {np.notes}
+                        </p>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </section>
       )}
@@ -1161,6 +1550,317 @@ export default function LearnerIntelligence() {
                     onChange={(e) => setCheckpointRemarks(e.target.value)}
                     placeholder="e.g. Verified 3-month continuous EPF contribution remittance from employer..."
                     className="mt-1 w-full rounded-md border border-slate-200 bg-white p-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  />
+                </div>
+              </div>
+            </ActionModal>
+          )}
+
+          {/* Schedule Outcome Follow-Up Modal */}
+          <ActionModal
+            isOpen={isScheduleFollowUpModalOpen}
+            onClose={() => setIsScheduleFollowUpModalOpen(false)}
+            title="Schedule Longitudinal Outcome Milestone"
+            subtitle={`Candidate: ${currentLearner.full_name} (${currentLearner.id})`}
+            confirmText={actionLoading ? "Scheduling..." : "Schedule Milestone"}
+            onConfirm={handleScheduleFollowUp}
+          >
+            <div className="space-y-3 text-xs">
+              <div className="rounded border border-blue-200 bg-blue-50 p-2 text-[11px] text-blue-900 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200">
+                Outreach dispatch strictly verifies candidate active privacy consent before queuing.
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  Milestone Window:
+                </label>
+                <select
+                  value={followUpType}
+                  onChange={(e) => setFollowUpType(e.target.value)}
+                  className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                >
+                  <option value="30_DAY">30-Day Post-Training Outreach</option>
+                  <option value="90_DAY">90-Day Retention Milestone</option>
+                  <option value="180_DAY">180-Day Sustainability Audit</option>
+                  <option value="365_DAY">365-Day Long-Term Impact Audit</option>
+                  <option value="POST_TRAINING">Immediate Post-Certification</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  Primary Notification Channel:
+                </label>
+                <select
+                  value={followUpChannel}
+                  onChange={(e) => setFollowUpChannel(e.target.value)}
+                  className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                >
+                  <option value="IN_APP">In-App Candidate Portal Notice</option>
+                  <option value="SMS">SMS / WhatsApp Gateway (Simulated Sandbox)</option>
+                  <option value="EMAIL">Email Dispatch</option>
+                  <option value="ASSISTED_CALL">Assisted Counselor Tele-Calling</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  Outreach Instructions / Notes:
+                </label>
+                <textarea
+                  rows={2}
+                  value={followUpNotes}
+                  onChange={(e) => setFollowUpNotes(e.target.value)}
+                  placeholder="e.g. Inquire about current employment offer letter or freelance contracts..."
+                  className="mt-1 w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                />
+              </div>
+            </div>
+          </ActionModal>
+
+          {/* Record Follow-Up Response Modal */}
+          <ActionModal
+            isOpen={isRecordResponseModalOpen}
+            onClose={() => setIsRecordResponseModalOpen(false)}
+            title="Record Beneficiary Outcome Feedback"
+            subtitle={`Candidate: ${currentLearner.full_name} (${currentLearner.id})`}
+            confirmText={actionLoading ? "Recording..." : "Save Outcome"}
+            onConfirm={handleRecordResponse}
+          >
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  Reported Destination Status:
+                </label>
+                <select
+                  value={responseStatus}
+                  onChange={(e) => setResponseStatus(e.target.value)}
+                  className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                >
+                  <option value="EMPLOYED">Wage Employment (Full-Time / Corporate)</option>
+                  <option value="SELF_EMPLOYED">Self-Employed / Independent Contractor</option>
+                  <option value="APPRENTICESHIP">NAPS / Industry Apprenticeship</option>
+                  <option value="UNEMPLOYED">Currently Seeking Employment</option>
+                  <option value="FURTHER_EDUCATION">Enrolled in Higher Technical Education</option>
+                  <option value="OTHER">Other / Family Obligation</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  Verification Notes / Evidence Details:
+                </label>
+                <textarea
+                  rows={2}
+                  value={responseNotes}
+                  onChange={(e) => setResponseNotes(e.target.value)}
+                  placeholder="e.g. Candidate confirmed employment at local auto assembly plant..."
+                  className="mt-1 w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                />
+              </div>
+            </div>
+          </ActionModal>
+
+          {/* Record Self-Employment Modal */}
+          <ActionModal
+            isOpen={isSelfEmpModalOpen}
+            onClose={() => setIsSelfEmpModalOpen(false)}
+            title="Document Candidate Self-Employment Venture"
+            subtitle={`Candidate: ${currentLearner.full_name} (${currentLearner.id})`}
+            confirmText={actionLoading ? "Registering..." : "Register Micro-Enterprise"}
+            onConfirm={handleCreateSelfEmployment}
+          >
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  Venture / Enterprise Legal or Trade Name:
+                </label>
+                <input
+                  type="text"
+                  value={selfEmpName}
+                  onChange={(e) => setSelfEmpName(e.target.value)}
+                  placeholder="e.g. Sunrise Solar Services"
+                  className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2.5 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  Primary Commercial Activity / Trade:
+                </label>
+                <input
+                  type="text"
+                  value={selfEmpActivity}
+                  onChange={(e) => setSelfEmpActivity(e.target.value)}
+                  placeholder="e.g. Solar panel installation & rooftop maintenance"
+                  className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2.5 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                    Sector:
+                  </label>
+                  <select
+                    value={selfEmpSector}
+                    onChange={(e) => setSelfEmpSector(e.target.value)}
+                    className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  >
+                    <option value="Power & Clean Energy">Power &amp; Clean Energy</option>
+                    <option value="Electronics & Hardware">Electronics &amp; Hardware</option>
+                    <option value="Automotive & CNC">Automotive &amp; CNC</option>
+                    <option value="Apparel & Handicrafts">Apparel &amp; Handicrafts</option>
+                    <option value="IT Services & Kiosks">IT Services &amp; Kiosks</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                    Monthly Revenue Band:
+                  </label>
+                  <select
+                    value={selfEmpIncome}
+                    onChange={(e) => setSelfEmpIncome(e.target.value)}
+                    className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  >
+                    <option value="Below ₹10,000">Below ₹10,000</option>
+                    <option value="₹10,000 - ₹20,000">₹10,000 - ₹20,000</option>
+                    <option value="₹20,000 - ₹35,000">₹20,000 - ₹35,000</option>
+                    <option value="Above ₹35,000">Above ₹35,000</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  MSME Udyam / Trade Notes:
+                </label>
+                <textarea
+                  rows={2}
+                  value={selfEmpNotes}
+                  onChange={(e) => setSelfEmpNotes(e.target.value)}
+                  placeholder="e.g. Registered with Udyam Registration Portal (UDYAM-UP-...). Physical workshop verified."
+                  className="mt-1 w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                />
+              </div>
+            </div>
+          </ActionModal>
+
+          {/* Record Non-Placement Reason Modal */}
+          <ActionModal
+            isOpen={isNonPlacementModalOpen}
+            onClose={() => setIsNonPlacementModalOpen(false)}
+            title="Document Candidate Non-Placement Diagnostic"
+            subtitle={`Candidate: ${currentLearner.full_name} (${currentLearner.id})`}
+            confirmText={actionLoading ? "Documenting..." : "Log Diagnostic Bottleneck"}
+            onConfirm={handleRecordNonPlacement}
+          >
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  Diagnostic Bottleneck Category:
+                </label>
+                <select
+                  value={nonPlacementReason}
+                  onChange={(e) => setNonPlacementReason(e.target.value)}
+                  className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                >
+                  <option value="SKILL_GAP">Technical Competency Deficit (Skill Gap)</option>
+                  <option value="INTERVIEW_FAILURE">Interview / Technical Screening Rejection</option>
+                  <option value="LOCATION_CONSTRAINT">Geographic / Relocation Constraint</option>
+                  <option value="SALARY_EXPECTATION">Compensation Expectations Mismatch</option>
+                  <option value="COMMUNICATION_ISSUE">Soft-Skills &amp; Communication Deficit</option>
+                  <option value="HEALTH_PERSONAL">Personal / Family Circumstances</option>
+                  <option value="OTHER">Other Factor</option>
+                </select>
+              </div>
+
+              {nonPlacementReason === "SKILL_GAP" && (
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                    Associated Competency Code:
+                  </label>
+                  <input
+                    type="text"
+                    value={nonPlacementSkillCode}
+                    onChange={(e) => setNonPlacementSkillCode(e.target.value)}
+                    placeholder="e.g. COMP-GENAI-01 or COMP-CNC-02"
+                    className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2.5 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  />
+                  <span className="text-[10px] text-slate-400">
+                    Enables targeted remedial bridge course generation.
+                  </span>
+                </div>
+              )}
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  Counselor Observations / Notes:
+                </label>
+                <textarea
+                  rows={2}
+                  value={nonPlacementNotes}
+                  onChange={(e) => setNonPlacementNotes(e.target.value)}
+                  placeholder="e.g. Candidate struggled in technical live coding and cloud concepts..."
+                  className="mt-1 w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                />
+              </div>
+            </div>
+          </ActionModal>
+
+          {/* Record Job Separation Modal */}
+          {activePlacement && (
+            <ActionModal
+              isOpen={isSeparationModalOpen}
+              onClose={() => setIsSeparationModalOpen(false)}
+              title="Record Job Departure / Placement Separation"
+              subtitle={`Candidate: ${currentLearner.full_name} · Employer: ${activePlacement.employer_name || "Partner"}`}
+              confirmText={actionLoading ? "Recording..." : "Confirm Separation"}
+              onConfirm={handleRecordSeparation}
+            >
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                    Primary Separation Driver:
+                  </label>
+                  <select
+                    value={separationReason}
+                    onChange={(e) => setSeparationReason(e.target.value)}
+                    className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  >
+                    <option value="BETTER_OPPORTUNITY">Career Advancement / Higher Compensation</option>
+                    <option value="LOW_SALARY">Compensation Insufficiency</option>
+                    <option value="RELOCATION">Relocation / Housing Challenge</option>
+                    <option value="SKILL_MISMATCH">On-the-Job Skill Mismatch</option>
+                    <option value="WORK_ENVIRONMENT">Work Environment / Shift Hours</option>
+                    <option value="HEALTH_FAMILY">Health or Family Reason</option>
+                    <option value="CONTRACT_EXPIRED">Apprenticeship / Contract Completion</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                    Separation Date:
+                  </label>
+                  <input
+                    type="date"
+                    value={separationDate}
+                    onChange={(e) => setSeparationDate(e.target.value)}
+                    className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2.5 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                    Audit Notes / Exit Interview Details:
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={separationNotes}
+                    onChange={(e) => setSeparationNotes(e.target.value)}
+                    placeholder="e.g. Beneficiary received higher wage offer from Tier-1 automotive supplier..."
+                    className="mt-1 w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                   />
                 </div>
               </div>

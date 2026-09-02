@@ -386,7 +386,7 @@ export default function EmployerMatching() {
               trend="up"
               period="active pipeline"
               subtitle="Vacancies evaluated across 6 sectors"
-              highlight="Aadhaar-EPFO Compliant"
+              highlight="Verification Ready"
               tone="neutral"
             />
 
@@ -751,7 +751,7 @@ export default function EmployerMatching() {
       <IntelligenceCard
         category="Corporate Pipeline Engine"
         title="Immediate Candidate Placement Dispatch"
-        description="Top-ranked candidates exceed the 70%+ match threshold for active vacancies. Authorizing batch submission will dispatch verified candidate profiles with Aadhaar-linked credentials to employer HR portals."
+        description="Top-ranked candidates exceed the 70%+ match threshold for active vacancies. Authorizing batch submission will dispatch verified candidate profiles with competency-aligned credential records to employer HR portals."
         confidence="95.6% Placement Conversion Probability"
         sampleSize={`${mandates.length} Active Corporate Mandates`}
         actionText="Review Selected Candidate"

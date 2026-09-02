@@ -1,8 +1,8 @@
-import { apiClient } from './client';
+import { apiClient } from './client.js';
 
 export const verificationApi = {
   /**
-   * Performs demographic Aadhaar identity verification (with automated PII masking)
+   * Performs demographic identity verification via simulated sandbox adapter (with automated PII masking)
    * @param {Object} payload - { aadhaar_number, full_name, dob, state }
    */
   async verifyIdentity(payload) {

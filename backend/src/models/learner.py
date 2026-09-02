@@ -11,6 +11,10 @@ if TYPE_CHECKING:
     from src.models.training_center import TrainingCenter
     from src.models.competency import LearnerSkill
     from src.models.placement import Placement
+    from src.models.consent import Consent
+    from src.models.follow_up import OutcomeFollowUp
+    from src.models.self_employment import SelfEmploymentOutcome
+    from src.models.outcomes import NonPlacementReason
 
 
 class Learner(Base, TimestampMixin):
@@ -107,6 +111,26 @@ class Learner(Base, TimestampMixin):
     )
     placements: Mapped[List["Placement"]] = relationship(
         "Placement",
+        back_populates="learner",
+        cascade="all, delete-orphan",
+    )
+    consents: Mapped[List["Consent"]] = relationship(
+        "Consent",
+        back_populates="learner",
+        cascade="all, delete-orphan",
+    )
+    follow_ups: Mapped[List["OutcomeFollowUp"]] = relationship(
+        "OutcomeFollowUp",
+        back_populates="learner",
+        cascade="all, delete-orphan",
+    )
+    self_employment_outcomes: Mapped[List["SelfEmploymentOutcome"]] = relationship(
+        "SelfEmploymentOutcome",
+        back_populates="learner",
+        cascade="all, delete-orphan",
+    )
+    non_placement_reasons: Mapped[List["NonPlacementReason"]] = relationship(
+        "NonPlacementReason",
         back_populates="learner",
         cascade="all, delete-orphan",
     )

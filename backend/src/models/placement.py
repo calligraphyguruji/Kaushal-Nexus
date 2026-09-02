@@ -10,6 +10,7 @@ from src.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 if TYPE_CHECKING:
     from src.models.employer import Employer, HiringMandate
     from src.models.learner import Learner
+    from src.models.outcomes import PlacementSeparation
 
 
 class Placement(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -114,6 +115,11 @@ class Placement(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         back_populates="placement",
         cascade="all, delete-orphan",
         order_by="RetentionCheckpoint.milestone_months",
+    )
+    separations: Mapped[List["PlacementSeparation"]] = relationship(
+        "PlacementSeparation",
+        back_populates="placement",
+        cascade="all, delete-orphan",
     )
 
     __table_args__ = (

@@ -63,7 +63,14 @@ export default function ImpactDashboard() {
   const [funnelData, setFunnelData] = useState([]);
   const [sectorMatrixData, setSectorMatrixData] = useState([]);
 
-  // Fetch all 4 dashboard endpoints in parallel
+  // Longitudinal Outcomes & Diagnostic States
+  const [outcomesData, setOutcomesData] = useState(null);
+  const [followUpData, setFollowUpData] = useState(null);
+  const [nonPlacementData, setNonPlacementData] = useState(null);
+  const [attritionData, setAttritionData] = useState(null);
+  const [wageData, setWageData] = useState(null);
+
+  // Fetch all dashboard & longitudinal outcome endpoints in parallel
   const fetchDashboardData = useCallback(async (showRefreshing = false) => {
     try {
       if (showRefreshing) {
@@ -76,17 +83,37 @@ export default function ImpactDashboard() {
       // Ensure active demo authentication session exists
       await authApi.ensureAuthenticated();
 
-      const [summaryRes, trendRes, funnelRes, sectorRes] = await Promise.all([
+      const [
+        summaryRes,
+        trendRes,
+        funnelRes,
+        sectorRes,
+        outcomesRes,
+        followUpsRes,
+        nonPlacementRes,
+        attritionRes,
+        wageRes,
+      ] = await Promise.all([
         dashboardApi.getSummary(),
         dashboardApi.getEmploymentTrend({ months: 6 }),
         dashboardApi.getFunnel(),
         dashboardApi.getSectorMatrix(),
+        dashboardApi.getOutcomeDistribution(),
+        dashboardApi.getFollowUpMetrics(),
+        dashboardApi.getNonPlacementAnalytics(),
+        dashboardApi.getAttritionAnalytics(),
+        dashboardApi.getWageMetrics(),
       ]);
 
       setSummaryData(summaryRes);
       setTrendData(trendRes || []);
       setFunnelData(funnelRes || []);
       setSectorMatrixData(sectorRes || []);
+      setOutcomesData(outcomesRes || null);
+      setFollowUpData(followUpsRes || null);
+      setNonPlacementData(nonPlacementRes || null);
+      setAttritionData(attritionRes || null);
+      setWageData(wageRes || null);
     } catch (err) {
       console.error("Impact Dashboard fetch failed:", err);
       setError(getErrorMessage(err));
@@ -120,7 +147,7 @@ export default function ImpactDashboard() {
           trend: "up",
           period: "conversion rate",
           subtitle: `${summaryData.placement_percentage || 0}% of certified candidates placed`,
-          highlight: "Aadhaar / EPFO Linked",
+          highlight: "Verification Ready",
           icon: BriefcaseBusiness,
         },
         {
@@ -129,7 +156,7 @@ export default function ImpactDashboard() {
           change: `${Number(summaryData.retention_verified_count || 0).toLocaleString()} active`,
           trend: "up",
           period: "at 180 days",
-          subtitle: "Continuous EPF remittance verified",
+          subtitle: "180-day retention audited (EPFO mock adapter)",
           highlight: "180-Day Milestone",
           icon: ShieldCheck,
         },
@@ -465,7 +492,7 @@ export default function ImpactDashboard() {
           <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-[11px] font-medium text-slate-500 dark:border-slate-800 dark:text-slate-400">
             <span>Aggregated from {summaryData?.total_enrolled || 0} candidate cohorts</span>
             <span className="font-semibold text-blue-700 dark:text-blue-400">
-              Aadhaar-EPFO Linkage Verified
+              Verification Adapter Linked (Demo)
             </span>
           </div>
         </div>
@@ -675,6 +702,227 @@ export default function ImpactDashboard() {
             <StatusBadge variant="success" size="sm" dot>
               All Schemes Audited
             </StatusBadge>
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================
+          3.5 LONGITUDINAL OUTCOME & IMPACT INTELLIGENCE
+      ====================================================== */}
+      <section className="space-y-4">
+        <SectionHeader
+          title="Longitudinal Outcomes & Diagnostic Intelligence"
+          subtitle="Multi-track destination pathways, follow-up milestone completion, wage trajectories, and attrition drivers (demonstration dataset metrics)"
+          badge={
+            <StatusBadge variant="neutral" size="sm" dot>
+              Demonstration Dataset
+            </StatusBadge>
+          }
+        />
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Card 1: Multi-Track Outcome Distribution */}
+          <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Multi-Track Destination Mix (Demo Dataset)
+              </span>
+              <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                {outcomesData?.total_candidates ? `${outcomesData.total_candidates.toLocaleString()} Tracked` : "All Cohorts"}
+              </span>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div>
+                <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  <span>Wage Employment</span>
+                  <span className="tabular-nums font-bold text-blue-600 dark:text-blue-400">
+                    {outcomesData?.employed_rate || 59.4}% ({outcomesData?.employed_count?.toLocaleString() || "16,886"})
+                  </span>
+                </div>
+                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div
+                    className="h-full rounded-full bg-blue-600 transition-all"
+                    style={{ width: `${outcomesData?.employed_rate || 59.4}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  <span>Self-Employment &amp; Micro-Enterprise</span>
+                  <span className="tabular-nums font-bold text-purple-600 dark:text-purple-400">
+                    {outcomesData?.self_employed_rate || 15.0}% ({outcomesData?.self_employed_count?.toLocaleString() || "4,268"})
+                  </span>
+                </div>
+                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div
+                    className="h-full rounded-full bg-purple-600 transition-all"
+                    style={{ width: `${outcomesData?.self_employed_rate || 15.0}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  <span>Apprenticeships &amp; On-the-Job Training</span>
+                  <span className="tabular-nums font-bold text-emerald-600 dark:text-emerald-400">
+                    {outcomesData?.apprenticeship_rate || 10.0}% ({outcomesData?.apprenticeship_count?.toLocaleString() || "2,845"})
+                  </span>
+                </div>
+                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div
+                    className="h-full rounded-full bg-emerald-600 transition-all"
+                    style={{ width: `${outcomesData?.apprenticeship_rate || 10.0}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  <span>Unemployed &amp; Active Job Seekers</span>
+                  <span className="tabular-nums font-bold text-amber-600 dark:text-amber-400">
+                    {outcomesData?.unemployed_rate || 10.0}% ({outcomesData?.unemployed_count?.toLocaleString() || "2,845"})
+                  </span>
+                </div>
+                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div
+                    className="h-full rounded-full bg-amber-500 transition-all"
+                    style={{ width: `${outcomesData?.unemployed_rate || 10.0}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  <span>Further Education / Vocational Higher Ed</span>
+                  <span className="tabular-nums font-bold text-slate-600 dark:text-slate-400">
+                    {outcomesData?.further_education_rate || 4.0}%
+                  </span>
+                </div>
+                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div
+                    className="h-full rounded-full bg-slate-500 transition-all"
+                    style={{ width: `${outcomesData?.further_education_rate || 4.0}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Follow-Up & Wage Progression */}
+          <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Outreach &amp; Wage Trajectory (Demo Dataset)
+              </span>
+              <span className="rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                {followUpData?.completion_rate || 80.3}% Follow-Up Complete (Demo)
+              </span>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/40">
+                  <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Follow-Up Response Rate</p>
+                  <p className="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100">
+                    {followUpData?.response_rate || 76.5}%
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    {followUpData?.pending_count || 3120} pending outreach
+                  </p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/40">
+                  <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Wage Progression (CTC)</p>
+                  <p className="mt-1 text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                    +{wageData?.avg_wage_growth_pct || 14.3}%
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    ₹{wageData?.avg_starting_ctc_lpa || 4.2}L → ₹{wageData?.avg_current_ctc_lpa || 4.8}L
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Follow-Up Channel Distribution (Demonstration Dataset)
+                </p>
+                <div className="grid grid-cols-4 gap-1.5 text-center">
+                  <div className="rounded border border-slate-200/80 p-2 dark:border-slate-800">
+                    <span className="text-[10px] text-slate-400 block">In-App</span>
+                    <span className="text-xs font-bold text-blue-600">45%</span>
+                  </div>
+                  <div className="rounded border border-slate-200/80 p-2 dark:border-slate-800">
+                    <span className="text-[10px] text-slate-400 block">SMS</span>
+                    <span className="text-xs font-bold text-emerald-600">18%</span>
+                  </div>
+                  <div className="rounded border border-slate-200/80 p-2 dark:border-slate-800">
+                    <span className="text-[10px] text-slate-400 block">Email</span>
+                    <span className="text-xs font-bold text-purple-600">28%</span>
+                  </div>
+                  <div className="rounded border border-slate-200/80 p-2 dark:border-slate-800">
+                    <span className="text-[10px] text-slate-400 block">Assisted</span>
+                    <span className="text-xs font-bold text-amber-600">9%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: Diagnostic Bottlenecks (Non-Placement & Attrition) */}
+          <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Diagnostic Factors &amp; Turnover (Demo Dataset)
+              </span>
+              <span className="rounded bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-950 dark:text-rose-300">
+                {attritionData?.attrition_rate || 8.4}% Turnover Rate (Demo)
+              </span>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {/* Checkpoint Retentions */}
+              <div>
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Milestone Retention Sustainability (Demonstration Cohort)
+                </p>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="rounded bg-slate-50 p-2 dark:bg-slate-800/40">
+                    <span className="text-[10px] text-slate-400 block">3-Month</span>
+                    <span className="text-xs font-bold text-emerald-600">
+                      {attritionData?.three_month_retention_rate || 88.5}%
+                    </span>
+                  </div>
+                  <div className="rounded bg-slate-50 p-2 dark:bg-slate-800/40">
+                    <span className="text-[10px] text-slate-400 block">6-Month</span>
+                    <span className="text-xs font-bold text-blue-600">
+                      {attritionData?.six_month_retention_rate || 81.3}%
+                    </span>
+                  </div>
+                  <div className="rounded bg-slate-50 p-2 dark:bg-slate-800/40">
+                    <span className="text-[10px] text-slate-400 block">12-Month</span>
+                    <span className="text-xs font-bold text-purple-600">
+                      {attritionData?.twelve_month_retention_rate || 74.2}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Non-Placement Driver */}
+              <div className="border-t border-slate-100 pt-2.5 dark:border-slate-800">
+                <div className="flex justify-between text-xs">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    Skill-Deficit Linked Unplaced (Demo Metric):
+                  </span>
+                  <span className="font-bold text-rose-600 dark:text-rose-400">
+                    {nonPlacementData?.skill_gap_percentage || 38.0}% of non-placements
+                  </span>
+                </div>
+                <p className="mt-1 text-[10px] text-slate-400">
+                  On the demonstration dataset: Skill Deficits (38%), Interview Failures (24%), Relocation Constraints (17%).
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

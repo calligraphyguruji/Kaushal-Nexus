@@ -1,11 +1,22 @@
-from typing import Optional
-from fastapi import APIRouter, Depends, Query, status
+from typing import List, Optional
+import uuid
+from fastapi import APIRouter, Depends, Path, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.deps import get_current_user, require_role
 from src.core.database import get_db
 from src.models.user import User
 from src.schemas.common import PaginatedResponse
+from src.schemas.consent_dto import (
+    ConsentCreateDTO,
+    ConsentResponseDTO,
+    ConsentUpdateDTO,
+)
+from src.schemas.follow_up_dto import (
+    FollowUpCreateDTO,
+    FollowUpRecordResponseDTO,
+    FollowUpResponseDTO,
+)
 from src.schemas.learner_dto import (
     BridgeModuleAllocationRequestDTO,
     BridgeModuleAllocationResponseDTO,
@@ -16,9 +27,22 @@ from src.schemas.learner_dto import (
     LearnerListItemDTO,
     LearnerUpdateDTO,
 )
+from src.schemas.outcome_dto import (
+    NonPlacementReasonCreateDTO,
+    NonPlacementReasonResponseDTO,
+)
+from src.schemas.self_employment_dto import (
+    SelfEmploymentCreateDTO,
+    SelfEmploymentResponseDTO,
+    SelfEmploymentVerifyDTO,
+)
 from src.schemas.user import UserRole
 from src.services.audit_service import audit_service
+from src.services.consent_service import consent_service
+from src.services.follow_up_service import follow_up_service
 from src.services.learner_service import learner_service
+from src.services.outcome_tracking_service import outcome_tracking_service
+from src.services.self_employment_service import self_employment_service
 
 router = APIRouter()
 
@@ -200,5 +224,346 @@ async def allocate_bridge_module(
         actor=current_user,
         status="SUCCESS",
         details={"module_name": req.module_name, "duration_hours": req.duration_hours, "readiness_boost": res.readiness_increment},
+    )
+    return res
+
+
+# ==============================================================================
+# Consent & Privacy Management Endpoints
+# ==============================================================================
+
+@router.get(
+    "/{learner_id}/consents",
+    response_model=List[ConsentResponseDTO],
+    status_code=status.HTTP_200_OK,
+    summary="List Candidate Privacy Consents",
+    description="Retrieve all active and historical privacy authorizations documented for a skilling beneficiary.",
+)
+async def get_learner_consents(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+) -> List[ConsentResponseDTO]:
+    """Retrieves consent permissions for candidate."""
+    return await consent_service.get_learner_consents(db, learner_id, user=current_user)
+
+
+@router.post(
+    "/{learner_id}/consents",
+    response_model=ConsentResponseDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Grant or Register Candidate Consent",
+    description="Records candidate's explicit consent for wage tracking, retention monitoring, or longitudinal follow-ups.",
+)
+async def create_learner_consent(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    consent_in: ConsentCreateDTO = ...,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*LEARNER_UPDATE_ROLES)),
+) -> ConsentResponseDTO:
+    """Registers candidate privacy authorization."""
+    res = await consent_service.create_or_update_consent(db, learner_id, consent_in, user=current_user)
+    await audit_service.log_action(
+        db=db,
+        action="CONSENT_GRANTED",
+        resource_type="CONSENT",
+        resource_id=str(res.id),
+        actor=current_user,
+        status="SUCCESS",
+        details={
+            "learner_id": learner_id,
+            "consent_type": res.consent_type.value,
+            "version": res.version,
+            "source": res.source,
+        },
+    )
+    return res
+
+
+@router.patch(
+    "/{learner_id}/consents/{consent_id}",
+    response_model=ConsentResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Update or Revoke Consent",
+    description="Partially updates consent terms or marks consent as revoked with audit trail.",
+)
+async def update_learner_consent(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    consent_id: uuid.UUID = Path(..., description="Unique consent record UUID"),
+    consent_in: ConsentUpdateDTO = ...,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*LEARNER_UPDATE_ROLES)),
+) -> ConsentResponseDTO:
+    """Updates or revokes candidate consent."""
+    res = await consent_service.update_consent(db, learner_id, consent_id, consent_in, user=current_user)
+    action_verb = "CONSENT_REVOKED" if not res.granted else "CONSENT_UPDATED"
+    await audit_service.log_action(
+        db=db,
+        action=action_verb,
+        resource_type="CONSENT",
+        resource_id=str(res.id),
+        actor=current_user,
+        status="SUCCESS",
+        details={
+            "learner_id": learner_id,
+            "consent_type": res.consent_type.value,
+            "granted": res.granted,
+            "revoked_at": res.revoked_at.isoformat() if res.revoked_at else None,
+        },
+    )
+    return res
+
+
+@router.delete(
+    "/{learner_id}/consents/{consent_id}",
+    response_model=ConsentResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Revoke Candidate Consent",
+    description="Explicitly revokes active tracking authorization.",
+)
+async def revoke_learner_consent(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    consent_id: uuid.UUID = Path(..., description="Unique consent record UUID"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*LEARNER_UPDATE_ROLES)),
+) -> ConsentResponseDTO:
+    """Revokes candidate consent record."""
+    res = await consent_service.revoke_consent(db, learner_id, consent_id, user=current_user)
+    await audit_service.log_action(
+        db=db,
+        action="CONSENT_REVOKED",
+        resource_type="CONSENT",
+        resource_id=str(res.id),
+        actor=current_user,
+        status="SUCCESS",
+        details={
+            "learner_id": learner_id,
+            "consent_type": res.consent_type.value,
+            "revoked_at": res.revoked_at.isoformat() if res.revoked_at else None,
+        },
+    )
+    return res
+
+
+# ==============================================================================
+# Longitudinal Follow-Up Endpoints
+# ==============================================================================
+
+@router.get(
+    "/{learner_id}/follow-ups",
+    response_model=List[FollowUpResponseDTO],
+    status_code=status.HTTP_200_OK,
+    summary="List Candidate Outcome Follow-Ups",
+    description="Retrieves scheduled, sent, and completed longitudinal outreach records for a candidate.",
+)
+async def get_learner_follow_ups(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+) -> List[FollowUpResponseDTO]:
+    """Retrieves outreach follow-up history."""
+    return await follow_up_service.get_learner_follow_ups(db, learner_id, user=current_user)
+
+
+@router.post(
+    "/{learner_id}/follow-ups",
+    response_model=FollowUpResponseDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Schedule Longitudinal Follow-Up Milestone",
+    description="Schedules automated or assisted outcome verification outreach (e.g. 30_DAY, 90_DAY, 180_DAY, 365_DAY).",
+)
+async def schedule_learner_follow_up(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    follow_up_in: FollowUpCreateDTO = ...,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*LEARNER_MUTATION_ROLES)),
+) -> FollowUpResponseDTO:
+    """Schedules follow-up milestone outreach."""
+    res = await follow_up_service.schedule_follow_up(db, learner_id, follow_up_in, user=current_user)
+    await audit_service.log_action(
+        db=db,
+        action="FOLLOWUP_SCHEDULED",
+        resource_type="FOLLOW_UP",
+        resource_id=str(res.id),
+        actor=current_user,
+        status="SUCCESS",
+        details={
+            "learner_id": learner_id,
+            "follow_up_type": res.follow_up_type.value,
+            "scheduled_at": res.scheduled_at.isoformat(),
+            "channel": res.channel.value,
+        },
+    )
+    return res
+
+
+@router.post(
+    "/{learner_id}/follow-ups/{follow_up_id}/respond",
+    response_model=FollowUpResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Record Follow-Up Outcome Response",
+    description="Captures candidate response (Employed, Self-Employed, Apprenticeship, Unemployed, etc.) from outreach.",
+)
+async def record_follow_up_response(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    follow_up_id: uuid.UUID = Path(..., description="Unique follow-up record UUID"),
+    resp_in: FollowUpRecordResponseDTO = ...,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+) -> FollowUpResponseDTO:
+    """Records feedback from follow-up survey."""
+    res = await follow_up_service.record_follow_up_response(
+        db, learner_id, follow_up_id, resp_in, user=current_user
+    )
+    await audit_service.log_action(
+        db=db,
+        action="FOLLOWUP_COMPLETED",
+        resource_type="FOLLOW_UP",
+        resource_id=str(res.id),
+        actor=current_user,
+        status="SUCCESS",
+        details={
+            "learner_id": learner_id,
+            "follow_up_type": res.follow_up_type.value,
+            "response_status": res.response_status,
+        },
+    )
+    return res
+
+
+# ==============================================================================
+# Self-Employment Outcome Endpoints
+# ==============================================================================
+
+@router.get(
+    "/{learner_id}/self-employment",
+    response_model=List[SelfEmploymentResponseDTO],
+    status_code=status.HTTP_200_OK,
+    summary="List Self-Employment Ventures",
+    description="Retrieves micro-enterprise and entrepreneurial ventures documented for a skilling graduate.",
+)
+async def get_learner_self_employment(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+) -> List[SelfEmploymentResponseDTO]:
+    """Retrieves self-employment records."""
+    return await self_employment_service.get_outcomes_by_learner(db, learner_id, user=current_user)
+
+
+@router.post(
+    "/{learner_id}/self-employment",
+    response_model=SelfEmploymentResponseDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Record Self-Employment Outcome",
+    description="Registers beneficiary micro-enterprise, trade activity, operating district, and income band.",
+)
+async def create_self_employment_outcome(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    outcome_in: SelfEmploymentCreateDTO = ...,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*LEARNER_UPDATE_ROLES)),
+) -> SelfEmploymentResponseDTO:
+    """Records self-employment outcome."""
+    res = await self_employment_service.create_outcome(db, learner_id, outcome_in, user=current_user)
+    await audit_service.log_action(
+        db=db,
+        action="SELF_EMPLOYMENT_RECORDED",
+        resource_type="SELF_EMPLOYMENT",
+        resource_id=str(res.id),
+        actor=current_user,
+        status="SUCCESS",
+        details={
+            "learner_id": learner_id,
+            "enterprise_name": res.enterprise_name,
+            "sector": res.sector,
+            "district_id": res.district_id,
+        },
+    )
+    return res
+
+
+@router.patch(
+    "/{learner_id}/self-employment/{outcome_id}/verify",
+    response_model=SelfEmploymentResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Verify Self-Employment Outcome",
+    description="Assessor or institutional evaluator verification of candidate micro-enterprise operations.",
+)
+async def verify_self_employment_outcome(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    outcome_id: uuid.UUID = Path(..., description="Unique self-employment outcome UUID"),
+    verify_in: SelfEmploymentVerifyDTO = ...,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*CREDENTIAL_VERIFY_ROLES)),
+) -> SelfEmploymentResponseDTO:
+    """Verifies micro-enterprise status."""
+    res = await self_employment_service.verify_outcome(
+        db, learner_id, outcome_id, verify_in, user=current_user
+    )
+    await audit_service.log_action(
+        db=db,
+        action="SELF_EMPLOYMENT_VERIFIED",
+        resource_type="SELF_EMPLOYMENT",
+        resource_id=str(res.id),
+        actor=current_user,
+        status="SUCCESS",
+        details={
+            "learner_id": learner_id,
+            "verification_status": res.verification_status.value,
+        },
+    )
+    return res
+
+
+# ==============================================================================
+# Non-Placement Reasons Endpoints
+# ==============================================================================
+
+@router.get(
+    "/{learner_id}/non-placement-reasons",
+    response_model=List[NonPlacementReasonResponseDTO],
+    status_code=status.HTTP_200_OK,
+    summary="List Non-Placement Diagnostic Factors",
+    description="Retrieves reasons documented for unplaced candidates (skill deficits, relocation constraints, salary mismatch).",
+)
+async def get_learner_non_placement_reasons(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+) -> List[NonPlacementReasonResponseDTO]:
+    """Retrieves non-placement reasons for candidate."""
+    return await outcome_tracking_service.get_non_placement_reasons(db, learner_id, user=current_user)
+
+
+@router.post(
+    "/{learner_id}/non-placement-reasons",
+    response_model=NonPlacementReasonResponseDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Record Non-Placement Reason",
+    description="Documents why candidate has not secured placement to trigger targeted remedial bridge courses or mobilization.",
+)
+async def record_non_placement_reason(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    reason_in: NonPlacementReasonCreateDTO = ...,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*LEARNER_UPDATE_ROLES)),
+) -> NonPlacementReasonResponseDTO:
+    """Records non-placement diagnostic factor."""
+    res = await outcome_tracking_service.record_non_placement_reason(
+        db, learner_id, reason_in, user=current_user
+    )
+    await audit_service.log_action(
+        db=db,
+        action="NON_PLACEMENT_REASON_RECORDED",
+        resource_type="OUTCOME",
+        resource_id=str(res.id),
+        actor=current_user,
+        status="SUCCESS",
+        details={
+            "learner_id": learner_id,
+            "reason": res.reason.value,
+            "associated_skill_code": res.associated_skill_code,
+        },
     )
     return res

@@ -91,3 +91,20 @@ async def deploy_skill_gap_intervention(
     return await skill_gap_engine.deploy_intervention(
         db=db, req=req, deployed_by=current_user.full_name
     )
+
+
+@router.get(
+    "/outcome-correlations",
+    status_code=status.HTTP_200_OK,
+    summary="Skill Gap & Outcome Correlations",
+    description="Empirical correlations linking competency deficits to interview failures, non-placements, and post-hiring attrition.",
+)
+async def get_outcome_skill_correlations(
+    district_id: Optional[str] = Query(None, description="Filter correlations by district code"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+):
+    """Returns associative correlations between skill gaps and employment outcomes."""
+    return await skill_gap_engine.analyze_outcome_skill_correlations(
+        db=db, district_id=district_id, user=current_user
+    )

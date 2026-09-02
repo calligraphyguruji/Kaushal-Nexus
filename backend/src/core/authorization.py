@@ -219,13 +219,17 @@ class ScopeAuthorizationService:
         if user.role == UserRole.EVALUATOR.value:
             resolved_state = None
             for kw, state_name in STATE_KEYWORDS.items():
-                if kw in user_text:
+                if kw in cleaned_text:
                     resolved_state = state_name
                     break
 
             district_ids: Set[str] = set()
             if resolved_state:
                 dist_stmt = select(District.id).where(District.state == resolved_state)
+                dist_res = await db.execute(dist_stmt)
+                district_ids = set(dist_res.scalars().all())
+            else:
+                dist_stmt = select(District.id)
                 dist_res = await db.execute(dist_stmt)
                 district_ids = set(dist_res.scalars().all())
 

@@ -18,6 +18,7 @@ from src.schemas.task_dto import (
 from src.schemas.user import UserRole
 from src.workers.celery_app import celery_app, execute_celery_test_task
 from src.workers.epfo_sync_task import sync_epfo_batch_task
+from src.workers.followup_task import process_due_followups_task
 from src.workers.report_generator import REPORTS_DIR, _generate_pdf_artifact, _generate_csv_artifact, generate_longitudinal_impact_report_task
 from src.workers.sid_pipeline import sync_sid_learner_batch_task
 
@@ -248,4 +249,27 @@ async def download_report_endpoint(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@router.post(
+    "/process-followups",
+    response_model=TaskTriggerResponseDTO,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Trigger Due Follow-Ups Outreach Batch",
+    description="Dispatches Celery task to scan scheduled follow-ups, enforce active consent checks, and send simulated outreach notifications.",
+)
+async def trigger_followup_processing(
+    batch_limit: int = 50,
+    current_user: User = Depends(require_role(*REPORT_AND_SYNC_ROLES)),
+) -> TaskTriggerResponseDTO:
+    """Dispatches follow-up batch outreach to Celery."""
+    async_res = process_due_followups_task.delay(batch_limit=batch_limit)
+    return TaskTriggerResponseDTO(
+        task_id=async_res.id,
+        task_name="process_due_followups_task",
+        status="QUEUED",
+        message="Follow-up outreach batch task dispatched to Celery worker.",
+        check_status_url=f"/api/v1/tasks/{async_res.id}",
+    )
+
 
