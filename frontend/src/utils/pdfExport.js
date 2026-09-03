@@ -314,7 +314,7 @@ export function exportImpactAuditPDF({ summary, trendData, funnelData, sectorMat
       {
         title: "180-Day Retention",
         value: `${summary.retention_percentage || 0}%`,
-        subtitle: "EPFO Passbook Synced",
+        subtitle: "EPFO Sandbox Synced",
         color: COLORS.brandDarkBlue,
       },
       {
@@ -339,7 +339,7 @@ export function exportImpactAuditPDF({ summary, trendData, funnelData, sectorMat
     Number(f.count || 0).toLocaleString(),
     `${f.percentage || 0}%`,
     f.description || "Longitudinal tracked candidate cohort",
-    f.stage === "Retained" ? "EPFO Verified Remittance" : "NCVET Authenticated",
+    f.stage === "Retained" ? "EPFO Electronic Remittance (Simulated Mock Adapter)" : "NCVET Authenticated",
   ]);
 
   renderAutoTable(doc, {
@@ -470,7 +470,7 @@ export function exportDistrictDossierPDF(district) {
     {
       title: "6M Retention Rate",
       value: `${district.retention_rate || 0}%`,
-      subtitle: "EPFO Verified Remittance",
+      subtitle: "EPFO Electronic Remittance (Simulated Mock Adapter)",
       color: COLORS.brandDarkBlue,
     },
     {
@@ -607,7 +607,7 @@ export function exportLearnerDossierPDF(learner, placements = [], retentionAudit
     {
       title: "Starting CTC",
       value: startingCTC,
-      subtitle: "EPFO Remitted",
+      subtitle: "EPFO Sandbox Remitted",
       color: COLORS.primary,
     },
   ];
@@ -687,19 +687,19 @@ export function exportLearnerDossierPDF(learner, placements = [], retentionAudit
     cp.is_active_at_checkpoint ? "Active & Retained" : "Inactive",
     cp.current_ctc_lpa ? `Rs. ${cp.current_ctc_lpa} LPA` : "Rs. 4.5 LPA",
     `+${cp.wage_increment_percentage || 0}%`,
-    cp.epfo_verified ? "EPFO Electronic Remittance Synced" : "Pending",
+    cp.epfo_verified ? "EPFO Electronic Remittance (Simulated Mock Adapter)" : "Pending",
     cp.remarks || "Quarterly statutory passbook contribution recorded",
   ]);
 
   renderAutoTable(doc, {
     startY: currentY,
-    head: [["Milestone", "Employment Status", "Current CTC", "Wage Growth", "EPFO Verification", "Audit Remarks"]],
+    head: [["Milestone", "Employment Status", "Current CTC", "Wage Growth", "EPFO Verification (Simulated)", "Audit Remarks"]],
     body:
       checkpointRows.length > 0
         ? checkpointRows
         : [
-            ["3-Month Milestone", "Active & Retained", "Rs. 4.5 LPA", "+0%", "EPFO Remittance Synced", "Continuous EPF contribution"],
-            ["6-Month Milestone", "Active & Retained", "Rs. 5.2 LPA", "+15.5%", "EPFO Remittance Synced", "Performance increment confirmed"],
+            ["3-Month Milestone", "Active & Retained", "Rs. 4.5 LPA", "+0%", "EPFO Electronic Remittance (Simulated Mock Adapter)", "Continuous EPF contribution"],
+            ["6-Month Milestone", "Active & Retained", "Rs. 5.2 LPA", "+15.5%", "EPFO Electronic Remittance (Simulated Mock Adapter)", "Performance increment confirmed"],
             ["12-Month Milestone", "Scheduled", "Rs. 5.8 LPA (Est)", "+28.8%", "Pending Next Window", "Annual appraisal checkpoint"],
           ],
     theme: "grid",
@@ -750,7 +750,7 @@ export function exportEmployerDirectoryPDF(mandates = []) {
     {
       title: "Salary Range (Avg)",
       value: "Rs. 4.2 - 6.5 LPA",
-      subtitle: "EPFO Compliant",
+      subtitle: "EPFO Sandbox Compliant",
       color: COLORS.brandDarkBlue,
     },
     {

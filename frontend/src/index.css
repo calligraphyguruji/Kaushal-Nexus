@@ -1,23 +1,141 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
+  --font-heading: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Theme tokens bound to CSS variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Legacy brand accents */
+  --color-brand-navy: #070d18;
+  --color-brand-panel: #0b1528;
+  --color-brand-card: #0f1c33;
+  --color-brand-border: #1e293b;
+  --color-brand-cyan: #38bdf8;
+  --color-brand-indigo: #818cf8;
+  --color-brand-amber: #f59e0b;
+  --color-brand-emerald: #10b981;
+}
+
+/* ==============================================================================
+   CENTRALIZED THEME TOKENS (LIGHT MODE DEFAULT & DARK MODE OVERRIDES)
+   ============================================================================== */
+
 :root {
   font-family: "Plus Jakarta Sans", sans-serif;
 
-  color: #0f172a;
-  background: #f8fafc;
+  /* Semantic Theme Tokens (Enterprise Light Mode) */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  
+  --primary: #0284c7;
+  --primary-foreground: #ffffff;
+  
+  --secondary: #f1f5f9;
+  --secondary-foreground: #1e293b;
+  
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  
+  --accent: #f0f9ff;
+  --accent-foreground: #0369a1;
+  
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  
+  --border: #e2e8f0;
+  --input: #cbd5e1;
+  --ring: #0284c7;
+
+  /* Surface mapping tokens */
+  --canvas-bg: #f8fafc;
+  --surface-panel: #ffffff;
+  --surface-card: #ffffff;
+  --surface-elevated: #f1f5f9;
+  --surface-footer: #f1f5f9;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-body: #475569;
+  --text-muted: #64748b;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
-:root.dark {
-  color: #f8fafc;
-  background: #090d16;
+.dark, :root.dark {
+  /* Semantic Theme Tokens (Stitch Cyber-Navy Dark Mode) */
+  --background: #070d18;
+  --foreground: #f8fafc;
+  
+  --card: #0b1528;
+  --card-foreground: #f8fafc;
+  
+  --popover: #0b1528;
+  --popover-foreground: #f8fafc;
+  
+  --primary: #38bdf8;
+  --primary-foreground: #070d18;
+  
+  --secondary: #0f1c33;
+  --secondary-foreground: #f8fafc;
+  
+  --muted: #0f1c33;
+  --muted-foreground: #94a3b8;
+  
+  --accent: rgba(56, 189, 248, 0.15);
+  --accent-foreground: #38bdf8;
+  
+  --destructive: #f43f5e;
+  --destructive-foreground: #ffffff;
+  
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #38bdf8;
+
+  /* Surface mapping tokens */
+  --canvas-bg: #070d18;
+  --surface-panel: #0b1528;
+  --surface-card: #0b1528;
+  --surface-elevated: #0f1c33;
+  --surface-footer: #050a12;
+  --border-color: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-body: #cbd5e1;
+  --text-muted: #94a3b8;
 }
 
 * {
@@ -32,14 +150,9 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #f8fafc;
-  color: #0f172a;
+  background-color: var(--background);
+  color: var(--foreground);
   transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.dark body {
-  background: #090d16;
-  color: #f8fafc;
 }
 
 button,
@@ -53,7 +166,15 @@ button {
   cursor: pointer;
 }
 
-/* Dark mode input autofill and consistency rules */
+/* Form Controls and Inputs */
+input,
+select,
+textarea {
+  background-color: var(--card);
+  color: var(--foreground);
+  border-color: var(--input);
+}
+
 .dark input:-webkit-autofill,
 .dark input:-webkit-autofill:hover, 
 .dark input:-webkit-autofill:focus,
@@ -65,8 +186,418 @@ button {
   transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Ensure native select dropdown options follow theme background and text */
+/* Ensure native select dropdown options follow theme */
+select option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
 .dark select option {
   background-color: #1e293b;
   color: #f8fafc;
+}
+
+/* Stitch Visual Utilities */
+.glass-card {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.dark .glass-card {
+  background: rgba(15, 28, 51, 0.7);
+  border-color: #1e293b;
+}
+
+html:not(.dark) .glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.grid-pattern {
+  background-size: 32px 32px;
+}
+
+.dark .grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(30, 41, 59, 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(30, 41, 59, 0.35) 1px, transparent 1px);
+}
+
+html:not(.dark) .grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(203, 213, 225, 0.45) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(203, 213, 225, 0.45) 1px, transparent 1px);
+}
+
+.radar-grid {
+  background-size: 24px 24px;
+}
+
+.dark .radar-grid {
+  background-image: radial-gradient(circle, rgba(56, 189, 248, 0.15) 1px, transparent 1px);
+}
+
+html:not(.dark) .radar-grid {
+  background-image: radial-gradient(circle, rgba(2, 132, 199, 0.15) 1px, transparent 1px);
+}
+
+.tech-border {
+  border: 1px solid var(--border);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 24px -4px rgba(56, 189, 248, 0.25);
+}
+
+html:not(.dark) .glow-cyan {
+  box-shadow: 0 4px 14px -2px rgba(2, 132, 199, 0.12);
+}
+
+.glow-indigo {
+  box-shadow: 0 0 24px -4px rgba(129, 140, 248, 0.25);
+}
+
+html:not(.dark) .glow-indigo {
+  box-shadow: 0 4px 14px -2px rgba(99, 102, 241, 0.12);
+}
+
+/* ==============================================================================
+   LIGHT MODE SURFACE & TYPOGRAPHY CASSCADE ENGINE (html:not(.dark))
+   Maps hardcoded dark cyber-navy utilities into enterprise light mode tokens
+   ============================================================================== */
+
+html:not(.dark) {
+  color-scheme: light;
+}
+
+/* 1. Surfaces in Light Mode */
+html:not(.dark) .bg-\[\#070d18\],
+html:not(.dark) [class*="bg-[#070d18]"] {
+  background-color: #f8fafc !important;
+}
+
+html:not(.dark) .bg-\[\#060c18\],
+html:not(.dark) [class*="bg-[#060c18]"] {
+  background-color: #ffffff !important;
+}
+
+html:not(.dark) .bg-\[\#080e1a\],
+html:not(.dark) [class*="bg-[#080e1a]"] {
+  background-color: #f8fafc !important;
+}
+
+html:not(.dark) .bg-\[\#050a12\],
+html:not(.dark) [class*="bg-[#050a12]"] {
+  background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) .bg-\[\#0b1528\],
+html:not(.dark) [class*="bg-[#0b1528]"] {
+  background-color: #ffffff !important;
+}
+
+html:not(.dark) .bg-\[\#0f1c33\],
+html:not(.dark) [class*="bg-[#0f1c33]"] {
+  background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) .border-\[\#1e293b\],
+html:not(.dark) [class*="border-[#1e293b]"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* Interactive hover backgrounds in Light Mode */
+html:not(.dark) .hover\:bg-\[\#0b1528\]:hover {
+  background-color: #f1f5f9 !important;
+}
+html:not(.dark) .hover\:bg-\[\#0f1c33\]:hover {
+  background-color: #e2e8f0 !important;
+}
+html:not(.dark) .hover\:border-slate-700:hover {
+  border-color: #cbd5e1 !important;
+}
+
+/* 2. Headings & Typography in Light Mode */
+html:not(.dark) h1,
+html:not(.dark) h2,
+html:not(.dark) h3,
+html:not(.dark) h4,
+html:not(.dark) h5,
+html:not(.dark) h6 {
+  color: #0f172a !important;
+}
+
+/* Unstyled white text conversion on light surfaces */
+html:not(.dark) .text-white {
+  color: #0f172a !important;
+}
+
+html:not(.dark) .text-slate-100,
+html:not(.dark) .text-gray-100,
+html:not(.dark) .text-\[\#f1f5f9\],
+html:not(.dark) .text-\[\#f8fafc\] {
+  color: #0f172a !important;
+}
+
+html:not(.dark) .text-slate-200,
+html:not(.dark) .text-gray-200 {
+  color: #1e293b !important;
+}
+
+html:not(.dark) .text-slate-300,
+html:not(.dark) .text-gray-300,
+html:not(.dark) .text-\[\#cbd5e1\] {
+  color: #334155 !important;
+}
+
+/* Secondary & Muted body text (WCAG AA: >= 5.5:1 contrast on white) */
+html:not(.dark) .text-slate-400,
+html:not(.dark) .text-slate-500,
+html:not(.dark) .text-gray-400,
+html:not(.dark) .text-gray-500,
+html:not(.dark) .text-\[\#94a3b8\] {
+  color: #475569 !important;
+}
+
+/* 3. Button Typography Protection in Light Mode (White text on solid colored buttons) */
+html:not(.dark) .bg-blue-600,
+html:not(.dark) .bg-blue-600 *,
+html:not(.dark) .bg-blue-700,
+html:not(.dark) .bg-blue-700 *,
+html:not(.dark) .bg-sky-500,
+html:not(.dark) .bg-sky-500 *,
+html:not(.dark) .bg-sky-600,
+html:not(.dark) .bg-sky-600 *,
+html:not(.dark) .bg-emerald-600,
+html:not(.dark) .bg-emerald-600 *,
+html:not(.dark) .bg-emerald-700,
+html:not(.dark) .bg-emerald-700 *,
+html:not(.dark) .bg-rose-600,
+html:not(.dark) .bg-rose-600 *,
+html:not(.dark) .bg-rose-700,
+html:not(.dark) .bg-rose-700 *,
+html:not(.dark) .bg-indigo-600,
+html:not(.dark) .bg-indigo-600 *,
+html:not(.dark) .bg-indigo-700,
+html:not(.dark) .bg-indigo-700 *,
+html:not(.dark) .bg-purple-600,
+html:not(.dark) .bg-purple-600 *,
+html:not(.dark) .bg-slate-900,
+html:not(.dark) .bg-slate-900 *,
+html:not(.dark) .bg-slate-950,
+html:not(.dark) .bg-slate-950 * {
+  &.text-white,
+  & .text-white,
+  &.text-slate-100,
+  & .text-slate-100,
+  &.text-slate-200,
+  & .text-slate-200 {
+    color: #ffffff !important;
+  }
+}
+
+/* 4. Pastel Badges & Accent Status in Light Mode */
+html:not(.dark) .text-sky-300,
+html:not(.dark) .text-sky-400 {
+  color: #0369a1 !important;
+}
+
+html:not(.dark) .text-emerald-300,
+html:not(.dark) .text-emerald-400 {
+  color: #047857 !important;
+}
+
+html:not(.dark) .text-amber-300,
+html:not(.dark) .text-amber-400,
+html:not(.dark) .text-yellow-400 {
+  color: #b45309 !important;
+}
+
+html:not(.dark) .text-rose-300,
+html:not(.dark) .text-rose-400,
+html:not(.dark) .text-red-400 {
+  color: #be123c !important;
+}
+
+html:not(.dark) .text-indigo-300,
+html:not(.dark) .text-indigo-400 {
+  color: #4338ca !important;
+}
+
+html:not(.dark) .text-purple-300,
+html:not(.dark) .text-purple-400 {
+  color: #6b21a8 !important;
+}
+
+html:not(.dark) .bg-sky-500\/10,
+html:not(.dark) .bg-sky-950\/40,
+html:not(.dark) .bg-sky-950\/50 {
+  background-color: #f0f9ff !important;
+  border-color: #bae6fd !important;
+}
+
+html:not(.dark) .bg-emerald-500\/10,
+html:not(.dark) .bg-emerald-950\/40,
+html:not(.dark) .bg-emerald-950\/50 {
+  background-color: #f0fdf4 !important;
+  border-color: #bbf7d0 !important;
+}
+
+html:not(.dark) .bg-amber-500\/10,
+html:not(.dark) .bg-amber-950\/40,
+html:not(.dark) .bg-amber-950\/50 {
+  background-color: #fffbeb !important;
+  border-color: #fde68a !important;
+}
+
+html:not(.dark) .bg-rose-500\/10,
+html:not(.dark) .bg-rose-950\/40,
+html:not(.dark) .bg-rose-950\/50 {
+  background-color: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+
+html:not(.dark) .bg-indigo-500\/10,
+html:not(.dark) .bg-indigo-950\/40,
+html:not(.dark) .bg-indigo-950\/50 {
+  background-color: #eef2ff !important;
+  border-color: #c7d2fe !important;
+}
+
+html:not(.dark) .bg-purple-500\/10,
+html:not(.dark) .bg-purple-950\/40,
+html:not(.dark) .bg-purple-950\/50 {
+  background-color: #faf5ff !important;
+  border-color: #e9d5ff !important;
+}
+
+/* 5. Inputs, Forms & Placeholders in Light Mode */
+html:not(.dark) input,
+html:not(.dark) select,
+html:not(.dark) textarea {
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+html:not(.dark) select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+html:not(.dark) label {
+  color: #1e293b !important;
+}
+
+/* 6. Tables, Recharts & Tooltips in Light Mode */
+html:not(.dark) th {
+  color: #475569 !important;
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+html:not(.dark) td {
+  color: #1e293b !important;
+  border-color: #e2e8f0 !important;
+}
+
+html:not(.dark) .recharts-cartesian-axis-tick text {
+  fill: #475569 !important;
+}
+
+html:not(.dark) .recharts-cartesian-grid line {
+  stroke: #e2e8f0 !important;
+}
+
+html:not(.dark) .recharts-default-tooltip {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+html:not(.dark) .recharts-tooltip-item {
+  color: #1e293b !important;
+}
+
+html:not(.dark) .recharts-legend-item-text {
+  color: #334155 !important;
+}
+
+/* 7. Homepage Section 10 CTA Banner in Light Mode */
+html:not(.dark) #explore {
+  background-image: linear-gradient(to bottom, #f8fafc, #f1f5f9, #f8fafc) !important;
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+html:not(.dark) #explore h2 {
+  color: #0f172a !important;
+}
+
+html:not(.dark) #explore p {
+  color: #475569 !important;
+}
+
+/* 8. Footer in Light Mode */
+html:not(.dark) footer {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #475569 !important;
+}
+
+html:not(.dark) footer h1,
+html:not(.dark) footer h2,
+html:not(.dark) footer h3,
+html:not(.dark) footer h4,
+html:not(.dark) footer .font-heading {
+  color: #0f172a !important;
+}
+
+html:not(.dark) footer span.font-bold,
+html:not(.dark) footer .font-bold.uppercase,
+html:not(.dark) footer strong {
+  color: #0f172a !important;
+}
+
+html:not(.dark) footer a,
+html:not(.dark) footer li a {
+  color: #475569 !important;
+}
+
+html:not(.dark) footer a:hover,
+html:not(.dark) footer li a:hover {
+  color: #0284c7 !important;
+}
+
+html:not(.dark) footer p,
+html:not(.dark) footer .text-slate-400,
+html:not(.dark) footer .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* 9. Header in Light Mode */
+html:not(.dark) header {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+html:not(.dark) header nav a {
+  color: #334155 !important;
+}
+
+html:not(.dark) header nav a:hover {
+  color: #0284c7 !important;
+}
+
+html:not(.dark) button:disabled,
+html:not(.dark) input:disabled {
+  opacity: 0.65 !important;
 }

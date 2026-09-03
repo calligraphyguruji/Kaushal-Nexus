@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   ShieldCheck,
@@ -9,13 +9,11 @@ import {
   Check,
   ScrollText,
   Lock,
-  Layers,
   Search,
   SlidersHorizontal,
   Server,
   AlertCircle,
   Clock,
-  User,
 } from "lucide-react";
 import PageHeader from "../components/PageHeader";
 import SectionHeader from "../components/SectionHeader";
@@ -32,7 +30,6 @@ export default function Settings() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const permissions = usePermissions();
 
-  const [synced, setSynced] = useState(false);
   const [retentionTarget, setRetentionTarget] = useState(80);
   const [gapThreshold, setGapThreshold] = useState(65);
 
@@ -107,21 +104,21 @@ export default function Settings() {
       name: "Light Mode",
       description: "Clean high-contrast daytime interface for bright office environments.",
       icon: Sun,
-      iconColor: "text-amber-500",
+      iconColor: "text-amber-400",
     },
     {
       id: "dark",
       name: "Dark Mode",
-      description: "Deep Bharat-Slate palette engineered for low eye strain during data auditing.",
+      description: "Deep Cyber-Navy palette engineered for low eye strain during data auditing.",
       icon: Moon,
-      iconColor: "text-blue-400",
+      iconColor: "text-sky-400",
     },
     {
       id: "system",
       name: "System Default",
       description: "Automatically matches your operating system preference dynamically.",
       icon: Monitor,
-      iconColor: "text-slate-400 dark:text-slate-300",
+      iconColor: "text-slate-300",
     },
   ];
 
@@ -137,24 +134,29 @@ export default function Settings() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 font-sans text-[#f1f5f9]">
+      {/* =====================================================
+          1. PAGE HEADER
+      ====================================================== */}
       <PageHeader
-        badge="Platform Governance"
-        badgeVariant="neutral"
-        title="Platform & Policy Settings"
+        badge="SYSTEM CONFIGURATION"
+        badgeVariant="cyan"
+        title="Settings"
         description="Configure longitudinal tracking parameters, verification sources, theme preferences, and inspect compliance audit trails."
         breadcrumbs={["Administration", "Settings"]}
       />
 
-      {/* Tabs Navigation */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800">
+      {/* =====================================================
+          2. NAVIGATION TABS
+      ====================================================== */}
+      <div className="flex border-b border-[#1e293b] overflow-x-auto">
         <button
           type="button"
           onClick={() => handleTabChange("preferences")}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-semibold transition ${
+          className={`flex items-center gap-2 border-b-2 px-4 py-3 font-mono text-xs font-semibold transition cursor-pointer shrink-0 ${
             activeTab === "preferences"
-              ? "border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+              ? "border-sky-400 text-sky-400 bg-sky-500/5"
+              : "border-transparent text-slate-400 hover:text-slate-200"
           }`}
         >
           <SlidersHorizontal size={14} />
@@ -164,28 +166,28 @@ export default function Settings() {
         <button
           type="button"
           onClick={() => handleTabChange("pipelines")}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-semibold transition ${
+          className={`flex items-center gap-2 border-b-2 px-4 py-3 font-mono text-xs font-semibold transition cursor-pointer shrink-0 ${
             activeTab === "pipelines"
-              ? "border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+              ? "border-sky-400 text-sky-400 bg-sky-500/5"
+              : "border-transparent text-slate-400 hover:text-slate-200"
           }`}
         >
           <Server size={14} />
-          <span>Data Pipelines & Integrations</span>
+          <span>Data Pipelines &amp; Integrations</span>
         </button>
 
         <button
           type="button"
           onClick={() => handleTabChange("audit")}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-semibold transition ${
+          className={`flex items-center gap-2 border-b-2 px-4 py-3 font-mono text-xs font-semibold transition cursor-pointer shrink-0 ${
             activeTab === "audit"
-              ? "border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+              ? "border-sky-400 text-sky-400 bg-sky-500/5"
+              : "border-transparent text-slate-400 hover:text-slate-200"
           }`}
         >
           <ScrollText size={14} />
           <span>Compliance Audit Logs</span>
-          <span className="rounded-full bg-indigo-50 border border-indigo-200 px-1.5 py-0.2 text-[9px] font-bold text-indigo-700 dark:bg-indigo-950/50 dark:border-indigo-800 dark:text-indigo-300">
+          <span className="rounded border border-indigo-500/30 bg-indigo-950/40 px-1.5 py-0.2 font-mono text-[9px] font-bold text-indigo-300">
             Privileged
           </span>
         </button>
@@ -193,34 +195,36 @@ export default function Settings() {
         <button
           type="button"
           onClick={() => handleTabChange("privacy")}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-semibold transition ${
+          className={`flex items-center gap-2 border-b-2 px-4 py-3 font-mono text-xs font-semibold transition cursor-pointer shrink-0 ${
             activeTab === "privacy"
-              ? "border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+              ? "border-sky-400 text-sky-400 bg-sky-500/5"
+              : "border-transparent text-slate-400 hover:text-slate-200"
           }`}
         >
           <Lock size={14} />
-          <span>Privacy & Consent</span>
-          <span className="rounded-full bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 text-[9px] font-bold text-emerald-700 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-300">
+          <span>Privacy &amp; Consent</span>
+          <span className="rounded border border-emerald-500/30 bg-emerald-950/40 px-1.5 py-0.2 font-mono text-[9px] font-bold text-emerald-300">
             DPDP-Aligned
           </span>
         </button>
       </div>
 
       {syncStatusMsg && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 p-3.5 text-xs font-semibold text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-200">
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/40 p-4 font-mono text-xs font-semibold text-emerald-200">
           {syncStatusMsg}
         </div>
       )}
 
-      {/* Tab 1: Preferences */}
+      {/* =====================================================
+          TAB 1: PREFERENCES
+      ====================================================== */}
       {activeTab === "preferences" && (
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             {/* Appearance & Theme Selector */}
-            <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+            <div className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 shadow-sm">
               <SectionHeader
-                title="Interface Appearance & Theme"
+                title="Interface Appearance &amp; Theme"
                 subtitle="Choose your preferred color theme for data visualization and navigation."
                 badge={
                   <StatusBadge variant="info" size="sm">
@@ -239,30 +243,28 @@ export default function Settings() {
                       key={opt.id}
                       type="button"
                       onClick={() => setTheme(opt.id)}
-                      className={`relative flex flex-col justify-between rounded-xl border p-4 text-left transition-all ${
+                      className={`relative flex flex-col justify-between rounded-xl border p-4 text-left transition-all cursor-pointer ${
                         isSelected
-                          ? "border-blue-600 bg-blue-50/40 shadow-xs ring-1 ring-blue-600/30 dark:border-blue-500 dark:bg-blue-950/20 dark:ring-blue-500/40"
-                          : "border-slate-200/80 bg-slate-50/50 hover:border-slate-300 hover:bg-slate-100/60 dark:border-slate-800 dark:bg-slate-950/50 dark:hover:border-slate-700 dark:hover:bg-slate-800/40"
+                          ? "border-sky-400/50 bg-[#0f1c33] shadow-xs ring-1 ring-sky-400/30"
+                          : "border-[#1e293b] bg-[#070d18] hover:border-slate-700 hover:bg-[#0b1528]"
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between">
-                          <div
-                            className={`flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200/80 bg-white shadow-2xs dark:border-slate-700 dark:bg-slate-800`}
-                          >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#1e293b] bg-[#0b1528]">
                             <Icon size={16} className={opt.iconColor} />
                           </div>
                           {isSelected && (
-                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white dark:bg-blue-500">
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-400 text-slate-950">
                               <Check size={12} strokeWidth={2.5} />
                             </span>
                           )}
                         </div>
 
-                        <h4 className="mt-3 text-xs font-bold text-slate-900 dark:text-slate-100">
+                        <h4 className="mt-3 font-heading text-xs font-bold text-white">
                           {opt.name}
                         </h4>
-                        <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                        <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
                           {opt.description}
                         </p>
                       </div>
@@ -273,17 +275,17 @@ export default function Settings() {
             </div>
 
             {/* Longitudinal Outcome Parameters */}
-            <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+            <div className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 shadow-sm">
               <SectionHeader
                 title="Longitudinal Tracking Benchmarks"
                 subtitle="Define state and scheme-level outcome thresholds for intervention alerts."
               />
 
-              <div className="mt-5 space-y-4">
+              <div className="mt-5 space-y-4 font-sans">
                 <div>
-                  <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  <div className="flex justify-between text-xs font-semibold text-slate-300">
                     <span>Minimum 6-Month Employment Retention Target</span>
-                    <span className="font-bold text-blue-700 tabular-nums dark:text-blue-400">
+                    <span className="font-mono font-bold text-sky-400 tabular-nums">
                       {retentionTarget}%
                     </span>
                   </div>
@@ -293,17 +295,17 @@ export default function Settings() {
                     max="95"
                     value={retentionTarget}
                     onChange={(e) => setRetentionTarget(Number(e.target.value))}
-                    className="mt-2 h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-blue-600 dark:bg-slate-700 dark:accent-blue-500"
+                    className="mt-2 h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-[#070d18] accent-sky-400"
                   />
-                  <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 font-mono text-[11px] text-slate-400">
                     Cohorts falling below this rate are automatically flagged for curriculum audit.
                   </p>
                 </div>
 
-                <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
-                  <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
+                <div className="border-t border-[#1e293b] pt-4">
+                  <div className="flex justify-between text-xs font-semibold text-slate-300">
                     <span>Critical Skill Gap Trigger Threshold</span>
-                    <span className="font-bold text-rose-700 tabular-nums dark:text-rose-400">
+                    <span className="font-mono font-bold text-rose-400 tabular-nums">
                       {gapThreshold}%
                     </span>
                   </div>
@@ -313,9 +315,9 @@ export default function Settings() {
                     max="90"
                     value={gapThreshold}
                     onChange={(e) => setGapThreshold(Number(e.target.value))}
-                    className="mt-2 h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-rose-600 dark:bg-slate-700 dark:accent-rose-500"
+                    className="mt-2 h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-[#070d18] accent-rose-500"
                   />
-                  <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 font-mono text-[11px] text-slate-400">
                     Employer demand-to-supply deltas exceeding this limit activate regional bridge training mandates.
                   </p>
                 </div>
@@ -324,32 +326,48 @@ export default function Settings() {
           </div>
 
           <div className="space-y-6">
-            <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-5 dark:border-blue-900/50 dark:bg-blue-950/20">
+            <div className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 shadow-sm">
               <div className="flex items-center gap-2">
-                <ShieldCheck size={17} className="text-blue-700 dark:text-blue-400" />
-                <h4 className="text-xs font-bold text-blue-950 uppercase tracking-wide dark:text-blue-200">
+                <ShieldCheck size={17} className="text-sky-400" />
+                <h4 className="font-heading text-xs font-bold text-white uppercase tracking-wide">
                   Authoritative Security Baseline
                 </h4>
               </div>
-              <p className="mt-2 text-xs leading-relaxed text-blue-900/80 dark:text-blue-300/80">
+              <p className="mt-2 text-xs leading-relaxed text-slate-300">
                 All platform endpoints enforce strict institutional RBAC, user scope boundaries,
                 and automated PII redaction.
               </p>
+              <div className="mt-4 space-y-2 border-t border-[#1e293b] pt-3 font-mono text-[11px] text-slate-400">
+                <div className="flex justify-between">
+                  <span>RBAC Enforcement:</span>
+                  <span className="text-emerald-400 font-semibold">Active Strict</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Session Security:</span>
+                  <span className="text-sky-400 font-semibold">HTTP-Only / JWT</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>PII Redaction:</span>
+                  <span className="text-slate-200">Aadhaar/Phone Masked</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Tab 2: Pipelines & Integrations */}
+      {/* =====================================================
+          TAB 2: PIPELINES & INTEGRATIONS
+      ====================================================== */}
       {activeTab === "pipelines" && (
         <div className="space-y-6">
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+          <div className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 shadow-sm">
             <SectionHeader
-              title="Institutional Data Pipelines & Adapters"
+              title="Institutional Data Pipelines &amp; Adapters"
               subtitle="Integration-ready verification architecture with sandbox/mock adapters for demonstration."
             />
 
-            <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="mt-4 divide-y divide-[#1e293b]">
               {[
                 {
                   name: "UIDAI / Aadhaar Beneficiary Verification",
@@ -388,13 +406,13 @@ export default function Settings() {
               ].map((pipe) => (
                 <div
                   key={pipe.name}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
                 >
                   <div>
-                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    <p className="font-heading text-xs font-semibold text-white">
                       {pipe.name}
                     </p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{pipe.type}</p>
+                    <p className="font-mono text-[11px] text-slate-400">{pipe.type}</p>
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -407,11 +425,11 @@ export default function Settings() {
                         type="button"
                         onClick={pipe.onTrigger}
                         disabled={pipe.loading}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-750"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#070d18] px-2.5 py-1 font-mono text-[11px] font-semibold text-slate-200 hover:border-slate-700 hover:bg-[#0f1c33] disabled:opacity-50 cursor-pointer"
                       >
                         <RefreshCw
                           size={12}
-                          className={pipe.loading ? "animate-spin text-blue-600" : ""}
+                          className={pipe.loading ? "animate-spin text-sky-400" : "text-sky-400"}
                         />
                         <span>{pipe.loading ? "Syncing..." : pipe.triggerLabel}</span>
                       </button>
@@ -424,7 +442,9 @@ export default function Settings() {
         </div>
       )}
 
-      {/* Tab 3: Compliance Audit Logs */}
+      {/* =====================================================
+          TAB 3: COMPLIANCE AUDIT LOGS
+      ====================================================== */}
       {activeTab === "audit" && (
         <div>
           {!permissions.canViewAuditLogs ? (
@@ -437,10 +457,10 @@ export default function Settings() {
             />
           ) : (
             <div className="space-y-4">
-              <div className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-5 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex flex-col gap-3 rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:flex-row sm:items-center sm:justify-between shadow-sm">
                 <div>
                   <SectionHeader
-                    title="Compliance & Security Audit Trail"
+                    title="Compliance &amp; Security Audit Trail"
                     subtitle="Role-gated audit logging with PII redaction and correlation tracing."
                   />
                 </div>
@@ -449,14 +469,14 @@ export default function Settings() {
                   <div className="relative">
                     <Search
                       size={13}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500"
                     />
                     <input
                       type="text"
                       placeholder="Search action or actor..."
                       value={auditSearch}
                       onChange={(e) => setAuditSearch(e.target.value)}
-                      className="h-8 w-52 rounded-md border border-slate-200 bg-slate-50 pl-8 pr-2.5 text-xs text-slate-800 focus:border-blue-400 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                      className="h-8 w-52 rounded-lg border border-[#1e293b] bg-[#070d18] pl-8 pr-2.5 font-sans text-xs text-slate-200 placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
                     />
                   </div>
 
@@ -464,11 +484,11 @@ export default function Settings() {
                     type="button"
                     onClick={fetchAuditLogs}
                     disabled={auditLoading}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#070d18] px-2.5 py-1.5 font-mono text-xs font-semibold text-slate-300 hover:border-slate-700 hover:bg-[#0f1c33] disabled:opacity-50 cursor-pointer"
                   >
                     <RefreshCw
                       size={12}
-                      className={auditLoading ? "animate-spin text-blue-600" : ""}
+                      className={auditLoading ? "animate-spin text-sky-400" : "text-sky-400"}
                     />
                     <span>Refresh</span>
                   </button>
@@ -492,10 +512,10 @@ export default function Settings() {
                   message="No compliance audit records match your query."
                 />
               ) : (
-                <div className="overflow-x-auto rounded-xl border border-slate-200/80 bg-white shadow-2xs dark:border-slate-800 dark:bg-slate-900">
-                  <table className="w-full text-left text-xs">
+                <div className="overflow-x-auto rounded-xl border border-[#1e293b] bg-[#0b1528] shadow-sm">
+                  <table className="w-full text-left text-xs font-mono">
                     <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50/70 text-slate-500 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-400">
+                      <tr className="border-b border-[#1e293b] bg-[#070d18] text-slate-400">
                         <th className="px-4 py-3 font-semibold">Timestamp (UTC)</th>
                         <th className="px-4 py-3 font-semibold">Action</th>
                         <th className="px-4 py-3 font-semibold">Resource</th>
@@ -503,32 +523,32 @@ export default function Settings() {
                         <th className="px-4 py-3 font-semibold">Correlation ID</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tbody className="divide-y divide-[#1e293b]">
                       {filteredLogs.map((log, idx) => (
                         <tr
                           key={log.id || idx}
-                          className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
+                          className="hover:bg-[#0f1c33] transition-colors"
                         >
-                          <td className="whitespace-nowrap px-4 py-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                          <td className="whitespace-nowrap px-4 py-3 text-[11px] text-slate-400">
                             {log.timestamp || new Date().toISOString()}
                           </td>
                           <td className="px-4 py-3">
-                            <span className="rounded-full bg-slate-100 px-2 py-0.5 font-mono text-[10px] font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
+                            <span className="rounded border border-[#1e293b] bg-[#070d18] px-2 py-0.5 text-[10px] font-bold text-sky-400">
                               {log.action}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-slate-700 dark:text-slate-300">
-                            <span className="font-semibold">{log.resource_type}</span>
+                          <td className="px-4 py-3 text-slate-300">
+                            <span className="font-semibold text-white">{log.resource_type}</span>
                             {log.resource_id && (
-                              <span className="ml-1.5 font-mono text-[10px] text-slate-400">
+                              <span className="ml-1.5 text-[10px] text-slate-400">
                                 {log.resource_id}
                               </span>
                             )}
                           </td>
-                          <td className="px-4 py-3 font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                          <td className="px-4 py-3 text-[11px] text-slate-300">
                             {log.actor_id || "System Engine"}
                           </td>
-                          <td className="px-4 py-3 font-mono text-[10px] text-slate-400">
+                          <td className="px-4 py-3 text-[10px] text-slate-400">
                             {log.correlation_id || "—"}
                           </td>
                         </tr>
@@ -542,99 +562,101 @@ export default function Settings() {
         </div>
       )}
 
-      {/* Tab 4: Privacy & Consent Governance */}
+      {/* =====================================================
+          TAB 4: PRIVACY & CONSENT GOVERNANCE
+      ====================================================== */}
       {activeTab === "privacy" && (
         <div className="space-y-6">
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-5 dark:border-slate-800">
+          <div className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#1e293b] pb-5">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+                  <span className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2 text-emerald-400">
                     <ShieldCheck size={18} />
                   </span>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                    Beneficiary Consent & Data Privacy Governance
+                  <h3 className="font-heading text-base font-bold text-white">
+                    Beneficiary Consent &amp; Data Privacy Governance
                   </h3>
                 </div>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-xs text-slate-300 leading-relaxed">
                   KaushalNexus incorporates privacy controls aligned with relevant DPDP principles, including consent, purpose limitation, data minimization and accountability. Candidate consents are explicitly tracked with purpose-limitation, immutable audit timestamps, and automated revocation compliance.
                 </p>
               </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-300">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/40 px-3 py-1 font-mono text-xs font-semibold text-emerald-300 shrink-0">
                 <Check size={12} /> DPDP Act Aligned
               </span>
             </div>
 
             {/* Tracking Authorization Matrix */}
             <div className="mt-6">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
-                Tracking Permission Categories & Enforcement Rules
+              <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                Tracking Permission Categories &amp; Enforcement Rules
               </h4>
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                <div className="rounded-xl border border-[#1e293b] bg-[#070d18] p-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">
+                    <span className="font-heading font-semibold text-xs text-white">
                       Follow-Up Communication
                     </span>
-                    <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200">
+                    <span className="rounded border border-emerald-500/30 bg-emerald-950/40 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-300">
                       Active Guardrail
                     </span>
                   </div>
-                  <p className="mt-2 text-[11px] text-slate-600 dark:text-slate-400">
+                  <p className="mt-2 text-[11px] text-slate-400 leading-relaxed">
                     Governs automated 30, 90, 180, and 365-day milestone outreach. If consent is revoked, all dispatch queues immediately skip candidate outreach.
                   </p>
-                  <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-500">
+                  <div className="mt-3 flex items-center gap-2 font-mono text-[10px] text-slate-500">
                     <Clock size={11} /> <span>Revocation latency: &lt;10ms (Synchronous check)</span>
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                <div className="rounded-xl border border-[#1e293b] bg-[#070d18] p-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">
+                    <span className="font-heading font-semibold text-xs text-white">
                       Wage Progression Verification
                     </span>
-                    <span className="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:bg-blue-900/60 dark:text-blue-200">
+                    <span className="rounded border border-sky-500/30 bg-sky-950/40 px-2 py-0.5 font-mono text-[10px] font-bold text-sky-300">
                       Range-Based Minimization
                     </span>
                   </div>
-                  <p className="mt-2 text-[11px] text-slate-600 dark:text-slate-400">
+                  <p className="mt-2 text-[11px] text-slate-400 leading-relaxed">
                     Protects sensitive compensation details. Employs wage brackets and percentage deltas rather than granular transaction ledger pulls.
                   </p>
-                  <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-500">
+                  <div className="mt-3 flex items-center gap-2 font-mono text-[10px] text-slate-500">
                     <Lock size={11} /> <span>Anonymized in aggregated state metrics</span>
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                <div className="rounded-xl border border-[#1e293b] bg-[#070d18] p-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">
-                      Micro-Enterprise & Self-Employment
+                    <span className="font-heading font-semibold text-xs text-white">
+                      Micro-Enterprise &amp; Self-Employment
                     </span>
-                    <span className="rounded bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800 dark:bg-purple-900/60 dark:text-purple-200">
+                    <span className="rounded border border-indigo-500/30 bg-indigo-950/40 px-2 py-0.5 font-mono text-[10px] font-bold text-indigo-300">
                       Field Verified
                     </span>
                   </div>
-                  <p className="mt-2 text-[11px] text-slate-600 dark:text-slate-400">
+                  <p className="mt-2 text-[11px] text-slate-400 leading-relaxed">
                     Tracks entrepreneurial ventures, Udyam MSME credentials, and revenue bands with dual-signature assessor sign-off.
                   </p>
-                  <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-500">
+                  <div className="mt-3 flex items-center gap-2 font-mono text-[10px] text-slate-500">
                     <Check size={11} /> <span>Dual verification audit trail enabled</span>
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                <div className="rounded-xl border border-[#1e293b] bg-[#070d18] p-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">
+                    <span className="font-heading font-semibold text-xs text-white">
                       Epistemic AI Inference Standard
                     </span>
-                    <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:bg-amber-900/60 dark:text-amber-200">
+                    <span className="rounded border border-amber-500/30 bg-amber-950/40 px-2 py-0.5 font-mono text-[10px] font-bold text-amber-300">
                       Strict Guardrail
                     </span>
                   </div>
-                  <p className="mt-2 text-[11px] text-slate-600 dark:text-slate-400">
+                  <p className="mt-2 text-[11px] text-slate-400 leading-relaxed">
                     Ensures AI models express correlations (&quot;associated with&quot;, &quot;observed pattern&quot;) without asserting unsubstantiated causality in candidate dossiers.
                   </p>
-                  <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-500">
+                  <div className="mt-3 flex items-center gap-2 font-mono text-[10px] text-slate-500">
                     <AlertCircle size={11} /> <span>Non-causal phrasing enforced</span>
                   </div>
                 </div>

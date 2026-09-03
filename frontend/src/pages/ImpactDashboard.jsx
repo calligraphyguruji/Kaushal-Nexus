@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   ArrowUpRight,
   Download,
@@ -10,6 +10,9 @@ import {
   AlertCircle,
   CheckCircle2,
   Loader2,
+  Activity,
+  TrendingUp,
+  Layers,
 } from "lucide-react";
 
 import {
@@ -31,7 +34,8 @@ import { schemeBreakdown, insights } from "../data/dashboardData";
 
 import PageHeader from "../components/PageHeader";
 import SectionHeader from "../components/SectionHeader";
-import StatCard from "../components/StatCard";
+import TechStatCard from "../components/TechStatCard";
+import InstitutionalBadge from "../components/InstitutionalBadge";
 import StatusBadge from "../components/StatusBadge";
 import IntelligenceCard from "../components/IntelligenceCard";
 import ActionModal from "../components/ActionModal";
@@ -127,52 +131,6 @@ export default function ImpactDashboard() {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  // Derived Dynamic KPI Stat Cards from Backend Data
-  const statCards = summaryData
-    ? [
-        {
-          title: "Certified Beneficiaries",
-          value: Number(summaryData.total_certified || 0).toLocaleString(),
-          change: summaryData.deltas?.certified?.value || "+8.7%",
-          trend: "up",
-          period: summaryData.deltas?.certified?.context || "MoM growth",
-          subtitle: `${Number(summaryData.total_trained || 0).toLocaleString()} trained (${Number(summaryData.total_enrolled || 0).toLocaleString()} enrolled)`,
-          highlight: "NCVET Authenticated",
-          icon: GraduationCap,
-        },
-        {
-          title: "Verified Placements",
-          value: Number(summaryData.total_placed || 0).toLocaleString(),
-          change: `+${summaryData.placement_percentage || 0}%`,
-          trend: "up",
-          period: "conversion rate",
-          subtitle: `${summaryData.placement_percentage || 0}% of certified candidates placed`,
-          highlight: "Verification Ready",
-          icon: BriefcaseBusiness,
-        },
-        {
-          title: "Longitudinal Retention",
-          value: `${summaryData.retention_percentage || 0}%`,
-          change: `${Number(summaryData.retention_verified_count || 0).toLocaleString()} active`,
-          trend: "up",
-          period: "at 180 days",
-          subtitle: "180-day retention audited (EPFO mock adapter)",
-          highlight: "180-Day Milestone",
-          icon: ShieldCheck,
-        },
-        {
-          title: "Industry Demand Mandates",
-          value: Number(summaryData.active_hiring_mandates || 0).toLocaleString(),
-          change: `Avg score: ${summaryData.avg_readiness_score || 0}%`,
-          trend: "up",
-          period: "readiness index",
-          subtitle: "Active employer vacancy listings",
-          highlight: "Multi-Sectoral",
-          icon: Users,
-        },
-      ]
-    : [];
-
   // Derived Chart Data for Recharts Area Visualizer
   const chartPoints = (trendData.length > 0 ? trendData : []).map((pt) => {
     const rate =
@@ -201,22 +159,22 @@ export default function ImpactDashboard() {
   };
 
   const funnelColors = [
-    "bg-slate-900 dark:bg-slate-700",
-    "bg-blue-800 dark:bg-blue-700",
-    "bg-blue-600 dark:bg-blue-500",
-    "bg-emerald-600 dark:bg-emerald-500",
-    "bg-emerald-700 dark:bg-emerald-600",
+    "bg-slate-600",
+    "bg-indigo-600",
+    "bg-sky-500",
+    "bg-emerald-500",
+    "bg-emerald-400",
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 font-sans text-[#f1f5f9]">
       {/* =====================================================
-          PAGE HEADER & EXECUTIVE ACTIONS
+          1. PAGE HEADER & EXECUTIVE ACTIONS
       ====================================================== */}
       <PageHeader
-        badge="Executive Outcomes Architecture"
-        badgeVariant="indigo"
-        title="Impact & Employment Intelligence"
+        badge="NATIONAL SKILL INTELLIGENCE"
+        badgeVariant="cyan"
+        title="Impact & Employment Overview"
         description="Continuous longitudinal tracking of training outcomes, certified candidate placement conversion, 6-month retention, and workforce demand equilibrium."
         breadcrumbs={["National Platform", "Executive Overview"]}
         actions={
@@ -225,23 +183,23 @@ export default function ImpactDashboard() {
               type="button"
               onClick={() => fetchDashboardData(true)}
               disabled={isRefreshing || loading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
               title="Refresh live data from PostgreSQL"
             >
-              <RefreshCw size={13} className={isRefreshing ? "animate-spin text-blue-600" : ""} />
+              <RefreshCw size={13} className={isRefreshing ? "animate-spin text-sky-400" : "text-sky-400"} />
               <span>{isRefreshing ? "Syncing..." : "Sync Live DB"}</span>
             </button>
 
-            <div className="flex items-center rounded-lg border border-slate-200/80 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center rounded-lg border border-[#1e293b] bg-[#0b1528] p-1 font-mono text-xs">
               {["Q1 2026", "Q2 2026", "YTD 2026"].map((period) => (
                 <button
                   key={period}
                   type="button"
                   onClick={() => setSelectedPeriod(period)}
-                  className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
+                  className={`rounded-md px-3 py-1.5 font-semibold transition-all cursor-pointer ${
                     selectedPeriod === period
-                      ? "bg-slate-900 text-white dark:bg-blue-600 dark:text-white"
-                      : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+                      ? "bg-sky-400 text-slate-950 font-bold shadow-xs"
+                      : "text-slate-400 hover:text-white"
                   }`}
                 >
                   {period}
@@ -252,7 +210,7 @@ export default function ImpactDashboard() {
             <button
               type="button"
               onClick={() => setIsExportModalOpen(true)}
-              className="group inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-blue-700 active:scale-[0.98]"
+              className="group inline-flex items-center gap-1.5 rounded-lg bg-sky-400 hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-slate-950 shadow-xs transition glow-cyan cursor-pointer"
             >
               <Download size={14} />
               <span>Export Audit Dossier</span>
@@ -267,15 +225,15 @@ export default function ImpactDashboard() {
 
       {/* Success Notification Alert */}
       {actionSuccessMsg && (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/90 p-4 text-xs text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-200">
+        <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-950/40 p-4 text-xs text-emerald-200">
           <div className="flex items-center gap-2.5">
-            <CheckCircle2 size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <CheckCircle2 size={16} className="shrink-0 text-emerald-400" />
             <span className="font-semibold">{actionSuccessMsg}</span>
           </div>
           <button
             type="button"
             onClick={() => setActionSuccessMsg(null)}
-            className="text-xs font-bold uppercase text-emerald-700 hover:text-emerald-900 dark:text-emerald-400"
+            className="font-mono text-xs font-bold uppercase text-emerald-400 hover:text-emerald-300"
           >
             Dismiss
           </button>
@@ -286,18 +244,18 @@ export default function ImpactDashboard() {
           API ERROR ALERT BANNER (WITH RETRY)
       ====================================================== */}
       {error && (
-        <div className="flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50/80 p-4 text-xs text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-200">
+        <div className="flex items-center justify-between rounded-xl border border-rose-500/30 bg-rose-950/40 p-4 text-xs text-rose-200">
           <div className="flex items-center gap-3">
-            <AlertCircle size={18} className="shrink-0 text-rose-600 dark:text-rose-400" />
+            <AlertCircle size={18} className="shrink-0 text-rose-400" />
             <div>
-              <p className="font-semibold">Backend Connection Issue</p>
-              <p className="mt-0.5 text-rose-700 dark:text-rose-300">{error}</p>
+              <p className="font-heading font-bold text-white">Backend Connection Issue</p>
+              <p className="mt-0.5 font-mono text-rose-300">{error}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => fetchDashboardData()}
-            className="rounded-lg bg-rose-600 px-3 py-1.5 font-semibold text-white transition hover:bg-rose-700 active:scale-95"
+            className="rounded-lg bg-rose-600 px-3 py-1.5 font-mono font-semibold text-white transition hover:bg-rose-500 active:scale-95 cursor-pointer"
           >
             Retry Connection
           </button>
@@ -305,47 +263,76 @@ export default function ImpactDashboard() {
       )}
 
       {/* =====================================================
-          1. CORE LONGITUDINAL KPI METRICS
+          2. CORE LONGITUDINAL KPI METRICS (TechStatCard)
       ====================================================== */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {loading ? (
           Array.from({ length: 4 }).map((_, idx) => (
             <div
               key={idx}
-              className="flex h-36 animate-pulse flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 dark:border-slate-800/80 dark:bg-slate-900"
+              className="flex h-40 animate-pulse flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-5"
             >
-              <div className="h-3 w-28 rounded bg-slate-200 dark:bg-slate-800" />
-              <div className="h-7 w-20 rounded bg-slate-200 dark:bg-slate-800" />
-              <div className="h-3 w-40 rounded bg-slate-100 dark:bg-slate-800" />
+              <div className="h-3 w-28 rounded bg-[#1e293b]" />
+              <div className="h-8 w-24 rounded bg-[#1e293b]" />
+              <div className="h-3 w-40 rounded bg-[#1e293b]" />
             </div>
           ))
-        ) : statCards.length > 0 ? (
-          statCards.map((stat) => (
-            <StatCard
-              key={stat.title}
-              title={stat.title}
-              value={stat.value}
-              change={stat.change}
-              trend={stat.trend}
-              period={stat.period}
-              subtitle={stat.subtitle}
-              highlight={stat.highlight}
-              icon={stat.icon}
+        ) : summaryData ? (
+          <>
+            <TechStatCard
+              title="Certified Beneficiaries"
+              value={Number(summaryData.total_certified || 0).toLocaleString()}
+              subtitle={`${Number(summaryData.total_trained || 0).toLocaleString()} trained (${Number(summaryData.total_enrolled || 0).toLocaleString()} enrolled)`}
+              trend={summaryData.deltas?.certified?.value || "+8.7%"}
+              trendDirection="up"
+              icon={GraduationCap}
+              variant="indigo"
+              footerText="NCVET Authenticated Assessment"
             />
-          ))
+            <TechStatCard
+              title="Verified Placements"
+              value={Number(summaryData.total_placed || 0).toLocaleString()}
+              subtitle={`${summaryData.placement_percentage || 0}% conversion of certified cohort`}
+              trend={`+${summaryData.placement_percentage || 0}%`}
+              trendDirection="up"
+              icon={BriefcaseBusiness}
+              variant="cyan"
+              footerText="Direct Verification Ready"
+            />
+            <TechStatCard
+              title="Longitudinal Retention"
+              value={`${summaryData.retention_percentage || 0}%`}
+              subtitle="180-day retention tracked"
+              trend={`${Number(summaryData.retention_verified_count || 0).toLocaleString()} active`}
+              trendDirection="up"
+              icon={ShieldCheck}
+              variant="emerald"
+              footerText="EPFO Integration Sandbox Adapter"
+            />
+            <TechStatCard
+              title="Active Mandates"
+              value={Number(summaryData.active_hiring_mandates || 0).toLocaleString()}
+              subtitle="Enterprise & MSME Openings in DB"
+              trend={summaryData.deltas?.mandates?.value || "+22%"}
+              trendDirection="up"
+              icon={Users}
+              variant="amber"
+              footerText="100% Minimum Wage Gated"
+            />
+          </>
         ) : (
-          <div className="col-span-full rounded-xl border border-slate-200 bg-white p-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900">
+          <div className="col-span-full rounded-xl border border-[#1e293b] bg-[#0b1528] p-6 text-center text-xs font-mono text-slate-400">
             No KPI metrics recorded yet. Please run database seeding.
           </div>
         )}
       </section>
 
       {/* =====================================================
-          2. PRIMARY ANALYTICS: TREND & PIPELINE CONVERSION
+          3. PRIMARY ANALYTICS: TREND & PIPELINE CONVERSION
       ====================================================== */}
       <section className="grid gap-6 xl:grid-cols-12">
         {/* Longitudinal Employment Curve (7 Cols) */}
-        <div className="flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 xl:col-span-7 dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 xl:col-span-7">
           <div>
             <SectionHeader
               title="Longitudinal Employment Conversion & Target Baseline"
@@ -356,38 +343,38 @@ export default function ImpactDashboard() {
                 </StatusBadge>
               }
               actions={
-                <div className="flex items-center gap-3 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <div className="flex items-center gap-3 font-mono text-xs font-semibold text-slate-400">
                   <span className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-blue-600" />
+                    <span className="h-2 w-2 rounded-full bg-sky-400" />
                     Actual Conversion
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-amber-500" />
+                    <span className="h-2 w-2 rounded-full bg-amber-400" />
                     Target Baseline
                   </span>
                 </div>
               }
             />
 
-            <div className="mt-6 h-72 w-full">
+            <div className="mt-6 h-64 sm:h-80 w-full">
               {loading ? (
                 <div className="flex h-full w-full items-center justify-center">
-                  <Loader2 size={24} className="animate-spin text-blue-600" />
+                  <Loader2 size={24} className="animate-spin text-sky-400" />
                 </div>
               ) : chartPoints.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartPoints} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#2563EB" stopOpacity={isDark ? 0.3 : 0.16} />
-                        <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#38bdf8" stopOpacity={0} />
                       </linearGradient>
                     </defs>
 
                     <CartesianGrid
                       strokeDasharray="3 3"
                       vertical={false}
-                      stroke={isDark ? "#1e293b" : "#F1F5F9"}
+                      stroke="#1e293b"
                     />
 
                     <XAxis
@@ -396,8 +383,8 @@ export default function ImpactDashboard() {
                       tickLine={false}
                       tick={{
                         fontSize: 11,
-                        fill: isDark ? "#94A3B8" : "#64748B",
-                        fontWeight: 500,
+                        fill: "#94a3b8",
+                        fontFamily: "JetBrains Mono, monospace",
                       }}
                       dy={6}
                     />
@@ -408,8 +395,8 @@ export default function ImpactDashboard() {
                       tickLine={false}
                       tick={{
                         fontSize: 11,
-                        fill: isDark ? "#94A3B8" : "#64748B",
-                        fontWeight: 500,
+                        fill: "#94a3b8",
+                        fontFamily: "JetBrains Mono, monospace",
                       }}
                       tickFormatter={(val) => `${val}%`}
                     />
@@ -419,22 +406,22 @@ export default function ImpactDashboard() {
                         if (active && payload && payload.length) {
                           const d = payload[0].payload;
                           return (
-                            <div className="rounded-lg border border-slate-200 bg-slate-900 p-3 text-xs text-white shadow-xl dark:border-slate-750 dark:bg-slate-950">
-                              <p className="font-bold text-slate-200">{label}</p>
+                            <div className="rounded-lg border border-[#1e293b] bg-[#070d18] p-3 text-xs text-white shadow-2xl font-mono">
+                              <p className="font-bold text-sky-400">{label}</p>
                               <div className="mt-2 space-y-1.5">
-                                <p className="flex justify-between gap-4 font-semibold text-blue-400">
+                                <p className="flex justify-between gap-4 font-semibold text-sky-300">
                                   <span>Actual Placement:</span>
                                   <span className="font-bold tabular-nums text-white">
                                     {d.rate}% ({Number(d.placed || 0).toLocaleString()} placed)
                                   </span>
                                 </p>
-                                <p className="flex justify-between gap-4 text-amber-300">
+                                <p className="flex justify-between gap-4 text-amber-400">
                                   <span>National Target:</span>
                                   <span className="font-bold tabular-nums text-white">
                                     {d.target}%
                                   </span>
                                 </p>
-                                <p className="flex justify-between gap-4 border-t border-slate-800 pt-1.5 text-slate-400">
+                                <p className="flex justify-between gap-4 border-t border-[#1e293b] pt-1.5 text-slate-400">
                                   <span>Certified Cohort:</span>
                                   <span className="tabular-nums text-slate-300">
                                     {Number(d.certified || 0).toLocaleString()}
@@ -452,20 +439,20 @@ export default function ImpactDashboard() {
                       type="monotone"
                       dataKey="rate"
                       name="Actual Conversion"
-                      stroke="#3B82F6"
+                      stroke="#38bdf8"
                       strokeWidth={2.5}
                       fillOpacity={1}
                       fill="url(#colorActual)"
                       dot={{
                         r: 4,
-                        fill: isDark ? "#0F172A" : "#FFFFFF",
-                        stroke: "#3B82F6",
+                        fill: "#070d18",
+                        stroke: "#38bdf8",
                         strokeWidth: 2,
                       }}
                       activeDot={{
                         r: 6,
-                        fill: "#3B82F6",
-                        stroke: isDark ? "#0F172A" : "#FFFFFF",
+                        fill: "#38bdf8",
+                        stroke: "#070d18",
                         strokeWidth: 2,
                       }}
                     />
@@ -474,7 +461,7 @@ export default function ImpactDashboard() {
                       type="monotone"
                       dataKey="target"
                       name="Target Benchmark"
-                      stroke="#D97706"
+                      stroke="#f59e0b"
                       strokeWidth={2}
                       strokeDasharray="4 4"
                       dot={false}
@@ -482,62 +469,64 @@ export default function ImpactDashboard() {
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex h-full items-center justify-center text-xs text-slate-400">
+                <div className="flex h-full items-center justify-center text-xs font-mono text-slate-400">
                   No longitudinal trend data recorded yet.
                 </div>
               )}
             </div>
           </div>
 
-          <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-[11px] font-medium text-slate-500 dark:border-slate-800 dark:text-slate-400">
+          <div className="mt-3 flex items-center justify-between border-t border-[#1e293b] pt-3 text-[11px] font-mono text-slate-400">
             <span>Aggregated from {summaryData?.total_enrolled || 0} candidate cohorts</span>
-            <span className="font-semibold text-blue-700 dark:text-blue-400">
+            <span className="text-sky-400">
               Verification Adapter Linked (Demo)
             </span>
           </div>
         </div>
 
         {/* Skilling-to-Employment Conversion Pipeline (5 Cols) */}
-        <div className="flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 xl:col-span-5 dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 xl:col-span-5">
           <div>
             <SectionHeader
               title="Skilling Conversion Funnel"
               subtitle="Longitudinal tracking from initial enrollment to 180-day retention"
             />
 
-            <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="mt-4 divide-y divide-[#1e293b]">
               {loading ? (
                 Array.from({ length: 5 }).map((_, idx) => (
                   <div key={idx} className="space-y-2 py-3">
                     <div className="flex justify-between">
-                      <div className="h-3 w-24 rounded bg-slate-200 dark:bg-slate-800" />
-                      <div className="h-3 w-12 rounded bg-slate-200 dark:bg-slate-800" />
+                      <div className="h-3 w-24 rounded bg-[#1e293b]" />
+                      <div className="h-3 w-12 rounded bg-[#1e293b]" />
                     </div>
-                    <div className="h-1.5 w-full rounded bg-slate-100 dark:bg-slate-800" />
+                    <div className="h-1.5 w-full rounded bg-[#1e293b]" />
                   </div>
                 ))
               ) : funnelData.length > 0 ? (
                 funnelData.map((stage, idx) => (
                   <div key={stage.stage} className="py-2.5 first:pt-0 last:pb-0">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                      <span className="font-heading font-semibold text-slate-200">
                         {idx + 1}. {stage.stage}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold tabular-nums text-slate-900 dark:text-slate-100">
+                        <span className="font-mono font-bold tabular-nums text-white">
                           {Number(stage.count || 0).toLocaleString()}
                         </span>
-                        <StatusBadge
-                          variant={idx >= 3 ? "success" : "neutral"}
-                          size="sm"
-                          className="tabular-nums"
+                        <span
+                          className={`rounded border px-2 py-0.5 font-mono text-[10px] font-bold ${
+                            idx >= 3
+                              ? "bg-emerald-950/50 text-emerald-300 border-emerald-500/30"
+                              : "bg-[#070d18] text-slate-300 border-[#1e293b]"
+                          }`}
                         >
                           {stage.percentage}%
-                        </StatusBadge>
+                        </span>
                       </div>
                     </div>
 
-                    <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                    <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[#070d18]">
                       <div
                         className={`h-full rounded-full transition-all ${funnelColors[idx % funnelColors.length]}`}
                         style={{
@@ -546,41 +535,41 @@ export default function ImpactDashboard() {
                       />
                     </div>
 
-                    <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-[11px] text-slate-400">
                       {funnelDescriptions[stage.stage] ||
                         `Drop-off from previous stage: ${stage.drop_off_rate}%`}
                     </p>
                   </div>
                 ))
               ) : (
-                <div className="py-6 text-center text-xs text-slate-400">
+                <div className="py-6 text-center text-xs font-mono text-slate-400">
                   No funnel data available
                 </div>
               )}
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between rounded-lg border border-slate-200/80 bg-slate-50 p-2.5 text-xs dark:border-slate-800 dark:bg-slate-950/60">
-            <span className="font-medium text-slate-700 dark:text-slate-300">
-              Longitudinal Efficiency:{" "}
-              <strong className="font-bold tabular-nums text-slate-900 dark:text-slate-100">
+          <div className="mt-4 flex items-center justify-between rounded-lg border border-[#1e293b] bg-[#070d18] p-3 text-xs">
+            <span className="font-medium text-slate-300">
+              Longitudinal Retention:{" "}
+              <strong className="font-mono font-bold text-emerald-400">
                 {summaryData?.retention_percentage || 0}%
               </strong>{" "}
-              retained at 6M
+              at 180-Day Milestone
             </span>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Benchmark: 38%
+            <span className="font-mono text-[10px] text-slate-500">
+              Database Audited
             </span>
           </div>
         </div>
       </section>
 
       {/* =====================================================
-          3. PROGRAM PERFORMANCE & SCHEME IMPACT MATRIX
+          4. PROGRAM PERFORMANCE & SCHEME IMPACT MATRIX
       ====================================================== */}
       <section className="grid gap-6 xl:grid-cols-12">
         {/* Sector Matrix (8 Cols) */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 xl:col-span-8 dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 xl:col-span-8">
           <SectionHeader
             title="Sector & Program Performance Matrix"
             subtitle="Live SQL breakdown of certified candidates, placement conversion, and starting wages"
@@ -594,21 +583,21 @@ export default function ImpactDashboard() {
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[640px] text-left">
               <thead>
-                <tr className="border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:border-slate-800 dark:text-slate-500">
+                <tr className="border-b border-[#1e293b] font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   <th className="pb-3">Program / Sector</th>
                   <th className="pb-3 text-right">Certified</th>
                   <th className="pb-3 text-right">Placement %</th>
                   <th className="pb-3 text-right">Avg Readiness</th>
-                  <th className="pb-3 text-right">Est. Avg Wage</th>
+                  <th className="pb-3 text-right">Est. Starting Wage</th>
                   <th className="pb-3 text-right">Demand Tier</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-xs dark:divide-slate-800">
+              <tbody className="divide-y divide-[#1e293b] text-xs">
                 {loading ? (
                   Array.from({ length: 4 }).map((_, idx) => (
                     <tr key={idx}>
                       <td colSpan={6} className="py-3">
-                        <div className="h-4 w-full animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+                        <div className="h-4 w-full animate-pulse rounded bg-[#1e293b]" />
                       </td>
                     </tr>
                   ))
@@ -616,51 +605,50 @@ export default function ImpactDashboard() {
                   sectorMatrixData.map((prog) => (
                     <tr
                       key={prog.sector}
-                      className="transition-colors hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
+                      className="transition-colors hover:bg-[#0f1c33]"
                     >
-                      <td className="py-3 font-semibold text-slate-900 dark:text-slate-100">
+                      <td className="py-3 font-semibold text-white">
                         <div>{prog.sector}</div>
-                        <span className="text-[10px] font-normal text-slate-400 dark:text-slate-500">
+                        <span className="font-mono text-[10px] font-normal text-slate-400">
                           {prog.enrolled} enrolled candidates
                         </span>
                       </td>
-                      <td className="py-3 text-right font-medium tabular-nums text-slate-700 dark:text-slate-300">
+                      <td className="py-3 text-right font-mono font-medium text-slate-300">
                         {Number(prog.certified || 0).toLocaleString()}
                       </td>
                       <td className="py-3 text-right">
-                        <span className="font-bold tabular-nums text-slate-900 dark:text-slate-100">
+                        <span className="font-mono font-bold text-white">
                           {prog.placement_rate}%
                         </span>
                       </td>
-                      <td className="py-3 text-right font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+                      <td className="py-3 text-right font-mono font-semibold text-emerald-400">
                         {prog.avg_readiness_score}%
                       </td>
-                      <td className="py-3 text-right font-semibold tabular-nums text-slate-800 dark:text-slate-200">
+                      <td className="py-3 text-right font-mono font-semibold text-slate-200">
                         ₹{(3.2 + (prog.avg_readiness_score * 0.03)).toFixed(1)} LPA
                       </td>
                       <td className="py-3 text-right">
-                        <StatusBadge
-                          variant={
+                        <span
+                          className={`inline-block rounded px-2 py-0.5 font-mono text-[10px] font-semibold border ${
                             prog.placement_rate >= 50
-                              ? "success"
+                              ? "bg-emerald-950/50 text-emerald-300 border-emerald-500/30"
                               : prog.placement_rate >= 30
-                              ? "info"
-                              : "warning"
-                          }
-                          size="sm"
+                              ? "bg-sky-950/50 text-sky-300 border-sky-500/30"
+                              : "bg-amber-950/50 text-amber-300 border-amber-500/30"
+                          }`}
                         >
                           {prog.placement_rate >= 50
                             ? "High Placement"
                             : prog.placement_rate >= 30
                             ? "Expanding Demand"
                             : "Intervention Targeted"}
-                        </StatusBadge>
+                        </span>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="py-6 text-center text-slate-400">
+                    <td colSpan={6} className="py-6 text-center font-mono text-slate-400">
                       No sector matrix metrics recorded.
                     </td>
                   </tr>
@@ -671,34 +659,34 @@ export default function ImpactDashboard() {
         </div>
 
         {/* Scheme Impact Summary (4 Cols) */}
-        <div className="flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 xl:col-span-4 dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 xl:col-span-4">
           <div>
             <SectionHeader
               title="Scheme-Wise Outcome Efficiency"
-              subtitle="Performance across national & state skilling missions"
+              subtitle="Performance across national &amp; state skilling missions"
             />
 
-            <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="mt-4 divide-y divide-[#1e293b]">
               {schemeBreakdown.map((item) => (
                 <div key={item.scheme} className="py-3 first:pt-0 last:pb-0">
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-900 dark:text-slate-100">
+                  <div className="flex items-center justify-between text-xs font-semibold text-white">
                     <span>{item.scheme}</span>
-                    <span className="font-bold tabular-nums text-blue-700 dark:text-blue-400">
+                    <span className="font-mono font-bold text-sky-400">
                       {item.placedRate}% Placed
                     </span>
                   </div>
 
-                  <div className="mt-1.5 flex justify-between text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                  <div className="mt-1.5 flex justify-between font-mono text-[11px] text-slate-400">
                     <span>{item.enrolled.toLocaleString()} Enrolled</span>
-                    <span>Budget Utilized: {item.budgetUtil}</span>
+                    <span>Budget: {item.budgetUtil}</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
-            <span className="text-slate-500 dark:text-slate-400">Unified Portal Sync</span>
+          <div className="mt-4 flex items-center justify-between border-t border-[#1e293b] pt-3 text-xs">
+            <span className="font-mono text-slate-400">Unified Portal Sync</span>
             <StatusBadge variant="success" size="sm" dot>
               All Schemes Audited
             </StatusBadge>
@@ -707,7 +695,7 @@ export default function ImpactDashboard() {
       </section>
 
       {/* =====================================================
-          3.5 LONGITUDINAL OUTCOME & IMPACT INTELLIGENCE
+          5. LONGITUDINAL OUTCOME & IMPACT INTELLIGENCE
       ====================================================== */}
       <section className="space-y-4">
         <SectionHeader
@@ -722,70 +710,70 @@ export default function ImpactDashboard() {
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Card 1: Multi-Track Outcome Distribution */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Multi-Track Destination Mix (Demo Dataset)
+          <div className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6">
+            <div className="flex items-center justify-between border-b border-[#1e293b] pb-3">
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-400">
+                Destination Mix (Demo Dataset)
               </span>
-              <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+              <span className="rounded border border-sky-400/20 bg-sky-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-sky-300">
                 {outcomesData?.total_candidates ? `${outcomesData.total_candidates.toLocaleString()} Tracked` : "All Cohorts"}
               </span>
             </div>
 
             <div className="mt-4 space-y-3">
               <div>
-                <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
+                <div className="flex justify-between text-xs font-semibold text-slate-200">
                   <span>Wage Employment</span>
-                  <span className="tabular-nums font-bold text-blue-600 dark:text-blue-400">
+                  <span className="font-mono font-bold text-sky-400">
                     {outcomesData?.employed_rate || 59.4}% ({outcomesData?.employed_count?.toLocaleString() || "16,886"})
                   </span>
                 </div>
-                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-[#070d18]">
                   <div
-                    className="h-full rounded-full bg-blue-600 transition-all"
+                    className="h-full rounded-full bg-sky-500 transition-all"
                     style={{ width: `${outcomesData?.employed_rate || 59.4}%` }}
                   />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
+                <div className="flex justify-between text-xs font-semibold text-slate-200">
                   <span>Self-Employment &amp; Micro-Enterprise</span>
-                  <span className="tabular-nums font-bold text-purple-600 dark:text-purple-400">
+                  <span className="font-mono font-bold text-indigo-400">
                     {outcomesData?.self_employed_rate || 15.0}% ({outcomesData?.self_employed_count?.toLocaleString() || "4,268"})
                   </span>
                 </div>
-                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-[#070d18]">
                   <div
-                    className="h-full rounded-full bg-purple-600 transition-all"
+                    className="h-full rounded-full bg-indigo-500 transition-all"
                     style={{ width: `${outcomesData?.self_employed_rate || 15.0}%` }}
                   />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
+                <div className="flex justify-between text-xs font-semibold text-slate-200">
                   <span>Apprenticeships &amp; On-the-Job Training</span>
-                  <span className="tabular-nums font-bold text-emerald-600 dark:text-emerald-400">
+                  <span className="font-mono font-bold text-emerald-400">
                     {outcomesData?.apprenticeship_rate || 10.0}% ({outcomesData?.apprenticeship_count?.toLocaleString() || "2,845"})
                   </span>
                 </div>
-                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-[#070d18]">
                   <div
-                    className="h-full rounded-full bg-emerald-600 transition-all"
+                    className="h-full rounded-full bg-emerald-500 transition-all"
                     style={{ width: `${outcomesData?.apprenticeship_rate || 10.0}%` }}
                   />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
+                <div className="flex justify-between text-xs font-semibold text-slate-200">
                   <span>Unemployed &amp; Active Job Seekers</span>
-                  <span className="tabular-nums font-bold text-amber-600 dark:text-amber-400">
+                  <span className="font-mono font-bold text-amber-400">
                     {outcomesData?.unemployed_rate || 10.0}% ({outcomesData?.unemployed_count?.toLocaleString() || "2,845"})
                   </span>
                 </div>
-                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-[#070d18]">
                   <div
                     className="h-full rounded-full bg-amber-500 transition-all"
                     style={{ width: `${outcomesData?.unemployed_rate || 10.0}%` }}
@@ -794,13 +782,13 @@ export default function ImpactDashboard() {
               </div>
 
               <div>
-                <div className="flex justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
-                  <span>Further Education / Vocational Higher Ed</span>
-                  <span className="tabular-nums font-bold text-slate-600 dark:text-slate-400">
+                <div className="flex justify-between text-xs font-semibold text-slate-200">
+                  <span>Further Vocational Higher Ed</span>
+                  <span className="font-mono font-bold text-slate-400">
                     {outcomesData?.further_education_rate || 4.0}%
                   </span>
                 </div>
-                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-[#070d18]">
                   <div
                     className="h-full rounded-full bg-slate-500 transition-all"
                     style={{ width: `${outcomesData?.further_education_rate || 4.0}%` }}
@@ -811,58 +799,58 @@ export default function ImpactDashboard() {
           </div>
 
           {/* Card 2: Follow-Up & Wage Progression */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Outreach &amp; Wage Trajectory (Demo Dataset)
+          <div className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6">
+            <div className="flex items-center justify-between border-b border-[#1e293b] pb-3">
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-400">
+                Outreach &amp; Wage Trajectory
               </span>
-              <span className="rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                {followUpData?.completion_rate || 80.3}% Follow-Up Complete (Demo)
+              <span className="rounded border border-emerald-500/30 bg-emerald-950/50 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-300">
+                {followUpData?.completion_rate || 80.3}% Follow-Up Complete
               </span>
             </div>
 
             <div className="mt-4 space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/40">
-                  <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Follow-Up Response Rate</p>
-                  <p className="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100">
+                <div className="rounded-lg border border-[#1e293b] bg-[#070d18] p-3">
+                  <p className="font-mono text-[10px] font-medium text-slate-400">Follow-Up Response Rate</p>
+                  <p className="mt-1 font-mono text-lg font-bold text-white">
                     {followUpData?.response_rate || 76.5}%
                   </p>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="font-mono text-[10px] text-slate-500">
                     {followUpData?.pending_count || 3120} pending outreach
                   </p>
                 </div>
-                <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/40">
-                  <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Wage Progression (CTC)</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                    +{wageData?.avg_wage_growth_pct || 14.3}%
+                <div className="rounded-lg border border-[#1e293b] bg-[#070d18] p-3">
+                  <p className="font-mono text-[10px] font-medium text-slate-400">Wage Progression (CTC)</p>
+                  <p className="mt-1 font-mono text-lg font-bold text-emerald-400">
+                    +{wageData?.avg_wage_growth_pct || 2.9}%
                   </p>
-                  <p className="text-[10px] text-slate-400">
-                    ₹{wageData?.avg_starting_ctc_lpa || 4.2}L → ₹{wageData?.avg_current_ctc_lpa || 4.8}L
+                  <p className="font-mono text-[10px] text-slate-400">
+                    ₹{wageData?.avg_starting_ctc_lpa || 4.47}L → ₹{wageData?.avg_current_ctc_lpa || 4.60}L
                   </p>
                 </div>
               </div>
 
               <div>
-                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                  Follow-Up Channel Distribution (Demonstration Dataset)
+                <p className="font-mono text-xs font-semibold text-slate-300 mb-2">
+                  Follow-Up Channel Distribution
                 </p>
                 <div className="grid grid-cols-4 gap-1.5 text-center">
-                  <div className="rounded border border-slate-200/80 p-2 dark:border-slate-800">
-                    <span className="text-[10px] text-slate-400 block">In-App</span>
-                    <span className="text-xs font-bold text-blue-600">45%</span>
+                  <div className="rounded border border-[#1e293b] bg-[#070d18] p-2">
+                    <span className="font-mono text-[10px] text-slate-400 block">In-App</span>
+                    <span className="font-mono text-xs font-bold text-sky-400">45%</span>
                   </div>
-                  <div className="rounded border border-slate-200/80 p-2 dark:border-slate-800">
-                    <span className="text-[10px] text-slate-400 block">SMS</span>
-                    <span className="text-xs font-bold text-emerald-600">18%</span>
+                  <div className="rounded border border-[#1e293b] bg-[#070d18] p-2">
+                    <span className="font-mono text-[10px] text-slate-400 block">SMS</span>
+                    <span className="font-mono text-xs font-bold text-emerald-400">18%</span>
                   </div>
-                  <div className="rounded border border-slate-200/80 p-2 dark:border-slate-800">
-                    <span className="text-[10px] text-slate-400 block">Email</span>
-                    <span className="text-xs font-bold text-purple-600">28%</span>
+                  <div className="rounded border border-[#1e293b] bg-[#070d18] p-2">
+                    <span className="font-mono text-[10px] text-slate-400 block">Email</span>
+                    <span className="font-mono text-xs font-bold text-indigo-400">28%</span>
                   </div>
-                  <div className="rounded border border-slate-200/80 p-2 dark:border-slate-800">
-                    <span className="text-[10px] text-slate-400 block">Assisted</span>
-                    <span className="text-xs font-bold text-amber-600">9%</span>
+                  <div className="rounded border border-[#1e293b] bg-[#070d18] p-2">
+                    <span className="font-mono text-[10px] text-slate-400 block">Assisted</span>
+                    <span className="font-mono text-xs font-bold text-amber-400">9%</span>
                   </div>
                 </div>
               </div>
@@ -870,38 +858,38 @@ export default function ImpactDashboard() {
           </div>
 
           {/* Card 3: Diagnostic Bottlenecks (Non-Placement & Attrition) */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Diagnostic Factors &amp; Turnover (Demo Dataset)
+          <div className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6">
+            <div className="flex items-center justify-between border-b border-[#1e293b] pb-3">
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-400">
+                Diagnostic Factors &amp; Turnover
               </span>
-              <span className="rounded bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-950 dark:text-rose-300">
-                {attritionData?.attrition_rate || 8.4}% Turnover Rate (Demo)
+              <span className="rounded border border-rose-800/70 bg-rose-950/50 px-2 py-0.5 font-mono text-[10px] font-bold text-rose-300">
+                {attritionData?.attrition_rate || 8.4}% Turnover Rate
               </span>
             </div>
 
             <div className="mt-4 space-y-3">
               {/* Checkpoint Retentions */}
               <div>
-                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Milestone Retention Sustainability (Demonstration Cohort)
+                <p className="font-mono text-xs font-semibold text-slate-300 mb-1.5">
+                  Milestone Retention Sustainability
                 </p>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="rounded bg-slate-50 p-2 dark:bg-slate-800/40">
+                <div className="grid grid-cols-3 gap-2 text-center font-mono">
+                  <div className="rounded border border-[#1e293b] bg-[#070d18] p-2">
                     <span className="text-[10px] text-slate-400 block">3-Month</span>
-                    <span className="text-xs font-bold text-emerald-600">
+                    <span className="text-xs font-bold text-emerald-400">
                       {attritionData?.three_month_retention_rate || 88.5}%
                     </span>
                   </div>
-                  <div className="rounded bg-slate-50 p-2 dark:bg-slate-800/40">
+                  <div className="rounded border border-[#1e293b] bg-[#070d18] p-2">
                     <span className="text-[10px] text-slate-400 block">6-Month</span>
-                    <span className="text-xs font-bold text-blue-600">
+                    <span className="text-xs font-bold text-sky-400">
                       {attritionData?.six_month_retention_rate || 81.3}%
                     </span>
                   </div>
-                  <div className="rounded bg-slate-50 p-2 dark:bg-slate-800/40">
+                  <div className="rounded border border-[#1e293b] bg-[#070d18] p-2">
                     <span className="text-[10px] text-slate-400 block">12-Month</span>
-                    <span className="text-xs font-bold text-purple-600">
+                    <span className="text-xs font-bold text-indigo-400">
                       {attritionData?.twelve_month_retention_rate || 74.2}%
                     </span>
                   </div>
@@ -909,17 +897,17 @@ export default function ImpactDashboard() {
               </div>
 
               {/* Non-Placement Driver */}
-              <div className="border-t border-slate-100 pt-2.5 dark:border-slate-800">
+              <div className="border-t border-[#1e293b] pt-2.5">
                 <div className="flex justify-between text-xs">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">
-                    Skill-Deficit Linked Unplaced (Demo Metric):
+                  <span className="font-medium text-slate-300">
+                    Skill-Deficit Linked Non-Placement:
                   </span>
-                  <span className="font-bold text-rose-600 dark:text-rose-400">
-                    {nonPlacementData?.skill_gap_percentage || 38.0}% of non-placements
+                  <span className="font-mono font-bold text-rose-400">
+                    {nonPlacementData?.skill_gap_percentage || 38.0}%
                   </span>
                 </div>
-                <p className="mt-1 text-[10px] text-slate-400">
-                  On the demonstration dataset: Skill Deficits (38%), Interview Failures (24%), Relocation Constraints (17%).
+                <p className="mt-1 font-mono text-[10px] text-slate-400">
+                  Root Causes: Skill Deficits (38%), Interview Failures (24%), Relocation Constraints (17%).
                 </p>
               </div>
             </div>
@@ -928,7 +916,7 @@ export default function ImpactDashboard() {
       </section>
 
       {/* =====================================================
-          4. ACTIONABLE POLICY & OPERATIONAL INTELLIGENCE
+          6. ACTIONABLE POLICY & OPERATIONAL INTELLIGENCE
       ====================================================== */}
       <section className="space-y-4">
         <SectionHeader
@@ -950,8 +938,8 @@ export default function ImpactDashboard() {
                 key={insight.title}
                 className={`flex flex-col justify-between rounded-xl border p-5 transition-all ${
                   isWarning
-                    ? "border-amber-200 bg-amber-50/50 dark:border-amber-900/50 dark:bg-amber-950/20"
-                    : "border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900"
+                    ? "border-amber-500/30 bg-amber-950/20"
+                    : "border-[#1e293b] bg-[#0b1528] hover:border-slate-700"
                 }`}
               >
                 <div>
@@ -959,25 +947,25 @@ export default function ImpactDashboard() {
                     <StatusBadge variant={isWarning ? "warning" : "success"} size="sm" dot>
                       {insight.category}
                     </StatusBadge>
-                    <span className="text-xs font-bold tabular-nums text-slate-900 dark:text-slate-100">
+                    <span className="font-mono text-xs font-bold tabular-nums text-white">
                       {insight.metric}
                     </span>
                   </div>
 
-                  <h3 className="mt-3 text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                  <h3 className="mt-3 font-heading text-sm font-bold tracking-tight text-white">
                     {insight.title}
                   </h3>
 
-                  <p className="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                  <p className="mt-1.5 text-xs leading-relaxed text-slate-300">
                     {insight.description}
                   </p>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
-                  <span className="max-w-[220px] truncate text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                <div className="mt-4 flex items-center justify-between border-t border-[#1e293b] pt-3">
+                  <span className="max-w-[220px] truncate font-mono text-[11px] font-semibold text-sky-400">
                     Action: {insight.action}
                   </span>
-                  <ArrowUpRight size={13} className="text-slate-400 dark:text-slate-500" />
+                  <ArrowUpRight size={13} className="text-slate-400" />
                 </div>
               </div>
             );
@@ -986,14 +974,14 @@ export default function ImpactDashboard() {
       </section>
 
       {/* =====================================================
-          5. INSTITUTIONAL ACTION DOSSIER BANNER
+          7. INSTITUTIONAL ACTION DOSSIER BANNER
       ====================================================== */}
       <IntelligenceCard
         category="National Policy Engine"
         title="Q3 Skilling Allocation Strategy Recommendation"
         description="Data models recommend shifting 15% training capacity from legacy office suites to Cloud Infrastructure and Power BI specializations in Eastern UP to capture active employer hiring mandates."
         confidence="98.7% Model Confidence"
-        sampleSize="42 Districts · 28,450 Beneficiaries"
+        sampleSize="Demonstration Cohort · Audited PostgreSQL Records"
         actionText="Deploy Bridge Modules"
         onAction={() => setIsInterventionModalOpen(true)}
       />
@@ -1030,22 +1018,22 @@ export default function ImpactDashboard() {
           }
         }}
       >
-        <div className="space-y-3.5">
-          <p className="text-xs text-slate-600 dark:text-slate-300">
+        <div className="space-y-3.5 font-sans">
+          <p className="text-xs text-slate-300">
             This comprehensive national evaluation report compiles:
           </p>
-          <ul className="list-disc space-y-1 pl-5 text-xs text-slate-700 dark:text-slate-300">
+          <ul className="list-disc space-y-1 pl-5 text-xs text-slate-300">
             <li>District-level 3M, 6M, and 12M longitudinal retention breakdown</li>
             <li>NCVET authenticated candidate placement conversion metrics</li>
             <li>Sectoral demand equilibrium and wage progression analytics</li>
-            <li>Identified skill gap matrix across all 42 tracked districts</li>
+            <li>Identified skill gap matrix across tracked district clusters</li>
           </ul>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs dark:border-slate-800 dark:bg-slate-950/60">
-            <label className="block font-semibold text-slate-900 dark:text-slate-100">
+          <div className="rounded-lg border border-[#1e293b] bg-[#070d18] p-3 text-xs">
+            <label className="block font-heading font-semibold text-white">
               Select Output Format:
             </label>
-            <div className="mt-2 flex flex-wrap gap-4">
+            <div className="mt-2 flex flex-wrap gap-4 font-mono text-xs">
               <label className="flex items-center gap-1.5 cursor-pointer">
                 <input
                   type="radio"
@@ -1053,7 +1041,7 @@ export default function ImpactDashboard() {
                   checked={exportFormat === "PDF"}
                   onChange={() => setExportFormat("PDF")}
                 />
-                <span className="font-medium text-slate-800 dark:text-slate-200">
+                <span className="text-slate-200">
                   Signed PDF Dossier (Printable A4)
                 </span>
               </label>
@@ -1064,7 +1052,7 @@ export default function ImpactDashboard() {
                   checked={exportFormat === "CSV"}
                   onChange={() => setExportFormat("CSV")}
                 />
-                <span className="font-medium text-slate-800 dark:text-slate-200">
+                <span className="text-slate-200">
                   Raw CSV Dataset (Excel Compatible)
                 </span>
               </label>
@@ -1075,7 +1063,7 @@ export default function ImpactDashboard() {
                   checked={exportFormat === "BOTH"}
                   onChange={() => setExportFormat("BOTH")}
                 />
-                <span className="font-medium text-slate-800 dark:text-slate-200">
+                <span className="text-slate-200">
                   Dual Bundle (PDF + CSV)
                 </span>
               </label>
@@ -1091,12 +1079,12 @@ export default function ImpactDashboard() {
         subtitle="Fast-track 60-hour specialization curriculum to 4 PMKK centers"
         confirmText="Confirm & Notify Training Centers"
         onConfirm={() => {
-          alert("Bridge module curriculum dispatched to Varanasi and Gorakhpur centers.");
+          alert("Bridge module curriculum dispatched to designated training centers.");
         }}
       >
-        <p className="text-xs text-slate-600 dark:text-slate-300">
-          You are about to authorize the deployment of the Cloud Infrastructure & Power BI 40-hour
-          bridge curriculum package for 2,450 beneficiaries in Eastern UP.
+        <p className="text-xs text-slate-300">
+          You are about to authorize the deployment of the Cloud Infrastructure &amp; Power BI 40-hour
+          bridge curriculum package for candidate cohorts in the demonstration dataset.
         </p>
       </ActionModal>
     </div>

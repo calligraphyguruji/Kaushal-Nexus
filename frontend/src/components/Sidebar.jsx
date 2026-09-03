@@ -1,3 +1,4 @@
+import React from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -6,8 +7,10 @@ import {
   MapPin,
   BriefcaseBusiness,
   Settings,
-  Network,
+  ShieldCheck,
+  Shield,
   X,
+  Activity,
 } from "lucide-react";
 import { useSidebarStats } from "../hooks/useSidebarStats";
 import { usePermissions } from "../hooks/usePermissions";
@@ -16,7 +19,7 @@ export default function Sidebar({ open, onClose }) {
   const { stats } = useSidebarStats();
   const permissions = usePermissions();
 
-  const navigation = [
+  const intelligenceNav = [
     {
       name: "Overview & Impact",
       path: "/dashboard",
@@ -25,14 +28,14 @@ export default function Sidebar({ open, onClose }) {
       badgeTone: stats.overview.tone,
     },
     {
-      name: "Learner 360° Intelligence",
+      name: "Learner Intelligence",
       path: "/learner",
       icon: UserRound,
       badge: stats.learner360.badge,
       badgeTone: stats.learner360.tone,
     },
     {
-      name: "Skill Gap Intelligence",
+      name: "Skill Gap Matrix",
       path: "/skill-gap",
       icon: BrainCircuit,
       badge: stats.skillGaps.badge,
@@ -46,7 +49,7 @@ export default function Sidebar({ open, onClose }) {
       badgeTone: stats.regional.tone,
     },
     {
-      name: "Employer Network & Matches",
+      name: "Employer Network",
       path: "/matching",
       icon: BriefcaseBusiness,
       badge: stats.matching.badge,
@@ -56,39 +59,39 @@ export default function Sidebar({ open, onClose }) {
 
   return (
     <>
-      {/* Mobile Backdrop */}
+      {/* Mobile Backdrop Overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-xs transition-opacity duration-200 lg:hidden ${
+        className={`fixed inset-0 z-40 bg-slate-900/60 dark:bg-[#040810]/70 backdrop-blur-xs transition-opacity duration-200 lg:hidden ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Sidebar Aside */}
+      {/* Main Sidebar Aside */}
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col border-r border-slate-200 bg-white transition-transform duration-200 ease-in-out lg:z-40 lg:w-64 lg:translate-x-0 dark:border-slate-800 dark:bg-slate-900 ${
+        className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col border-r border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#070d18] text-slate-800 dark:text-[#f1f5f9] transition-transform duration-200 ease-in-out lg:z-40 lg:w-64 lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand Header */}
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-100 px-5 dark:border-slate-800">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 dark:border-[#1e293b] px-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-white shadow-xs dark:bg-slate-800 dark:border dark:border-slate-700">
-              <Network size={19} strokeWidth={2.2} className="text-blue-400" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 shadow-xs glow-cyan">
+              <ShieldCheck size={20} strokeWidth={2.2} />
             </div>
 
-            <div>
+            <div className="flex flex-col">
               <div className="flex items-center tracking-tight">
-                <span className="text-sm font-extrabold text-slate-950 dark:text-white">
+                <span className="font-heading text-sm font-extrabold text-slate-900 dark:text-white">
                   KAUSHAL
                 </span>
-                <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                <span className="font-heading text-sm font-bold text-sky-600 dark:text-sky-400">
                   NEXUS
                 </span>
               </div>
-              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Skilling Intelligence Platform
+              <p className="font-mono text-[9px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                AI SKILL &amp; EMPLOYMENT INTELLIGENCE
               </p>
             </div>
           </div>
@@ -97,146 +100,161 @@ export default function Sidebar({ open, onClose }) {
             type="button"
             onClick={onClose}
             aria-label="Close navigation"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 lg:hidden dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-[#0b1528] dark:hover:text-white lg:hidden"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Navigation Section */}
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            Intelligence Modules
+        {/* Navigation Sections */}
+        <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
+          {/* Intelligence Group */}
+          <div className="space-y-1">
+            <div className="px-3 pb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400/80">
+              Intelligence
+            </div>
+
+            {intelligenceNav.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  onClick={onClose}
+                  className={({ isActive }) =>
+                    `group flex items-center justify-between rounded-lg px-3 py-2 text-xs font-sans transition-all duration-150 ${
+                      isActive
+                        ? "bg-sky-50 dark:bg-[#0b1528] text-sky-900 dark:text-white font-semibold border-l-2 border-sky-500 dark:border-sky-400 shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#0b1528]/60 hover:text-slate-900 dark:hover:text-slate-200 font-medium"
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <div className="flex items-center gap-2.5">
+                        <Icon
+                          size={16}
+                          strokeWidth={isActive ? 2.2 : 1.8}
+                          className={
+                            isActive
+                              ? "text-sky-600 dark:text-sky-400"
+                              : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300"
+                          }
+                        />
+                        <span>{item.name}</span>
+                      </div>
+
+                      {item.badge && (
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-mono tabular-nums border ${
+                            item.badgeTone === "danger"
+                              ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/70"
+                              : item.badgeTone === "warning"
+                              ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/70"
+                              : item.badgeTone === "info"
+                              ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/70"
+                              : isActive
+                              ? "bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-400/30 font-bold"
+                              : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-[#0b1528] dark:text-slate-400 dark:border-[#1e293b]"
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              );
+            })}
           </div>
 
-          {navigation.map((item) => {
-            const Icon = item.icon;
+          {/* System Group */}
+          <div className="space-y-1">
+            <div className="px-3 pb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              System
+            </div>
 
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                onClick={onClose}
-                className={({ isActive }) =>
-                  `group flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors ${
-                    isActive
-                      ? "bg-slate-100 text-slate-950 font-semibold dark:bg-slate-800 dark:text-white"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
-                  }`
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <div className="flex items-center gap-2.5">
-                      <Icon
-                        size={16}
-                        strokeWidth={isActive ? 2.2 : 1.8}
-                        className={isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300"}
-                      />
-                      <span>{item.name}</span>
-                    </div>
-
-                    {item.badge && (
-                      <span
-                        className={`rounded-full px-2 py-0.2 text-[10px] font-semibold tabular-nums border ${
-                          item.badgeTone === "danger"
-                            ? "bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/70"
-                            : item.badgeTone === "warning"
-                            ? "bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/70"
-                            : item.badgeTone === "info"
-                            ? "bg-blue-50 text-blue-700 border-blue-200/80 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800/70"
-                            : isActive
-                            ? "bg-white text-slate-900 border-slate-200 dark:bg-slate-700 dark:text-white dark:border-slate-600"
-                            : "bg-slate-100 text-slate-500 border-transparent dark:bg-slate-800/80 dark:text-slate-400"
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
-                  </>
-                )}
-              </NavLink>
-            );
-          })}
-
-          <div className="my-3 border-t border-slate-100 dark:border-slate-800" />
-
-          <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            Administration
-          </div>
-
-          <NavLink
-            to="/settings"
-            onClick={onClose}
-            className={({ isActive }) =>
-              `group flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors ${
-                isActive
-                  ? "bg-slate-100 text-slate-950 font-semibold dark:bg-slate-800 dark:text-white"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <Settings
-                  size={16}
-                  strokeWidth={isActive ? 2.2 : 1.8}
-                  className={isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300"}
-                />
-                <span>Platform Settings</span>
-              </>
-            )}
-          </NavLink>
-
-          {permissions.canViewAuditLogs && (
             <NavLink
-              to="/settings?tab=audit"
+              to="/settings"
               onClick={onClose}
               className={({ isActive }) =>
-                `group flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors ${
+                `group flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-sans transition-all duration-150 ${
                   isActive
-                    ? "bg-slate-100 text-slate-950 font-semibold dark:bg-slate-800 dark:text-white"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
+                    ? "bg-sky-50 dark:bg-[#0b1528] text-sky-900 dark:text-white font-semibold border-l-2 border-sky-500 dark:border-sky-400 shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#0b1528]/60 hover:text-slate-900 dark:hover:text-slate-200 font-medium"
                 }`
               }
             >
-              <div className="flex items-center gap-2.5">
-                <Network
-                  size={16}
-                  strokeWidth={1.8}
-                  className="text-indigo-600 dark:text-indigo-400"
-                />
-                <span>Compliance Audit Logs</span>
-              </div>
-              <span className="rounded-full bg-indigo-50 border border-indigo-200/80 px-1.5 py-0.2 text-[9px] font-bold text-indigo-700 dark:bg-indigo-950/50 dark:border-indigo-800 dark:text-indigo-300">
-                P0
-              </span>
+              {({ isActive }) => (
+                <>
+                  <Settings
+                    size={16}
+                    strokeWidth={isActive ? 2.2 : 1.8}
+                    className={
+                      isActive
+                        ? "text-sky-600 dark:text-sky-400"
+                        : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300"
+                    }
+                  />
+                  <span>Settings</span>
+                </>
+              )}
             </NavLink>
-          )}
+
+            {permissions.canViewAuditLogs && (
+              <NavLink
+                to="/settings?tab=audit"
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `group flex items-center justify-between rounded-lg px-3 py-2 text-xs font-sans transition-all duration-150 ${
+                    isActive
+                      ? "bg-indigo-50 dark:bg-[#0b1528] text-indigo-900 dark:text-white font-semibold border-l-2 border-indigo-500 dark:border-indigo-400 shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#0b1528]/60 hover:text-slate-900 dark:hover:text-slate-200 font-medium"
+                  }`
+                }
+              >
+                <div className="flex items-center gap-2.5">
+                  <Shield
+                    size={16}
+                    strokeWidth={1.8}
+                    className="text-indigo-500 dark:text-indigo-400"
+                  />
+                  <span>Compliance Audit Logs</span>
+                </div>
+                <span className="rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/50 dark:border-indigo-800 px-1.5 py-0.5 text-[9px] font-mono font-bold dark:text-indigo-300">
+                  P0
+                </span>
+              </NavLink>
+            )}
+          </div>
         </nav>
 
-        {/* System & Verification Status Footer */}
-        <div className="shrink-0 border-t border-slate-100 p-3.5 dark:border-slate-800">
-          <div className="rounded-lg border border-slate-200/80 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-950/60">
+        {/* System Telemetry & Verification Footer */}
+        <div className="shrink-0 border-t border-slate-200 dark:border-[#1e293b] p-3.5">
+          <div className="rounded-xl border border-slate-200 dark:border-[#1e293b] bg-slate-50 dark:bg-[#0b1528] p-3 shadow-xs">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                </span>
+                <span className="font-heading text-[11px] font-bold text-slate-900 dark:text-white">
                   National Engine
                 </span>
               </div>
-              <span className="rounded-full bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 text-[9px] font-bold text-emerald-800 dark:bg-emerald-950/50 dark:border-emerald-800/80 dark:text-emerald-300">
-                LIVE
+              <span className="rounded border border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 px-1.5 py-0.5 font-mono text-[9px] font-bold dark:text-emerald-300">
+                ACTIVE
               </span>
             </div>
 
-            <p className="mt-1.5 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+            <p className="mt-1.5 font-sans text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
               {stats.footerSummary}
             </p>
 
-            <div className="mt-2.5 flex items-center justify-between border-t border-slate-200/60 pt-2 text-[10px] text-slate-400 dark:border-slate-800 dark:text-slate-500">
+            <div className="mt-2.5 flex items-center justify-between border-t border-slate-200 dark:border-[#1e293b] pt-2 font-mono text-[10px] text-slate-500">
               <span>Sync: UIDAI / NCVET</span>
-              <span className="font-mono text-slate-600 dark:text-slate-400">v2.4</span>
+              <span className="text-sky-600 dark:text-sky-400/80">Sandbox Active</span>
             </div>
           </div>
         </div>

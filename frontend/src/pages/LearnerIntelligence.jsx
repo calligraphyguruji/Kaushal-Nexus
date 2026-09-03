@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import {
   Search,
@@ -42,20 +42,17 @@ import ActionModal from "../components/ActionModal";
 import AISkillIntelligence from "../components/AISkillIntelligence";
 import StateView from "../components/StateView";
 
-
 // Deterministic color palette for candidate avatars
 const AVATAR_COLORS = [
-  "bg-blue-600",
-  "bg-indigo-600",
-  "bg-purple-600",
-  "bg-emerald-600",
-  "bg-teal-600",
-  "bg-amber-600",
-  "bg-rose-600",
-  "bg-cyan-600",
+  "from-sky-500 to-indigo-600",
+  "from-indigo-500 to-purple-600",
+  "from-purple-500 to-pink-600",
+  "from-emerald-500 to-teal-600",
+  "from-cyan-500 to-blue-600",
+  "from-amber-500 to-orange-600",
 ];
 
-function getAvatarBg(name = "") {
+function getAvatarGradient(name = "") {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -204,7 +201,6 @@ export default function LearnerIntelligence() {
       setLearnersList(items);
       setTotalLearners(res.total || 0);
 
-      // Only auto-select first item if no candidate is currently selected AND no route param exists
       setSelectedLearnerId((prev) => {
         if (prev) return prev;
         return items.length > 0 ? items[0].id : null;
@@ -237,7 +233,6 @@ export default function LearnerIntelligence() {
       setDossierNotFound(false);
       setDossierForbidden(false);
       setForbiddenMessage(null);
-      // Immediately clear previous candidate to prevent showing stale details
       setCurrentLearner(null);
       setPlacements([]);
       setRetentionAudit(null);
@@ -312,14 +307,12 @@ export default function LearnerIntelligence() {
     }
   }, [selectedLearnerId, fetchLearnerDossier]);
 
-  // When clicking a candidate in the registry list
   const handleSelectCandidate = (candidateId) => {
     if (!candidateId) return;
     setSelectedLearnerId(candidateId);
     navigate(`/learner/${encodeURIComponent(candidateId)}`);
   };
 
-  // Execute NCVET Credential Verification Action
   const handleVerifyCredential = async () => {
     if (!currentLearner) return;
     try {
@@ -339,7 +332,6 @@ export default function LearnerIntelligence() {
     }
   };
 
-  // Execute Bridge Module Allocation Action
   const handleAllocateBridgeModule = async () => {
     if (!currentLearner) return;
     try {
@@ -362,7 +354,6 @@ export default function LearnerIntelligence() {
     }
   };
 
-  // Open Retention Checkpoint Edit Modal
   const handleOpenCheckpointModal = (cp) => {
     setSelectedCheckpointModal(cp);
     setCheckpointActive(cp.is_active_at_checkpoint);
@@ -370,7 +361,6 @@ export default function LearnerIntelligence() {
     setCheckpointRemarks(cp.remarks || "");
   };
 
-  // Execute Retention Checkpoint Update
   const handleUpdateCheckpoint = async () => {
     if (!selectedCheckpointModal || !placements[0]) return;
     try {
@@ -514,18 +504,18 @@ export default function LearnerIntelligence() {
   const activePlacement = placements.length > 0 ? placements[0] : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 font-sans text-[#f1f5f9]">
       {/* =====================================================
-          PAGE HEADER & ACTIONS
+          1. PAGE HEADER & ACTIONS
       ====================================================== */}
       <PageHeader
-        badge="Beneficiary 360° Intelligence"
-        badgeVariant="indigo"
-        title="Learner Dossier & Competency Tracker"
-        description="Individual-level tracking of verified skills, assessment scores, detected skill gaps, employment readiness, and longitudinal career progression."
+        badge="LEARNER INTELLIGENCE"
+        badgeVariant="cyan"
+        title="Learner 360"
+        description="Individual learner readiness, skill-gap, placement, and longitudinal outcome intelligence."
         breadcrumbs={["National Platform", "Learner Intelligence"]}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => {
@@ -533,11 +523,11 @@ export default function LearnerIntelligence() {
                 if (selectedLearnerId) fetchLearnerDossier(selectedLearnerId);
               }}
               disabled={listLoading || dossierLoading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
             >
               <RefreshCw
                 size={13}
-                className={listLoading || dossierLoading ? "animate-spin text-blue-600" : ""}
+                className={listLoading || dossierLoading ? "animate-spin text-sky-400" : "text-sky-400"}
               />
               <span>Sync</span>
             </button>
@@ -551,10 +541,10 @@ export default function LearnerIntelligence() {
                 }
               }}
               disabled={!currentLearner}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
               title="Download Candidate 360 Dossier & NCVET Certificate PDF"
             >
-              <Download size={13} />
+              <Download size={13} className="text-sky-400" />
               <span>Download Dossier (PDF)</span>
             </button>
 
@@ -563,7 +553,7 @@ export default function LearnerIntelligence() {
                 type="button"
                 onClick={() => setIsDossierModalOpen(true)}
                 disabled={!currentLearner}
-                className="group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
+                className="group inline-flex items-center gap-2 rounded-lg bg-sky-400 hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-slate-950 shadow-xs transition glow-cyan disabled:opacity-50 cursor-pointer"
               >
                 <Award size={14} />
                 <span>Verify NCVET Credential</span>
@@ -579,15 +569,15 @@ export default function LearnerIntelligence() {
 
       {/* Success Notification Alert */}
       {actionSuccessMsg && (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/90 p-4 text-xs text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-200">
+        <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-950/40 p-4 text-xs text-emerald-200">
           <div className="flex items-center gap-2.5">
-            <CheckCircle2 size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <CheckCircle2 size={16} className="shrink-0 text-emerald-400" />
             <span className="font-semibold">{actionSuccessMsg}</span>
           </div>
           <button
             type="button"
             onClick={() => setActionSuccessMsg(null)}
-            className="text-xs font-bold uppercase text-emerald-700 hover:text-emerald-900 dark:text-emerald-400"
+            className="font-mono text-xs font-bold uppercase text-emerald-400 hover:text-emerald-300"
           >
             Dismiss
           </button>
@@ -596,18 +586,18 @@ export default function LearnerIntelligence() {
 
       {/* Error Alert Banner */}
       {error && (
-        <div className="flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50/80 p-4 text-xs text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-200">
+        <div className="flex items-center justify-between rounded-xl border border-rose-500/30 bg-rose-950/40 p-4 text-xs text-rose-200">
           <div className="flex items-center gap-3">
-            <AlertCircle size={18} className="shrink-0 text-rose-600 dark:text-rose-400" />
+            <AlertCircle size={18} className="shrink-0 text-rose-400" />
             <div>
-              <p className="font-semibold">Unable to Load Beneficiary Data</p>
-              <p className="mt-0.5 text-rose-700 dark:text-rose-300">{error}</p>
+              <p className="font-heading font-bold text-white">Unable to Load Beneficiary Data</p>
+              <p className="mt-0.5 font-mono text-rose-300">{error}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => fetchLearnersList()}
-            className="rounded-lg bg-rose-600 px-3 py-1.5 font-semibold text-white transition hover:bg-rose-700 active:scale-95"
+            className="rounded-lg bg-rose-600 px-3 py-1.5 font-mono font-semibold text-white transition hover:bg-rose-500 active:scale-95 cursor-pointer"
           >
             Retry
           </button>
@@ -615,13 +605,13 @@ export default function LearnerIntelligence() {
       )}
 
       {/* =====================================================
-          1. COHORT SELECTOR & PAGINATED BROWSER
+          2. COHORT SELECTOR & PAGINATED BROWSER
       ====================================================== */}
-      <section className="rounded-xl border border-slate-200/80 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+      <section className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-4 sm:p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <UserCheck size={15} className="text-blue-600 dark:text-blue-400" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+            <UserCheck size={16} className="text-sky-400" />
+            <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-300">
               National Beneficiary Registry ({totalLearners} Total):
             </span>
           </div>
@@ -630,14 +620,14 @@ export default function LearnerIntelligence() {
             <div className="relative w-full sm:w-64">
               <Search
                 size={13}
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500"
               />
               <input
                 type="text"
-                placeholder="Search candidate name, ID, or district..."
+                placeholder="Search candidate name, ID, district..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 w-full rounded-md border border-slate-200 bg-slate-50/80 pl-8 pr-3 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                className="h-8 w-full rounded-lg border border-[#1e293b] bg-[#070d18] pl-8 pr-3 font-sans text-xs text-slate-200 placeholder:text-slate-500 transition-all focus:border-sky-400 focus:outline-none"
               />
             </div>
 
@@ -648,7 +638,7 @@ export default function LearnerIntelligence() {
                 setActionSuccessMsg(`✅ Exported ${learnersList.length} candidate records to CSV.`);
               }}
               disabled={learnersList.length === 0}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-750"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#070d18] px-2.5 py-1.5 font-mono text-xs font-semibold text-slate-300 hover:border-slate-700 hover:text-white disabled:opacity-50 cursor-pointer"
               title="Export visible candidates to CSV"
             >
               <Download size={13} />
@@ -663,23 +653,23 @@ export default function LearnerIntelligence() {
             Array.from({ length: 6 }).map((_, idx) => (
               <div
                 key={idx}
-                className="flex h-12 w-64 animate-pulse items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-800 dark:bg-slate-800"
+                className="flex h-12 w-64 animate-pulse items-center gap-2.5 rounded-lg border border-[#1e293b] bg-[#070d18] p-2"
               >
-                <div className="h-7 w-7 rounded-md bg-slate-200 dark:bg-slate-700" />
+                <div className="h-7 w-7 rounded-md bg-[#1e293b]" />
                 <div className="flex-1 space-y-1">
-                  <div className="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700" />
-                  <div className="h-2 w-32 rounded bg-slate-100 dark:bg-slate-800" />
+                  <div className="h-3 w-24 rounded bg-[#1e293b]" />
+                  <div className="h-2 w-32 rounded bg-[#1e293b]" />
                 </div>
               </div>
             ))
           ) : learnersList.length === 0 ? (
-            <div className="w-full py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+            <div className="w-full py-6 text-center font-mono text-xs text-slate-400">
               No beneficiary records found matching "{searchQuery}".
             </div>
           ) : (
             learnersList.map((learner) => {
               const isSelected = learner.id === selectedLearnerId;
-              const avatarBg = getAvatarBg(learner.full_name);
+              const avatarGrad = getAvatarGradient(learner.full_name);
               const initials = getInitials(learner.full_name);
 
               return (
@@ -687,28 +677,28 @@ export default function LearnerIntelligence() {
                   key={learner.id}
                   type="button"
                   onClick={() => handleSelectCandidate(learner.id)}
-                  className={`flex items-center gap-2.5 rounded-lg border p-2 text-left transition-colors ${
+                  className={`flex items-center gap-2.5 rounded-lg border p-2 text-left transition-all cursor-pointer ${
                     isSelected
-                      ? "border-slate-900 bg-slate-50 font-semibold text-slate-950 dark:border-blue-500 dark:bg-slate-800 dark:text-white"
-                      : "border-slate-200/80 bg-white font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-800/50"
+                      ? "border-sky-400 bg-[#0f1c33] text-white shadow-sm ring-1 ring-sky-400/40 glow-cyan"
+                      : "border-[#1e293b] bg-[#070d18] text-slate-300 hover:border-slate-700 hover:bg-[#0b1528]"
                   }`}
                 >
                   <div
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[11px] font-bold text-white ${avatarBg}`}
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md font-mono text-[11px] font-bold text-slate-950 bg-gradient-to-br ${avatarGrad}`}
                   >
                     {initials}
                   </div>
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="max-w-[130px] truncate text-xs font-bold text-slate-900 dark:text-slate-100">
+                      <span className="max-w-[130px] truncate text-xs font-heading font-bold text-white">
                         {learner.full_name}
                       </span>
-                      <StatusBadge variant={getStatusVariant(learner.status)} size="sm">
+                      <span className="rounded border border-sky-400/20 bg-sky-500/10 px-1.5 py-0.2 font-mono text-[9px] font-bold text-sky-300">
                         {learner.employment_readiness_score}%
-                      </StatusBadge>
+                      </span>
                     </div>
-                    <p className="max-w-[170px] truncate text-[10px] text-slate-500 dark:text-slate-400">
+                    <p className="max-w-[170px] truncate font-mono text-[10px] text-slate-400">
                       {learner.district_name || learner.district_id} · {learner.nsqf_level || "NSQF"}
                     </p>
                   </div>
@@ -720,7 +710,7 @@ export default function LearnerIntelligence() {
 
         {/* Pagination Bar */}
         {totalLearners > pageSize && (
-          <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2.5 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+          <div className="mt-3 flex items-center justify-between border-t border-[#1e293b] pt-2.5 font-mono text-xs text-slate-400">
             <span>
               Showing {(currentPage - 1) * pageSize + 1} –{" "}
               {Math.min(currentPage * pageSize, totalLearners)} of {totalLearners} candidates
@@ -731,19 +721,19 @@ export default function LearnerIntelligence() {
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1 || listLoading}
-                className="flex h-7 w-7 items-center justify-center rounded border border-slate-200 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800"
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#1e293b] bg-[#070d18] hover:bg-[#0f1c33] disabled:opacity-40"
                 title="Previous page"
               >
                 <ChevronLeft size={14} />
               </button>
-              <span className="px-2 font-semibold text-slate-700 dark:text-slate-300">
+              <span className="px-2 font-bold text-white">
                 Page {currentPage} of {totalPages}
               </span>
               <button
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage >= totalPages || listLoading}
-                className="flex h-7 w-7 items-center justify-center rounded border border-slate-200 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800"
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#1e293b] bg-[#070d18] hover:bg-[#0f1c33] disabled:opacity-40"
                 title="Next page"
               >
                 <ChevronRight size={14} />
@@ -754,9 +744,9 @@ export default function LearnerIntelligence() {
       </section>
 
       {/* =====================================================
-          2. SELECTED LEARNER 360° MASTER HEADER CARD
+          3. SELECTED LEARNER 360° MASTER HEADER CARD
       ====================================================== */}
-      <section className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+      <section className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 shadow-sm">
         {dossierLoading ? (
           <StateView
             variant="loading"
@@ -797,7 +787,7 @@ export default function LearnerIntelligence() {
             {/* Candidate Info */}
             <div className="flex items-start gap-4">
               <div
-                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white shadow-xs ${getAvatarBg(
+                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl font-mono text-lg font-bold text-slate-950 shadow-md border border-sky-400/30 bg-gradient-to-br ${getAvatarGradient(
                   currentLearner.full_name
                 )}`}
               >
@@ -806,55 +796,55 @@ export default function LearnerIntelligence() {
 
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-xl font-bold tracking-tight text-slate-950 dark:text-white">
+                  <h2 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white">
                     {currentLearner.full_name}
                   </h2>
                   <StatusBadge variant={getStatusVariant(currentLearner.status)} size="sm" dot>
                     {currentLearner.status}
                   </StatusBadge>
                   {currentLearner.ncvet_credential_id && (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 dark:border-emerald-800/70 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-950/40 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-emerald-300">
                       <ShieldCheck size={12} />
                       NCVET Verified (Aadhaar Mock Adapter)
                     </span>
                   )}
                   {consentsList && consentsList.some((c) => c.granted) ? (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-blue-200/80 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-800 dark:border-blue-800/70 dark:bg-blue-950/40 dark:text-blue-300">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-950/40 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-sky-300">
                       <ShieldCheck size={12} />
                       Consent-Based Tracking (DPDP-Aligned)
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900/60 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-slate-400">
                       <Clock size={12} />
                       Consent Pending
                     </span>
                   )}
                 </div>
 
-                <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-                  <span className="font-mono font-semibold text-slate-700 dark:text-slate-300">
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
+                  <span className="font-mono font-bold text-sky-400">
                     ID: {currentLearner.id}
                   </span>
                   <span>·</span>
-                  <span className="flex items-center gap-1 text-slate-600 dark:text-slate-300">
-                    <GraduationCap size={13} className="text-slate-400 dark:text-slate-500" />
+                  <span className="flex items-center gap-1 text-slate-300">
+                    <GraduationCap size={13} className="text-slate-400" />
                     {currentLearner.education_level || "Vocational Studies"}
                   </span>
                   <span>·</span>
-                  <span className="flex items-center gap-1 text-slate-600 dark:text-slate-300">
-                    <MapPin size={13} className="text-slate-400 dark:text-slate-500" />
+                  <span className="flex items-center gap-1 text-slate-300">
+                    <MapPin size={13} className="text-slate-400" />
                     {currentLearner.district_name || currentLearner.district_id},{" "}
                     {currentLearner.state || "India"}
                   </span>
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                  <span className="rounded border border-[#1e293b] bg-[#070d18] px-2 py-0.5 font-mono text-[10px] font-bold text-slate-300">
                     {currentLearner.nsqf_level || "NSQF Level 5"}
                   </span>
-                  <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                  <span className="font-mono text-[11px] text-slate-400">
                     Training Center:{" "}
-                    <strong className="text-slate-700 dark:text-slate-200">
+                    <strong className="text-white">
                       {currentLearner.training_info?.training_center_name ||
                         "PMKK Accredited Center"}
                     </strong>
@@ -864,20 +854,20 @@ export default function LearnerIntelligence() {
             </div>
 
             {/* Readiness & Progress Key Metrics */}
-            <div className="flex flex-wrap items-center gap-6 border-t border-slate-100 pt-4 lg:border-t-0 lg:pt-0 dark:border-slate-800">
+            <div className="flex flex-wrap items-center gap-6 border-t border-[#1e293b] pt-4 lg:border-t-0 lg:pt-0">
               <div className="text-center sm:text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                   Employment Readiness
                 </p>
                 <div className="mt-0.5 flex items-baseline justify-center gap-1 sm:justify-end">
-                  <span className="text-3xl font-bold tracking-tight tabular-nums text-blue-700 dark:text-blue-400">
+                  <span className="font-mono text-3xl font-extrabold tracking-tight tabular-nums text-sky-400">
                     {currentLearner.employment_readiness_score}
                   </span>
-                  <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
+                  <span className="font-mono text-xs text-slate-500">
                     /100
                   </span>
                 </div>
-                <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                <span className="font-mono text-[10px] font-semibold text-emerald-400">
                   {currentLearner.employment_readiness_score >= 80
                     ? "High Market Fit"
                     : currentLearner.employment_readiness_score >= 60
@@ -886,18 +876,18 @@ export default function LearnerIntelligence() {
                 </span>
               </div>
 
-              <div className="hidden h-10 w-px bg-slate-200 sm:block dark:bg-slate-800" />
+              <div className="hidden h-10 w-px bg-[#1e293b] sm:block" />
 
               <div className="text-center sm:text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                   Training Progress
                 </p>
                 <div className="mt-0.5 flex items-baseline justify-center gap-1 sm:justify-end">
-                  <span className="text-3xl font-bold tracking-tight tabular-nums text-slate-950 dark:text-white">
+                  <span className="font-mono text-3xl font-extrabold tracking-tight tabular-nums text-white">
                     {currentLearner.overall_progress}%
                   </span>
                 </div>
-                <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                <span className="font-mono text-[10px] text-slate-400">
                   {currentLearner.training_info?.modules_completed || 8} Modules (
                   {currentLearner.training_info?.training_hours || "120 hrs"})
                 </span>
@@ -905,38 +895,38 @@ export default function LearnerIntelligence() {
             </div>
           </div>
         ) : (
-          <div className="py-6 text-center text-xs text-slate-400">No candidate selected.</div>
+          <div className="py-6 text-center font-mono text-xs text-slate-400">No candidate selected.</div>
         )}
       </section>
 
       {/* =====================================================
-          2.5. LONGITUDINAL PLACEMENT & RETENTION TRACKING (3M/6M/12M)
+          4. LONGITUDINAL PLACEMENT & RETENTION TRACKING (3M/6M/12M)
       ====================================================== */}
       {currentLearner && activePlacement && (
-        <section className="rounded-xl border border-blue-200/80 bg-white p-5 sm:p-6 dark:border-blue-900/50 dark:bg-slate-900">
+        <section className="rounded-xl border border-sky-500/30 bg-[#0b1528] p-5 sm:p-6 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <Briefcase size={16} className="text-blue-600 dark:text-blue-400" />
-                <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">
-                  Verified Placement & Longitudinal Retention Checkpoints
+                <Briefcase size={16} className="text-sky-400" />
+                <h3 className="font-heading text-sm font-bold tracking-tight text-white">
+                  Verified Placement &amp; Longitudinal Retention Checkpoints
                 </h3>
               </div>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-xs text-slate-400">
                 Tracking candidate joined date, starting vs current CTC, and 3M, 6M, 12M retention checkpoints (demonstrated via mock EPFO adapter).
               </p>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-900 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300">
-                <ShieldCheck size={13} className="text-blue-600 dark:text-blue-400" />
+              <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-950/50 px-2.5 py-1 font-mono text-[11px] font-semibold text-sky-300">
+                <ShieldCheck size={13} className="text-sky-400" />
                 ⚡ Simulated Mock EPFO Adapter Active
               </span>
               {activePlacement.status !== "Separated" && permissions.canUpdateRetention && (
                 <button
                   type="button"
                   onClick={() => setIsSeparationModalOpen(true)}
-                  className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300"
+                  className="inline-flex items-center gap-1 rounded-lg border border-rose-800/70 bg-rose-950/50 px-2.5 py-1 font-mono text-[11px] font-semibold text-rose-300 hover:bg-rose-900/50 cursor-pointer"
                 >
                   <UserMinus size={12} />
                   Log Job Departure / Turnover
@@ -946,33 +936,33 @@ export default function LearnerIntelligence() {
           </div>
 
           {/* Placement Primary Summary */}
-          <div className="mt-4 grid gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs sm:grid-cols-4 dark:border-slate-800 dark:bg-slate-950/40">
+          <div className="mt-4 grid gap-3 rounded-lg border border-[#1e293b] bg-[#070d18] p-3 text-xs sm:grid-cols-4">
             <div>
-              <span className="text-[10px] font-semibold uppercase text-slate-400">Employer</span>
-              <p className="mt-0.5 font-bold text-slate-900 dark:text-white">
+              <span className="font-mono text-[10px] font-semibold uppercase text-slate-500">Employer</span>
+              <p className="mt-0.5 font-heading font-bold text-white">
                 {activePlacement.employer_name || "Corporate Partner"}
               </p>
             </div>
             <div>
-              <span className="text-[10px] font-semibold uppercase text-slate-400">Position / Role</span>
-              <p className="mt-0.5 font-bold text-slate-900 dark:text-white">
+              <span className="font-mono text-[10px] font-semibold uppercase text-slate-500">Position / Role</span>
+              <p className="mt-0.5 font-medium text-slate-200">
                 {activePlacement.job_title}
               </p>
             </div>
             <div>
-              <span className="text-[10px] font-semibold uppercase text-slate-400">Compensation</span>
-              <p className="mt-0.5 font-bold text-emerald-700 dark:text-emerald-400">
+              <span className="font-mono text-[10px] font-semibold uppercase text-slate-500">Compensation</span>
+              <p className="mt-0.5 font-mono font-bold text-emerald-400">
                 ₹{activePlacement.starting_ctc_lpa} LPA Starting
                 {activePlacement.current_ctc_lpa && activePlacement.current_ctc_lpa > activePlacement.starting_ctc_lpa && (
-                  <span className="ml-1 text-[10px] text-slate-500">
+                  <span className="ml-1 text-[10px] text-slate-400">
                     (Now: ₹{activePlacement.current_ctc_lpa} LPA)
                   </span>
                 )}
               </p>
             </div>
             <div>
-              <span className="text-[10px] font-semibold uppercase text-slate-400">EPFO UAN</span>
-              <p className="mt-0.5 font-mono font-semibold text-slate-800 dark:text-slate-200">
+              <span className="font-mono text-[10px] font-semibold uppercase text-slate-500">EPFO UAN</span>
+              <p className="mt-0.5 font-mono font-semibold text-sky-400">
                 {maskIdentifier(activePlacement.uan)}
               </p>
             </div>
@@ -983,44 +973,47 @@ export default function LearnerIntelligence() {
             {(retentionAudit?.checkpoints || []).map((cp) => (
               <div
                 key={cp.checkpoint_type}
-                className="flex flex-col justify-between rounded-lg border border-slate-200 bg-white p-3.5 text-xs transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
+                className="flex flex-col justify-between rounded-lg border border-[#1e293b] bg-[#070d18] p-3.5 text-xs transition hover:border-slate-700"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-900 dark:text-white">
+                    <span className="font-heading font-bold text-white">
                       {cp.checkpoint_type} Checkpoint ({cp.milestone_months * 30} Days)
                     </span>
-                    <StatusBadge
-                      variant={cp.is_active_at_checkpoint ? "success" : "danger"}
-                      size="sm"
+                    <span
+                      className={`rounded px-2 py-0.5 font-mono text-[10px] font-bold border ${
+                        cp.is_active_at_checkpoint
+                          ? "bg-emerald-950/50 text-emerald-300 border-emerald-500/30"
+                          : "bg-rose-950/50 text-rose-300 border-rose-800/70"
+                      }`}
                     >
                       {cp.is_active_at_checkpoint ? "Retained & Active" : "Stalled"}
-                    </StatusBadge>
+                    </span>
                   </div>
 
-                  <div className="mt-2 space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
+                  <div className="mt-2 space-y-1 font-mono text-[11px]">
                     <p className="flex justify-between">
-                      <span className="text-slate-400">Milestone Date:</span>
-                      <span className="font-medium text-slate-800 dark:text-slate-200">
+                      <span className="text-slate-500">Milestone Date:</span>
+                      <span className="text-slate-300">
                         {cp.checkpoint_date || "Calculated"}
                       </span>
                     </p>
                     <p className="flex justify-between">
-                      <span className="text-slate-400">EPFO Remittance:</span>
-                      <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                      <span className="text-slate-500">EPFO Remittance:</span>
+                      <span className="font-semibold text-emerald-400">
                         {cp.epfo_verified ? "✓ Verified (Mock)" : "Pending"}
                       </span>
                     </p>
                     <p className="flex justify-between">
-                      <span className="text-slate-400">Wage Increment:</span>
-                      <span className="font-bold text-blue-700 dark:text-blue-400">
+                      <span className="text-slate-500">Wage Increment:</span>
+                      <span className="font-bold text-sky-400">
                         +{cp.wage_increment_percentage || 0}%
                       </span>
                     </p>
                   </div>
 
                   {cp.remarks && (
-                    <p className="mt-2 rounded bg-slate-50 p-1.5 text-[10px] text-slate-500 dark:bg-slate-900/60 dark:text-slate-400">
+                    <p className="mt-2 rounded border border-[#1e293b] bg-[#0b1528] p-1.5 font-mono text-[10px] text-slate-400">
                       {cp.remarks}
                     </p>
                   )}
@@ -1030,7 +1023,7 @@ export default function LearnerIntelligence() {
                   <button
                     type="button"
                     onClick={() => handleOpenCheckpointModal(cp)}
-                    className="mt-3 w-full rounded border border-slate-200 bg-slate-50 py-1 text-[11px] font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-750"
+                    className="mt-3 w-full rounded-lg border border-[#1e293b] bg-[#0b1528] py-1 font-mono text-[11px] font-semibold text-slate-300 transition hover:bg-[#0f1c33] hover:text-white cursor-pointer"
                   >
                     Audit / Update Checkpoint
                   </button>
@@ -1042,19 +1035,19 @@ export default function LearnerIntelligence() {
       )}
 
       {/* =====================================================
-          2.5 LONGITUDINAL OUTCOMES, FOLLOW-UPS & BOTTLENECKS
+          5. LONGITUDINAL OUTCOMES, FOLLOW-UPS & BOTTLENECKS
       ====================================================== */}
       {currentLearner && (
-        <section className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+        <section className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[#1e293b] pb-4">
             <div>
               <div className="flex items-center gap-2">
-                <Clock size={16} className="text-indigo-600 dark:text-indigo-400" />
-                <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">
+                <Clock size={16} className="text-indigo-400" />
+                <h3 className="font-heading text-sm font-bold tracking-tight text-white">
                   Longitudinal Follow-Ups, Self-Employment &amp; Diagnostic Tracking
                 </h3>
               </div>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-xs text-slate-400">
                 End-to-end post-training outcomes: Scheduled milestone surveys, entrepreneurship ventures, and non-placement root-cause diagnostics.
               </p>
             </div>
@@ -1063,21 +1056,21 @@ export default function LearnerIntelligence() {
               <button
                 type="button"
                 onClick={() => setIsScheduleFollowUpModalOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-300"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-950/40 px-2.5 py-1.5 font-mono text-xs font-semibold text-indigo-300 hover:bg-indigo-900/50 cursor-pointer"
               >
                 <Send size={12} /> Schedule Follow-Up
               </button>
               <button
                 type="button"
                 onClick={() => setIsSelfEmpModalOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-purple-200 bg-purple-50 px-2.5 py-1.5 text-xs font-semibold text-purple-700 hover:bg-purple-100 dark:border-purple-900 dark:bg-purple-950/50 dark:text-purple-300"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-950/40 px-2.5 py-1.5 font-mono text-xs font-semibold text-purple-300 hover:bg-purple-900/50 cursor-pointer"
               >
                 <Building2 size={12} /> Record Self-Employment
               </button>
               <button
                 type="button"
                 onClick={() => setIsNonPlacementModalOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-950/40 px-2.5 py-1.5 font-mono text-xs font-semibold text-amber-300 hover:bg-amber-900/50 cursor-pointer"
               >
                 <AlertCircle size={12} /> Log Non-Placement Reason
               </button>
@@ -1086,27 +1079,27 @@ export default function LearnerIntelligence() {
 
           <div className="mt-4 grid gap-6 lg:grid-cols-3">
             {/* Card 1: Longitudinal Follow-Up Milestones */}
-            <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-800">
-                <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+            <div className="rounded-lg border border-[#1e293b] bg-[#070d18] p-4">
+              <div className="flex items-center justify-between pb-2 border-b border-[#1e293b]">
+                <span className="font-heading text-xs font-bold text-white">
                   Follow-Up Milestones ({followUpsList.length})
                 </span>
-                <span className="text-[10px] text-slate-400">30D / 90D / 180D / 365D</span>
+                <span className="font-mono text-[10px] text-slate-500">30D / 90D / 180D / 365D</span>
               </div>
 
               <div className="mt-3 space-y-2.5">
                 {followUpsList.length === 0 ? (
-                  <p className="text-center py-4 text-xs text-slate-400">
+                  <p className="text-center py-4 font-mono text-xs text-slate-500">
                     No outreach follow-ups scheduled yet.
                   </p>
                 ) : (
                   followUpsList.map((fu) => (
                     <div
                       key={fu.id}
-                      className="rounded border border-slate-200 bg-white p-2.5 text-xs dark:border-slate-700 dark:bg-slate-900"
+                      className="rounded border border-[#1e293b] bg-[#0b1528] p-2.5 text-xs"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900 dark:text-slate-100">
+                        <span className="font-heading font-bold text-white">
                           {fu.follow_up_type} Milestone
                         </span>
                         <StatusBadge
@@ -1124,12 +1117,12 @@ export default function LearnerIntelligence() {
                           {fu.status}
                         </StatusBadge>
                       </div>
-                      <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
+                      <div className="mt-1 flex items-center justify-between font-mono text-[10px] text-slate-400">
                         <span>Channel: {fu.channel}</span>
                         <span>{fu.scheduled_at?.split("T")[0]}</span>
                       </div>
                       {fu.response_status && (
-                        <p className="mt-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                        <p className="mt-1 font-mono text-[11px] font-semibold text-emerald-400">
                           Outcome: {fu.response_status}
                         </p>
                       )}
@@ -1140,7 +1133,7 @@ export default function LearnerIntelligence() {
                             setTargetFollowUpId(fu.id);
                             setIsRecordResponseModalOpen(true);
                           }}
-                          className="mt-2 w-full rounded border border-slate-200 bg-slate-50 py-0.5 text-[10px] font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                          className="mt-2 w-full rounded border border-[#1e293b] bg-[#070d18] py-1 font-mono text-[10px] font-semibold text-slate-300 hover:text-white hover:bg-[#0f1c33] cursor-pointer"
                         >
                           Record Feedback / Response
                         </button>
@@ -1152,27 +1145,27 @@ export default function LearnerIntelligence() {
             </div>
 
             {/* Card 2: Self-Employment & Micro-Enterprises */}
-            <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-800">
-                <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+            <div className="rounded-lg border border-[#1e293b] bg-[#070d18] p-4">
+              <div className="flex items-center justify-between pb-2 border-b border-[#1e293b]">
+                <span className="font-heading text-xs font-bold text-white">
                   Micro-Enterprise Ventures ({selfEmpList.length})
                 </span>
-                <span className="text-[10px] text-slate-400">Field &amp; Document Verified</span>
+                <span className="font-mono text-[10px] text-slate-500">Field &amp; Document Verified</span>
               </div>
 
               <div className="mt-3 space-y-2.5">
                 {selfEmpList.length === 0 ? (
-                  <p className="text-center py-4 text-xs text-slate-400">
+                  <p className="text-center py-4 font-mono text-xs text-slate-500">
                     No self-employment records documented.
                   </p>
                 ) : (
                   selfEmpList.map((se) => (
                     <div
                       key={se.id}
-                      className="rounded border border-slate-200 bg-white p-2.5 text-xs dark:border-slate-700 dark:bg-slate-900"
+                      className="rounded border border-[#1e293b] bg-[#0b1528] p-2.5 text-xs"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900 dark:text-slate-100 truncate max-w-[150px]">
+                        <span className="font-heading font-bold text-white truncate max-w-[150px]">
                           {se.enterprise_name}
                         </span>
                         <StatusBadge
@@ -1182,10 +1175,10 @@ export default function LearnerIntelligence() {
                           {se.verification_status || "Reported"}
                         </StatusBadge>
                       </div>
-                      <p className="mt-0.5 text-[11px] text-slate-600 dark:text-slate-400">
+                      <p className="mt-0.5 text-[11px] text-slate-300">
                         {se.business_activity} · {se.sector}
                       </p>
-                      <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
+                      <div className="mt-1 flex items-center justify-between font-mono text-[10px] text-slate-400">
                         <span>Income: {se.monthly_income_range || "₹15,000 - ₹25,000"}</span>
                         <span>Since: {se.start_date}</span>
                       </div>
@@ -1196,40 +1189,40 @@ export default function LearnerIntelligence() {
             </div>
 
             {/* Card 3: Non-Placement Diagnostic Bottlenecks */}
-            <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-800">
-                <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+            <div className="rounded-lg border border-[#1e293b] bg-[#070d18] p-4">
+              <div className="flex items-center justify-between pb-2 border-b border-[#1e293b]">
+                <span className="font-heading text-xs font-bold text-white">
                   Non-Placement Factors ({nonPlacementList.length})
                 </span>
-                <span className="text-[10px] text-slate-400">Diagnostic Root-Causes</span>
+                <span className="font-mono text-[10px] text-slate-500">Diagnostic Root-Causes</span>
               </div>
 
               <div className="mt-3 space-y-2.5">
                 {nonPlacementList.length === 0 ? (
-                  <p className="text-center py-4 text-xs text-slate-400">
+                  <p className="text-center py-4 font-mono text-xs text-slate-500">
                     No non-placement bottlenecks documented.
                   </p>
                 ) : (
                   nonPlacementList.map((np) => (
                     <div
                       key={np.id}
-                      className="rounded border border-slate-200 bg-white p-2.5 text-xs dark:border-slate-700 dark:bg-slate-900"
+                      className="rounded border border-[#1e293b] bg-[#0b1528] p-2.5 text-xs"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-amber-700 dark:text-amber-400">
+                        <span className="font-mono font-bold text-amber-400">
                           {np.reason}
                         </span>
-                        <span className="text-[10px] text-slate-400">
+                        <span className="font-mono text-[10px] text-slate-500">
                           {np.recorded_at?.split("T")[0]}
                         </span>
                       </div>
                       {np.associated_skill_code && (
-                        <p className="mt-1 font-mono text-[10px] text-blue-600 dark:text-blue-400">
+                        <p className="mt-1 font-mono text-[10px] text-sky-400">
                           Competency: {np.associated_skill_code}
                         </p>
                       )}
                       {np.notes && (
-                        <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-400">
+                        <p className="mt-1 text-[11px] text-slate-400">
                           {np.notes}
                         </p>
                       )}
@@ -1243,16 +1236,16 @@ export default function LearnerIntelligence() {
       )}
 
       {/* =====================================================
-          3. THREE-COLUMN INTELLIGENCE BREAKDOWN
+          6. THREE-COLUMN INTELLIGENCE BREAKDOWN
       ====================================================== */}
       {currentLearner && (
         <section className="grid gap-6 lg:grid-cols-3">
           {/* Verified Skills Dossier */}
-          <div className="flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-5">
             <div>
               <SectionHeader
                 title="Verified Competencies"
-                subtitle="Skills assessed & authenticated by accredited bodies"
+                subtitle="Skills assessed &amp; authenticated by accredited bodies"
                 badge={
                   <StatusBadge variant="success" size="sm">
                     {(currentLearner.skills || []).length} Verified
@@ -1260,28 +1253,28 @@ export default function LearnerIntelligence() {
                 }
               />
 
-              <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="mt-4 divide-y divide-[#1e293b]">
                 {(currentLearner.skills || []).map((skill) => (
                   <div key={skill.code || skill.name} className="py-2.5 first:pt-0 last:pb-0">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                      <span className="font-semibold text-slate-200">
                         {skill.name}
                       </span>
-                      <span className="font-bold tabular-nums text-blue-700 dark:text-blue-400">
+                      <span className="font-mono font-bold tabular-nums text-sky-400">
                         {skill.score_percentage}%
                       </span>
                     </div>
 
-                    <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                    <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[#070d18]">
                       <div
-                        className="h-full rounded-full bg-blue-700 transition-all dark:bg-blue-600"
+                        className="h-full rounded-full bg-sky-500 transition-all"
                         style={{ width: `${skill.score_percentage}%` }}
                       />
                     </div>
 
-                    <div className="mt-1 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
+                    <div className="mt-1 flex items-center justify-between font-mono text-[10px] text-slate-500">
                       <span>{skill.verified_by || "NCVET Accredited"}</span>
-                      <span className="font-semibold text-slate-600 dark:text-slate-400">
+                      <span className="text-slate-400">
                         {skill.sector}
                       </span>
                     </div>
@@ -1290,16 +1283,18 @@ export default function LearnerIntelligence() {
               </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 font-mono text-[11px] text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            <div className="mt-4 flex items-center justify-between border-t border-[#1e293b] pt-3 font-mono text-[11px] text-slate-400">
               <span>
                 Credential ID:{" "}
-                {currentLearner.ncvet_credential_id || "NCVET-PENDING-EVALUATION"}
+                <span className="text-sky-400 font-bold">
+                  {currentLearner.ncvet_credential_id || "NCVET-PENDING"}
+                </span>
               </span>
             </div>
           </div>
 
           {/* Detected Skill Gaps & Deficits */}
-          <div className="flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-5">
             <div>
               <SectionHeader
                 title="Detected Skill Gaps"
@@ -1311,11 +1306,11 @@ export default function LearnerIntelligence() {
                 }
               />
 
-              <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="mt-4 divide-y divide-[#1e293b]">
                 {(currentLearner.detected_gaps || []).map((gap) => (
                   <div key={gap.name} className="py-3 first:pt-0 last:pb-0">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-slate-900 dark:text-slate-100">
+                      <span className="font-heading font-semibold text-white">
                         {gap.name}
                       </span>
                       <StatusBadge
@@ -1326,17 +1321,17 @@ export default function LearnerIntelligence() {
                       </StatusBadge>
                     </div>
 
-                    <p className="mt-1.5 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
-                      <strong>Impact:</strong> {gap.impact}
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-slate-300">
+                      <strong className="text-slate-200">Impact:</strong> {gap.impact}
                     </p>
                   </div>
                 ))}
 
                 {(!currentLearner.detected_gaps || currentLearner.detected_gaps.length === 0) && (
-                  <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 text-center text-xs text-emerald-800 dark:border-emerald-800/70 dark:bg-emerald-950/30 dark:text-emerald-300">
+                  <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/30 p-4 text-center text-xs text-emerald-300 font-mono">
                     <CheckCircle2
                       size={22}
-                      className="mx-auto mb-1 text-emerald-600 dark:text-emerald-400"
+                      className="mx-auto mb-1 text-emerald-400"
                     />
                     No critical skill gaps detected. Candidate is fully aligned with market demand.
                   </div>
@@ -1348,16 +1343,16 @@ export default function LearnerIntelligence() {
               <button
                 type="button"
                 onClick={() => setIsInterventionModalOpen(true)}
-                className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 py-2 text-xs font-semibold text-slate-800 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-750"
+                className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#070d18] py-2 font-mono text-xs font-semibold text-slate-200 transition-colors hover:border-slate-700 hover:bg-[#0f1c33] cursor-pointer"
               >
-                <BrainCircuit size={14} className="text-amber-600 dark:text-amber-400" />
+                <BrainCircuit size={14} className="text-amber-400" />
                 <span>Generate Targeted Bridge Module</span>
               </button>
             )}
           </div>
 
           {/* Longitudinal Career Timeline */}
-          <div className="flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-5">
             <div>
               <SectionHeader
                 title="Longitudinal Career Journey"
@@ -1373,30 +1368,30 @@ export default function LearnerIntelligence() {
                     <div key={step.title} className="relative flex gap-3">
                       {/* Line Connector */}
                       {idx < (currentLearner.career_timeline || []).length - 1 && (
-                        <div className="absolute left-[11px] top-5 h-full w-px bg-slate-200 dark:bg-slate-800" />
+                        <div className="absolute left-[11px] top-5 h-full w-px bg-[#1e293b]" />
                       )}
 
-                      <div className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white dark:bg-slate-900">
+                      <div className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#0b1528]">
                         {isCompleted ? (
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/40">
                             <CheckCircle2 size={13} />
                           </div>
                         ) : isCurrent ? (
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-950 text-sky-400 border border-sky-400/40">
                             <Clock size={13} />
                           </div>
                         ) : (
-                          <div className="h-3.5 w-3.5 rounded-full border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800" />
+                          <div className="h-3.5 w-3.5 rounded-full border border-slate-700 bg-[#070d18]" />
                         )}
                       </div>
 
                       <div className="min-w-0 pb-1.5">
-                        <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">
+                        <p className="font-heading text-xs font-semibold text-white">
                           {step.title}
                         </p>
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500">{step.date}</p>
+                        <p className="font-mono text-[10px] text-slate-500">{step.date}</p>
                         {step.note && (
-                          <p className="mt-0.5 text-[11px] leading-tight text-slate-600 dark:text-slate-400">
+                          <p className="mt-0.5 text-[11px] leading-tight text-slate-400">
                             {step.note}
                           </p>
                         )}
@@ -1407,16 +1402,16 @@ export default function LearnerIntelligence() {
               </div>
             </div>
 
-            <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-2 text-[10px] font-medium text-slate-400 dark:border-slate-800 dark:text-slate-500">
+            <div className="mt-2 flex items-center justify-between border-t border-[#1e293b] pt-2 font-mono text-[10px] text-slate-500">
               <span>Next Verification: 180-Day Retention Check</span>
-              <span className="font-semibold text-slate-700 dark:text-slate-300">EPFO Synced</span>
+              <span className="text-sky-400 font-semibold">EPFO Synced</span>
             </div>
           </div>
         </section>
       )}
 
       {/* =====================================================
-          4. AI SKILL INTELLIGENCE & PERSONALIZED ROADMAP (GEMINI)
+          7. AI SKILL INTELLIGENCE & PERSONALIZED ROADMAP (GEMINI)
       ====================================================== */}
       {currentLearner && (
         <AISkillIntelligence
@@ -1424,7 +1419,6 @@ export default function LearnerIntelligence() {
           onInterventionDeploy={() => setIsInterventionModalOpen(true)}
         />
       )}
-
 
       {/* =====================================================
           ACTION MODALS
@@ -1440,18 +1434,18 @@ export default function LearnerIntelligence() {
             confirmText={actionLoading ? "Verifying..." : "Confirm & Verify Credential"}
             onConfirm={handleVerifyCredential}
           >
-            <div className="space-y-3">
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs dark:border-slate-800 dark:bg-slate-950/60">
-                <p className="font-bold text-slate-900 dark:text-slate-100">
+            <div className="space-y-3 font-sans">
+              <div className="rounded-lg border border-[#1e293b] bg-[#070d18] p-3 text-xs">
+                <p className="font-heading font-bold text-white">
                   {currentLearner.full_name}
                 </p>
-                <p className="text-slate-600 dark:text-slate-300">
+                <p className="text-slate-400">
                   Training Center: {currentLearner.training_info?.training_center_name || "PMKK Center"}
                 </p>
-                <p className="text-slate-600 dark:text-slate-300">
+                <p className="font-mono text-sky-400">
                   Credential ID: {currentLearner.ncvet_credential_id || "NCVET-2026-PENDING"}
                 </p>
-                <p className="mt-1 font-semibold text-emerald-700 dark:text-emerald-400">
+                <p className="mt-1 font-mono font-semibold text-emerald-400">
                   Status: Authenticated on National Skills Registry (NSR)
                 </p>
               </div>
@@ -1467,7 +1461,7 @@ export default function LearnerIntelligence() {
             confirmText={actionLoading ? "Allocating..." : "Enroll in Specialization Track"}
             onConfirm={handleAllocateBridgeModule}
           >
-            <p className="text-xs text-slate-600 dark:text-slate-300">
+            <p className="text-xs text-slate-300">
               This action assigns a 40-hour lab specialization credit to {currentLearner.full_name}{" "}
               to close the detected competency deficit and enhance employer placement match scores.
             </p>
@@ -1485,18 +1479,18 @@ export default function LearnerIntelligence() {
               confirmText={actionLoading ? "Auditing..." : "Update Retention Milestone"}
               onConfirm={handleUpdateCheckpoint}
             >
-              <div className="space-y-4 text-xs">
-                <div className="rounded-lg border border-blue-200 bg-blue-50 p-2.5 text-[11px] text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
+              <div className="space-y-4 text-xs font-sans">
+                <div className="rounded-lg border border-sky-500/30 bg-sky-950/40 p-2.5 font-mono text-[11px] text-sky-300">
                   <strong>⚡ Simulated EPFO Verification Adapter:</strong> Remittance verified
                   against 12-digit UAN:{" "}
-                  <span className="font-mono font-bold">{maskIdentifier(activePlacement?.uan)}</span>.
+                  <span className="font-bold">{maskIdentifier(activePlacement?.uan)}</span>.
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="block font-semibold text-slate-300">
                     Employment Status at Milestone:
                   </label>
-                  <div className="mt-1.5 flex gap-4">
+                  <div className="mt-1.5 flex gap-4 font-mono text-xs">
                     <label className="flex items-center gap-1.5 cursor-pointer">
                       <input
                         type="radio"
@@ -1504,8 +1498,8 @@ export default function LearnerIntelligence() {
                         checked={checkpointActive === true}
                         onChange={() => setCheckpointActive(true)}
                       />
-                      <span className="font-medium text-slate-800 dark:text-slate-200">
-                        Active & Retained
+                      <span className="text-white">
+                        Active &amp; Retained
                       </span>
                     </label>
                     <label className="flex items-center gap-1.5 cursor-pointer">
@@ -1515,7 +1509,7 @@ export default function LearnerIntelligence() {
                         checked={checkpointActive === false}
                         onChange={() => setCheckpointActive(false)}
                       />
-                      <span className="font-medium text-slate-800 dark:text-slate-200">
+                      <span className="text-slate-400">
                         Inactive / Resigned
                       </span>
                     </label>
@@ -1523,7 +1517,7 @@ export default function LearnerIntelligence() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="block font-semibold text-slate-300">
                     Current Milestone CTC (LPA ₹):
                   </label>
                   <input
@@ -1533,15 +1527,15 @@ export default function LearnerIntelligence() {
                     max="25.0"
                     value={checkpointCTC}
                     onChange={(e) => setCheckpointCTC(e.target.value)}
-                    className="mt-1 h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    className="mt-1 h-8 w-full rounded-md border border-[#1e293b] bg-[#070d18] px-2.5 font-mono text-xs text-white focus:border-sky-400 focus:outline-none"
                   />
-                  <span className="text-[10px] text-slate-400">
+                  <span className="font-mono text-[10px] text-slate-500">
                     Starting CTC: ₹{activePlacement?.starting_ctc_lpa} LPA
                   </span>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="block font-semibold text-slate-300">
                     Milestone Audit Remarks:
                   </label>
                   <textarea
@@ -1549,7 +1543,7 @@ export default function LearnerIntelligence() {
                     value={checkpointRemarks}
                     onChange={(e) => setCheckpointRemarks(e.target.value)}
                     placeholder="e.g. Verified 3-month continuous EPF contribution remittance from employer..."
-                    className="mt-1 w-full rounded-md border border-slate-200 bg-white p-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    className="mt-1 w-full rounded-md border border-[#1e293b] bg-[#070d18] p-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                   />
                 </div>
               </div>
@@ -1565,18 +1559,18 @@ export default function LearnerIntelligence() {
             confirmText={actionLoading ? "Scheduling..." : "Schedule Milestone"}
             onConfirm={handleScheduleFollowUp}
           >
-            <div className="space-y-3 text-xs">
-              <div className="rounded border border-blue-200 bg-blue-50 p-2 text-[11px] text-blue-900 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200">
+            <div className="space-y-3 text-xs font-sans">
+              <div className="rounded border border-sky-500/30 bg-sky-950/40 p-2 font-mono text-[11px] text-sky-300">
                 Outreach dispatch strictly verifies candidate active privacy consent before queuing.
               </div>
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block font-semibold text-slate-300">
                   Milestone Window:
                 </label>
                 <select
                   value={followUpType}
                   onChange={(e) => setFollowUpType(e.target.value)}
-                  className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="mt-1 h-8 w-full rounded border border-[#1e293b] bg-[#070d18] px-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                 >
                   <option value="30_DAY">30-Day Post-Training Outreach</option>
                   <option value="90_DAY">90-Day Retention Milestone</option>
@@ -1587,13 +1581,13 @@ export default function LearnerIntelligence() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block font-semibold text-slate-300">
                   Primary Notification Channel:
                 </label>
                 <select
                   value={followUpChannel}
                   onChange={(e) => setFollowUpChannel(e.target.value)}
-                  className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="mt-1 h-8 w-full rounded border border-[#1e293b] bg-[#070d18] px-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                 >
                   <option value="IN_APP">In-App Candidate Portal Notice</option>
                   <option value="SMS">SMS / WhatsApp Gateway (Simulated Sandbox)</option>
@@ -1603,7 +1597,7 @@ export default function LearnerIntelligence() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block font-semibold text-slate-300">
                   Outreach Instructions / Notes:
                 </label>
                 <textarea
@@ -1611,7 +1605,7 @@ export default function LearnerIntelligence() {
                   value={followUpNotes}
                   onChange={(e) => setFollowUpNotes(e.target.value)}
                   placeholder="e.g. Inquire about current employment offer letter or freelance contracts..."
-                  className="mt-1 w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="mt-1 w-full rounded border border-[#1e293b] bg-[#070d18] p-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                 />
               </div>
             </div>
@@ -1626,15 +1620,15 @@ export default function LearnerIntelligence() {
             confirmText={actionLoading ? "Recording..." : "Save Outcome"}
             onConfirm={handleRecordResponse}
           >
-            <div className="space-y-3 text-xs">
+            <div className="space-y-3 text-xs font-sans">
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block font-semibold text-slate-300">
                   Reported Destination Status:
                 </label>
                 <select
                   value={responseStatus}
                   onChange={(e) => setResponseStatus(e.target.value)}
-                  className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="mt-1 h-8 w-full rounded border border-[#1e293b] bg-[#070d18] px-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                 >
                   <option value="EMPLOYED">Wage Employment (Full-Time / Corporate)</option>
                   <option value="SELF_EMPLOYED">Self-Employed / Independent Contractor</option>
@@ -1646,7 +1640,7 @@ export default function LearnerIntelligence() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block font-semibold text-slate-300">
                   Verification Notes / Evidence Details:
                 </label>
                 <textarea
@@ -1654,7 +1648,7 @@ export default function LearnerIntelligence() {
                   value={responseNotes}
                   onChange={(e) => setResponseNotes(e.target.value)}
                   placeholder="e.g. Candidate confirmed employment at local auto assembly plant..."
-                  className="mt-1 w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="mt-1 w-full rounded border border-[#1e293b] bg-[#070d18] p-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                 />
               </div>
             </div>
@@ -1669,9 +1663,9 @@ export default function LearnerIntelligence() {
             confirmText={actionLoading ? "Registering..." : "Register Micro-Enterprise"}
             onConfirm={handleCreateSelfEmployment}
           >
-            <div className="space-y-3 text-xs">
+            <div className="space-y-3 text-xs font-sans">
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block font-semibold text-slate-300">
                   Venture / Enterprise Legal or Trade Name:
                 </label>
                 <input
@@ -1679,12 +1673,12 @@ export default function LearnerIntelligence() {
                   value={selfEmpName}
                   onChange={(e) => setSelfEmpName(e.target.value)}
                   placeholder="e.g. Sunrise Solar Services"
-                  className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2.5 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="mt-1 h-8 w-full rounded border border-[#1e293b] bg-[#070d18] px-2.5 text-xs text-white focus:border-sky-400 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block font-semibold text-slate-300">
                   Primary Commercial Activity / Trade:
                 </label>
                 <input
@@ -1692,19 +1686,19 @@ export default function LearnerIntelligence() {
                   value={selfEmpActivity}
                   onChange={(e) => setSelfEmpActivity(e.target.value)}
                   placeholder="e.g. Solar panel installation & rooftop maintenance"
-                  className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2.5 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="mt-1 h-8 w-full rounded border border-[#1e293b] bg-[#070d18] px-2.5 text-xs text-white focus:border-sky-400 focus:outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 font-mono text-xs">
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="block font-sans font-semibold text-slate-300">
                     Sector:
                   </label>
                   <select
                     value={selfEmpSector}
                     onChange={(e) => setSelfEmpSector(e.target.value)}
-                    className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    className="mt-1 h-8 w-full rounded border border-[#1e293b] bg-[#070d18] px-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                   >
                     <option value="Power & Clean Energy">Power &amp; Clean Energy</option>
                     <option value="Electronics & Hardware">Electronics &amp; Hardware</option>
@@ -1715,13 +1709,13 @@ export default function LearnerIntelligence() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="block font-sans font-semibold text-slate-300">
                     Monthly Revenue Band:
                   </label>
                   <select
                     value={selfEmpIncome}
                     onChange={(e) => setSelfEmpIncome(e.target.value)}
-                    className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    className="mt-1 h-8 w-full rounded border border-[#1e293b] bg-[#070d18] px-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                   >
                     <option value="Below ₹10,000">Below ₹10,000</option>
                     <option value="₹10,000 - ₹20,000">₹10,000 - ₹20,000</option>
@@ -1732,7 +1726,7 @@ export default function LearnerIntelligence() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block font-semibold text-slate-300">
                   MSME Udyam / Trade Notes:
                 </label>
                 <textarea
@@ -1740,7 +1734,7 @@ export default function LearnerIntelligence() {
                   value={selfEmpNotes}
                   onChange={(e) => setSelfEmpNotes(e.target.value)}
                   placeholder="e.g. Registered with Udyam Registration Portal (UDYAM-UP-...). Physical workshop verified."
-                  className="mt-1 w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="mt-1 w-full rounded border border-[#1e293b] bg-[#070d18] p-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                 />
               </div>
             </div>
@@ -1755,15 +1749,15 @@ export default function LearnerIntelligence() {
             confirmText={actionLoading ? "Documenting..." : "Log Diagnostic Bottleneck"}
             onConfirm={handleRecordNonPlacement}
           >
-            <div className="space-y-3 text-xs">
+            <div className="space-y-3 text-xs font-sans">
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block font-semibold text-slate-300">
                   Diagnostic Bottleneck Category:
                 </label>
                 <select
                   value={nonPlacementReason}
                   onChange={(e) => setNonPlacementReason(e.target.value)}
-                  className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="mt-1 h-8 w-full rounded border border-[#1e293b] bg-[#070d18] px-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                 >
                   <option value="SKILL_GAP">Technical Competency Deficit (Skill Gap)</option>
                   <option value="INTERVIEW_FAILURE">Interview / Technical Screening Rejection</option>
@@ -1777,7 +1771,7 @@ export default function LearnerIntelligence() {
 
               {nonPlacementReason === "SKILL_GAP" && (
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="block font-semibold text-slate-300">
                     Associated Competency Code:
                   </label>
                   <input
@@ -1785,16 +1779,16 @@ export default function LearnerIntelligence() {
                     value={nonPlacementSkillCode}
                     onChange={(e) => setNonPlacementSkillCode(e.target.value)}
                     placeholder="e.g. COMP-GENAI-01 or COMP-CNC-02"
-                    className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2.5 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    className="mt-1 h-8 w-full rounded border border-[#1e293b] bg-[#070d18] px-2.5 font-mono text-xs text-white focus:border-sky-400 focus:outline-none"
                   />
-                  <span className="text-[10px] text-slate-400">
+                  <span className="font-mono text-[10px] text-slate-500">
                     Enables targeted remedial bridge course generation.
                   </span>
                 </div>
               )}
 
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block font-semibold text-slate-300">
                   Counselor Observations / Notes:
                 </label>
                 <textarea
@@ -1802,7 +1796,7 @@ export default function LearnerIntelligence() {
                   value={nonPlacementNotes}
                   onChange={(e) => setNonPlacementNotes(e.target.value)}
                   placeholder="e.g. Candidate struggled in technical live coding and cloud concepts..."
-                  className="mt-1 w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="mt-1 w-full rounded border border-[#1e293b] bg-[#070d18] p-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                 />
               </div>
             </div>
@@ -1818,15 +1812,15 @@ export default function LearnerIntelligence() {
               confirmText={actionLoading ? "Recording..." : "Confirm Separation"}
               onConfirm={handleRecordSeparation}
             >
-              <div className="space-y-3 text-xs">
+              <div className="space-y-3 text-xs font-sans">
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="block font-semibold text-slate-300">
                     Primary Separation Driver:
                   </label>
                   <select
                     value={separationReason}
                     onChange={(e) => setSeparationReason(e.target.value)}
-                    className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    className="mt-1 h-8 w-full rounded border border-[#1e293b] bg-[#070d18] px-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                   >
                     <option value="BETTER_OPPORTUNITY">Career Advancement / Higher Compensation</option>
                     <option value="LOW_SALARY">Compensation Insufficiency</option>
@@ -1840,19 +1834,19 @@ export default function LearnerIntelligence() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="block font-semibold text-slate-300">
                     Separation Date:
                   </label>
                   <input
                     type="date"
                     value={separationDate}
                     onChange={(e) => setSeparationDate(e.target.value)}
-                    className="mt-1 h-8 w-full rounded border border-slate-200 bg-white px-2.5 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    className="mt-1 h-8 w-full rounded border border-[#1e293b] bg-[#070d18] px-2.5 font-mono text-xs text-white focus:border-sky-400 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="block font-semibold text-slate-300">
                     Audit Notes / Exit Interview Details:
                   </label>
                   <textarea
@@ -1860,7 +1854,7 @@ export default function LearnerIntelligence() {
                     value={separationNotes}
                     onChange={(e) => setSeparationNotes(e.target.value)}
                     placeholder="e.g. Beneficiary received higher wage offer from Tier-1 automotive supplier..."
-                    className="mt-1 w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    className="mt-1 w-full rounded border border-[#1e293b] bg-[#070d18] p-2 text-xs text-white focus:border-sky-400 focus:outline-none"
                   />
                 </div>
               </div>
