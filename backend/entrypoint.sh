@@ -31,6 +31,10 @@ case "$1" in
             echo "Applying database migrations (alembic upgrade head)..."
             alembic upgrade head
         fi
+        if [ "$SEED_DB" = "true" ]; then
+            echo "Seeding initial database records..."
+            python -m src.seed || true
+        fi
         exec uvicorn src.main:app \
             --host 0.0.0.0 \
             --port "${PORT:-8000}" \

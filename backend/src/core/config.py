@@ -62,6 +62,12 @@ class Settings(BaseSettings):
     @classmethod
     def assemble_db_connection(cls, v: Optional[str], info) -> str:
         if isinstance(v, str) and v.strip():
+            # Cloud platforms (like Render or Heroku) supply postgres:// or postgresql://
+            # SQLAlchemy asyncpg requires postgresql+asyncpg://
+            if v.startswith("postgres://"):
+                return v.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif v.startswith("postgresql://") and not v.startswith("postgresql+asyncpg://"):
+                return v.replace("postgresql://", "postgresql+asyncpg://", 1)
             return v
         values = info.data
         user = values.get("POSTGRES_USER", "kaushal_admin")
