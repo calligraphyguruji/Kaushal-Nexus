@@ -223,7 +223,7 @@ export default function SkillGapIntelligence() {
               onClick={() => fetchSkillGapData(true)}
               disabled={isRefreshing || loading}
               className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
-              title="Sync latest skill gap calculations from PostgreSQL"
+              title="Sync latest skill gap calculations"
             >
               <RefreshCw size={13} className={isRefreshing ? "animate-spin text-rose-400" : "text-rose-400"} />
               <span>{isRefreshing ? "Syncing..." : "Sync Live Deficits"}</span>
@@ -369,7 +369,7 @@ export default function SkillGapIntelligence() {
           <div>
             <SectionHeader
               title="Priority Skill Shortages — Demand vs. Supply Delta"
-              subtitle="Comparing active employer mandate demand against certified candidate availability (PostgreSQL Engine)"
+              subtitle="Comparing active employer mandate demand against certified candidate availability"
               actions={
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="relative">

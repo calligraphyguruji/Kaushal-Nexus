@@ -184,7 +184,7 @@ export default function ImpactDashboard() {
               onClick={() => fetchDashboardData(true)}
               disabled={isRefreshing || loading}
               className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
-              title="Refresh live data from PostgreSQL"
+              title="Refresh live data"
             >
               <RefreshCw size={13} className={isRefreshing ? "animate-spin text-sky-400" : "text-sky-400"} />
               <span>{isRefreshing ? "Syncing..." : "Sync Live DB"}</span>
@@ -336,10 +336,10 @@ export default function ImpactDashboard() {
           <div>
             <SectionHeader
               title="Longitudinal Employment Conversion & Target Baseline"
-              subtitle="Actual verified placement conversion vs. MSDE national target (PostgreSQL time-series)"
+              subtitle="Actual verified placement conversion vs. MSDE national target (audited time-series)"
               badge={
                 <StatusBadge variant="success" size="sm" dot>
-                  Live PostgreSQL Sync
+                  Live Database Sync
                 </StatusBadge>
               }
               actions={
@@ -981,7 +981,7 @@ export default function ImpactDashboard() {
         title="Q3 Skilling Allocation Strategy Recommendation"
         description="Data models recommend shifting 15% training capacity from legacy office suites to Cloud Infrastructure and Power BI specializations in Eastern UP to capture active employer hiring mandates."
         confidence="98.7% Model Confidence"
-        sampleSize="Demonstration Cohort · Audited PostgreSQL Records"
+        sampleSize="Demonstration Cohort · Audited Database Records"
         actionText="Deploy Bridge Modules"
         onAction={() => setIsInterventionModalOpen(true)}
       />

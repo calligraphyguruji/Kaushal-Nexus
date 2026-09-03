@@ -173,7 +173,7 @@ export default function RegionalIntelligence() {
               onClick={() => fetchRegionalData(true)}
               disabled={isRefreshing || loading}
               className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
-              title="Refresh live regional metrics from PostgreSQL"
+              title="Refresh live regional metrics"
             >
               <RefreshCw size={13} className={isRefreshing ? "animate-spin text-sky-400" : "text-sky-400"} />
               <span>{isRefreshing ? "Syncing..." : "Sync Regional DB"}</span>
@@ -283,7 +283,7 @@ export default function RegionalIntelligence() {
               trendDirection="up"
               icon={MapPin}
               variant="cyan"
-              footerText="PostgreSQL PostGIS Index"
+              footerText="Geospatial Index"
             />
 
             <TechStatCard
@@ -479,7 +479,7 @@ export default function RegionalIntelligence() {
           <div>
             <SectionHeader
               title="Regional Demand Divergence"
-              subtitle="Comparison of local employer demand vs trained candidate supply (PostgreSQL)"
+              subtitle="Comparison of local employer demand vs trained candidate supply"
             />
 
             <div className="mt-4 divide-y divide-[#1e293b]">

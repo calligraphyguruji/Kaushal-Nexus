@@ -171,7 +171,7 @@ export default function LearnerHome() {
               className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
             >
               <Cpu size={16} className="text-sky-600 dark:text-sky-400" />
-              <span>AI Architecture</span>
+              <span>AI Intelligence</span>
             </a>
             <a
               href="#interactive-preview"
@@ -278,7 +278,7 @@ export default function LearnerHome() {
                 className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
               >
                 <Cpu size={14} className="text-sky-400" />
-                <span>AI Architecture</span>
+                <span>AI Intelligence</span>
               </a>
               <a
                 href="#interactive-preview"
@@ -538,7 +538,7 @@ export default function LearnerHome() {
             <div className="text-center max-w-3xl mx-auto mb-10">
               <InstitutionalBadge
                 label="SOVEREIGN SKILL DATA PIPELINE"
-                secondaryText="END-TO-END TELEMETRY ARCHITECTURE"
+                secondaryText="END-TO-END TELEMETRY PIPELINE"
                 variant="cyan"
               />
               <h2 className="mt-4 font-heading text-2xl sm:text-4xl font-extrabold text-[#f8fafc] tracking-tight">
@@ -555,17 +555,17 @@ export default function LearnerHome() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 4. THE NATIONAL SKILL INTELLIGENCE ARCHITECTURE (How It Works)            */}
+        {/* 4. THE NATIONAL SKILL INTELLIGENCE PLATFORM (How It Works)                */}
         {/* ========================================================================= */}
         <section id="how-it-works" className="py-20 px-6 lg:px-12 border-t border-[#1e293b] bg-[#070d18]">
           <div className="max-w-[1516px] mx-auto">
             <div className="mb-12">
               <div className="inline-flex items-center gap-2 font-mono text-xs text-sky-400 uppercase tracking-wider mb-2">
                 <Layers size={14} />
-                <span>Architecture Workflow</span>
+                <span>Intelligence Workflow</span>
               </div>
               <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#f8fafc] tracking-tight">
-                The National Skill Intelligence Architecture
+                The National Skill Intelligence Platform
               </h2>
               <p className="mt-2 text-[#cbd5e1] text-sm sm:text-base max-w-2xl">
                 A structured, outcome-oriented workflow connecting raw vocational enrollment records
@@ -863,7 +863,7 @@ export default function LearnerHome() {
             <div className="mb-10">
               <InstitutionalBadge
                 label="DATABASE BENCHMARK METRICS"
-                secondaryText="POSTGRESQL AUDITED DATASET"
+                secondaryText="AUDITED BENCHMARK DATASET"
                 variant="emerald"
               />
               <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-extrabold text-[#f8fafc] tracking-tight">
@@ -884,7 +884,7 @@ export default function LearnerHome() {
                 trendDirection="up"
                 icon={Users}
                 variant="cyan"
-                footerText="Direct SQL Aggregate from PostgreSQL DB"
+                footerText="Direct SQL Aggregate from Production DB"
               />
               <TechStatCard
                 title="Milestone Retention"
@@ -1031,7 +1031,7 @@ export default function LearnerHome() {
             <div className="mt-8 font-mono text-xs text-slate-500 dark:text-[#94a3b8] flex items-center justify-center gap-2">
               <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
               <span>
-                Ready-to-deploy architecture aligned with NCVET &amp; Digital Personal Data Protection Act 2023
+                Ready-to-deploy platform aligned with NCVET &amp; Digital Personal Data Protection Act 2023
               </span>
             </div>
           </div>
@@ -1053,8 +1053,7 @@ export default function LearnerHome() {
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-[#94a3b8] leading-relaxed font-sans max-w-sm">
-                National Skilling &amp; Longitudinal Employment Outcomes Platform. Smart India
-                Hackathon (SIH) 2026 Problem Statement 135 Demonstration Prototype.
+                National Skilling &amp; Longitudinal Employment Outcomes Platform. Sovereign Workforce Intelligence Layer.
               </p>
               <div className="text-[10px] text-slate-500 dark:text-[#94a3b8] space-y-0.5">
                 <div>Consent Governance: DPDP Act 2023 Sec 4(1)</div>
@@ -1074,9 +1073,9 @@ export default function LearnerHome() {
               </ul>
             </div>
 
-            {/* Col 3: Architecture */}
+            {/* Col 3: Architecture -> Platform Engine */}
             <div className="space-y-2">
-              <span className="text-slate-900 dark:text-[#e2e8f0] font-bold uppercase text-[11px]">Architecture</span>
+              <span className="text-slate-900 dark:text-[#e2e8f0] font-bold uppercase text-[11px]">Platform Engine</span>
               <ul className="space-y-1.5 text-[11px]">
                 <li><a href="#pipeline" className="text-slate-600 hover:text-sky-600 dark:text-[#94a3b8] dark:hover:text-sky-400 transition-colors">5-Stage Pipeline</a></li>
                 <li><a href="#architecture" className="text-slate-600 hover:text-sky-600 dark:text-[#94a3b8] dark:hover:text-sky-400 transition-colors">Skill Ontology</a></li>
@@ -1106,23 +1105,22 @@ export default function LearnerHome() {
                 <li><Link to="/settings" className="text-slate-600 hover:text-sky-600 dark:text-[#94a3b8] dark:hover:text-sky-400 transition-colors">RBAC Security</Link></li>
                 <li><Link to="/login" className="text-slate-600 hover:text-sky-600 dark:text-[#94a3b8] dark:hover:text-sky-400 transition-colors">MSDE Officer Login</Link></li>
                 <li><Link to="/login" className="text-slate-600 hover:text-sky-600 dark:text-[#94a3b8] dark:hover:text-sky-400 transition-colors">State Admin Portal</Link></li>
-                <li><a href="/saas-template" className="text-slate-600 hover:text-sky-600 dark:text-[#94a3b8] dark:hover:text-sky-400 transition-colors">21st.dev UI Showcase</a></li>
               </ul>
             </div>
           </div>
 
           <div className="border-t border-slate-200 dark:border-[#1e293b] pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 dark:text-[#94a3b8] gap-2">
-            <div>© 2026 KaushalNexus · Smart India Hackathon 2026. All rights reserved.</div>
+            <div>© 2026 KaushalNexus. All rights reserved.</div>
             <div className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-ping" />
-              <span>National Backend Engine Active (FastAPI + PostgreSQL + Celery)</span>
+              <span>National Backend Engine Active</span>
             </div>
           </div>
         </footer>
       </main>
 
       {/* ========================================================================= */}
-      {/* 12. 21st.dev SCROLL-LOCKED VIDEO HERO MODAL                               */}
+      {/* 12. SCROLL-LOCKED VIDEO HERO MODAL                                        */}
       {/* ========================================================================= */}
       {isExperienceModalOpen && (
         <div className="fixed inset-0 z-50 bg-[#05070d]">
@@ -1140,7 +1138,7 @@ export default function LearnerHome() {
             title="KAUSHAL NEXUS"
             tagline="Connecting Verified Skills with National Career Opportunities."
             scrollHint="SCROLL TO SCRUB"
-            signature={{ name: "KaushalNexus · SIH 2026", url: "/" }}
+            signature={{ name: "KaushalNexus", url: "/" }}
             actionLabel="Enter Platform"
             onActionClick={() => setIsExperienceModalOpen(false)}
             unlockOnEnd={false}

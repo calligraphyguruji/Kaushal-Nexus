@@ -20,12 +20,12 @@ export default function Experience() {
         </button>
       </div>
 
-      {/* 21st.dev Scroll-Locked Video Hero */}
+      {/* Scroll-Locked Video Hero */}
       <MetroHero
         title="KAUSHAL NEXUS"
         tagline="Connecting Verified Skills with National Career Opportunities."
         scrollHint="SCROLL TO EXPLORE"
-        signature={{ name: "KaushalNexus · SIH 2026", url: "/" }}
+        signature={{ name: "KaushalNexus", url: "/" }}
         actionLabel="Explore Platform Features"
         onActionClick={() => navigate("/#benefits")}
         unlockOnEnd={true}

@@ -9,7 +9,7 @@ export default function SaasTemplatePage() {
 
   return (
     <div className="relative min-h-screen bg-black">
-      {/* Top Banner Control Bar for SIH Evaluation */}
+      {/* Top Banner Control Bar */}
       <div className="fixed top-4 left-4 z-50 flex items-center gap-2">
         <button
           type="button"
@@ -49,7 +49,7 @@ export default function SaasTemplatePage() {
             { label: "Skill Gap Matrix", href: "/skill-gap" },
             { label: "Regional Intelligence", href: "/regional" },
           ]}
-          announcementText="SIH 2026 Problem Statement 135 · National Skilling Intelligence"
+          announcementText="National Skilling & Longitudinal Employment Intelligence"
           announcementLinkText="Explore AI Diagnostics"
           announcementHref="/dashboard"
           headline={

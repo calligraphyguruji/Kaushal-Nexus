@@ -703,7 +703,7 @@ export default function EmployerMatching() {
       ====================================================== */}
       <section className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 shadow-sm">
         <SectionHeader
-          title="Multi-Signal Employer Matching Architecture"
+          title="Multi-Signal Employer Matching Engine"
           subtitle="How KaushalNexus matches candidate capabilities to verified industry requirements"
         />
 
