@@ -64,7 +64,7 @@ async def get_regional_divergence(
     district: Optional[str] = Query(None, description="Filter by district"),
     tier: Optional[str] = Query(None, description="Filter by tier"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(*STRATEGIC_PLANNING_ROLES)),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
 ) -> RegionalDivergenceResponseDTO:
     """Returns macro regional divergence analysis."""
     return await geospatial_service.get_regional_divergence(
@@ -86,7 +86,7 @@ async def get_priority_clusters(
     tier: Optional[str] = Query(None, description="Filter by tier"),
     limit: int = Query(20, ge=1, le=100, description="Max number of priority clusters to return"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(*STRATEGIC_PLANNING_ROLES)),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
 ) -> List[PriorityClusterItemDTO]:
     """Returns ranked priority clusters for targeted interventions."""
     return await geospatial_service.get_priority_clusters(

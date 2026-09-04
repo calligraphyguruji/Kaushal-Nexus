@@ -138,34 +138,34 @@ export default function LearnerHome() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden xl:flex items-center gap-8 h-full font-sans text-sm">
-            <a
-              href="#learner-intelligence"
+            <Link
+              to="/learner"
               className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
             >
               <Users size={16} className="text-sky-600 dark:text-sky-400" />
               <span>Learner Intelligence</span>
-            </a>
-            <a
-              href="#skill-gap"
+            </Link>
+            <Link
+              to="/skill-gap"
               className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
             >
               <BrainCircuit size={16} className="text-indigo-600 dark:text-indigo-400" />
               <span>Skill Gap Matrix</span>
-            </a>
-            <a
-              href="#regional"
+            </Link>
+            <Link
+              to="/regional"
               className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
             >
               <MapPin size={16} className="text-emerald-600 dark:text-emerald-400" />
               <span>Regional Analytics</span>
-            </a>
-            <a
-              href="#employers"
+            </Link>
+            <Link
+              to="/matching"
               className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
             >
               <Briefcase size={16} className="text-amber-600 dark:text-amber-400" />
               <span>Employer Network</span>
-            </a>
+            </Link>
             <a
               href="#architecture"
               className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
@@ -240,38 +240,38 @@ export default function LearnerHome() {
         {mobileMenuOpen && (
           <div className="xl:hidden border-b border-[#1e293b] bg-[#070d18]/95 px-6 py-5 shadow-2xl backdrop-blur-md">
             <nav className="flex flex-col space-y-3 font-mono text-xs">
-              <a
-                href="#learner-intelligence"
+              <Link
+                to="/learner"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
               >
                 <Users size={14} className="text-sky-400" />
                 <span>Learner Intelligence</span>
-              </a>
-              <a
-                href="#skill-gap"
+              </Link>
+              <Link
+                to="/skill-gap"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
               >
                 <BrainCircuit size={14} className="text-indigo-400" />
                 <span>Skill Gap Matrix</span>
-              </a>
-              <a
-                href="#regional"
+              </Link>
+              <Link
+                to="/regional"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
               >
                 <MapPin size={14} className="text-emerald-400" />
                 <span>Regional Analytics</span>
-              </a>
-              <a
-                href="#employers"
+              </Link>
+              <Link
+                to="/matching"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
               >
                 <Briefcase size={14} className="text-amber-400" />
                 <span>Employer Network</span>
-              </a>
+              </Link>
               <a
                 href="#architecture"
                 onClick={() => setMobileMenuOpen(false)}
@@ -650,7 +650,10 @@ export default function LearnerHome() {
         {/* ========================================================================= */}
         {/* 5. CORE PLATFORM SUITES (PlatformSuitePreview)                            */}
         {/* ========================================================================= */}
-        <section id="learner-intelligence" className="py-20 px-6 lg:px-12 border-t border-[#1e293b] bg-[#060c18]">
+        <section id="learner-intelligence" className="py-20 px-6 lg:px-12 border-t border-[#1e293b] bg-[#060c18] relative">
+          <span id="regional" className="absolute -top-20" />
+          <span id="skill-gap" className="absolute -top-20" />
+          <span id="employers" className="absolute -top-20" />
           <div className="max-w-[1516px] mx-auto">
             <div className="mb-10">
               <InstitutionalBadge

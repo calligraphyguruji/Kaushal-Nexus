@@ -94,15 +94,24 @@ export default function RegionalIntelligence() {
           tier: selectedTier === "All Tiers" ? undefined : selectedTier,
         };
 
-        const [districtsRes, divergenceRes, clustersRes] = await Promise.all([
+        const [districtsSettled, divergenceSettled, clustersSettled] = await Promise.allSettled([
           regionalApi.getDistricts(params),
           regionalApi.getDivergence(params),
           regionalApi.getPriorityClusters({ ...params, limit: 6 }),
         ]);
 
-        setDistricts(districtsRes || []);
+        const districtsRes = districtsSettled.status === "fulfilled" ? districtsSettled.value : [];
+        const divergenceRes = divergenceSettled.status === "fulfilled" ? divergenceSettled.value : null;
+        const clustersRes = clustersSettled.status === "fulfilled" ? clustersSettled.value : [];
+
+        setDistricts(Array.isArray(districtsRes) ? districtsRes : []);
         setDivergenceData(divergenceRes || null);
-        setPriorityClusters(clustersRes || []);
+        setPriorityClusters(Array.isArray(clustersRes) ? clustersRes : []);
+
+        if (districtsSettled.status === "rejected" && (!districtsRes || districtsRes.length === 0)) {
+          console.error("Regional districts fetch failed:", districtsSettled.reason);
+          setError(getErrorMessage(districtsSettled.reason));
+        }
       } catch (err) {
         console.error("Regional data fetch failed:", err);
         setError(getErrorMessage(err));
@@ -119,39 +128,44 @@ export default function RegionalIntelligence() {
   }, [fetchRegionalData]);
 
   // Client-side text search filtering on the active filtered district set
-  const filteredDistricts = districts.filter((d) => {
-    const q = searchDistrict.toLowerCase();
+  const filteredDistricts = (districts || []).filter((d) => {
+    if (!d) return false;
+    const q = (searchDistrict || "").toLowerCase();
+    const name = (d.name || d.district_name || "").toLowerCase();
+    const region = (d.region || "").toLowerCase();
+    const state = (d.state || "").toLowerCase();
+    const dominantGaps = Array.isArray(d.dominant_skill_gaps) ? d.dominant_skill_gaps : [];
     const matchesSearch =
-      d.name.toLowerCase().includes(q) ||
-      d.region.toLowerCase().includes(q) ||
-      d.state.toLowerCase().includes(q) ||
-      (d.dominant_skill_gaps && d.dominant_skill_gaps.some((g) => g.toLowerCase().includes(q)));
+      name.includes(q) ||
+      region.includes(q) ||
+      state.includes(q) ||
+      dominantGaps.some((g) => typeof g === "string" && g.toLowerCase().includes(q));
     return matchesSearch;
   });
 
   // Calculate Aggregated Live KPI Metrics
-  const totalEnrolled = districts.reduce((acc, curr) => acc + curr.total_enrolled, 0);
-  const totalPlaced = districts.reduce((acc, curr) => acc + curr.total_placed, 0);
-  const totalCertified = districts.reduce((acc, curr) => acc + curr.total_certified, 0);
+  const totalEnrolled = (districts || []).reduce((acc, curr) => acc + (Number(curr?.total_enrolled) || 0), 0);
+  const totalPlaced = (districts || []).reduce((acc, curr) => acc + (Number(curr?.total_placed) || 0), 0);
+  const totalCertified = (districts || []).reduce((acc, curr) => acc + (Number(curr?.total_certified) || 0), 0);
 
   const avgPlacementRate =
     districts.length > 0
       ? (
-          districts.reduce((acc, curr) => acc + curr.placement_rate, 0) / districts.length
+          districts.reduce((acc, curr) => acc + (Number(curr?.placement_rate) || 0), 0) / districts.length
         ).toFixed(1)
       : "0.0";
 
   const avgRetentionRate =
     districts.length > 0
       ? (
-          districts.reduce((acc, curr) => acc + curr.retention_rate, 0) / districts.length
+          districts.reduce((acc, curr) => acc + (Number(curr?.retention_rate ?? curr?.retention_rate_180d) || 0), 0) / districts.length
         ).toFixed(1)
       : "0.0";
 
   const avgDivergenceScore =
     districts.length > 0
       ? (
-          districts.reduce((acc, curr) => acc + curr.divergence_score, 0) / districts.length
+          districts.reduce((acc, curr) => acc + (Number(curr?.divergence_score) || 0), 0) / districts.length
         ).toFixed(1)
       : "0.0";
 
@@ -393,9 +407,9 @@ export default function RegionalIntelligence() {
                       </td>
                     </tr>
                   ) : (
-                    filteredDistricts.map((dist) => (
+                    filteredDistricts.map((dist, idx) => (
                       <tr
-                        key={dist.district_id}
+                        key={dist.district_id || dist.id || idx}
                         onClick={() => setSelectedDistrictModal(dist)}
                         className="cursor-pointer transition-colors hover:bg-[#0f1c33]"
                         title="Click to view district analytical dossier"
@@ -404,34 +418,34 @@ export default function RegionalIntelligence() {
                           <div className="flex items-center gap-2">
                             <MapPin size={14} className="text-sky-400" />
                             <div>
-                              <div className="font-heading font-bold">{dist.name}</div>
+                              <div className="font-heading font-bold">{dist.name || dist.district_name || "District"}</div>
                               <span className="font-mono text-[10px] font-normal text-slate-400">
-                                {dist.region} · {dist.state} ({dist.tier})
+                                {dist.region || "State Cluster"} · {dist.state || "India"} ({dist.tier || "Tier 2"})
                               </span>
                             </div>
                           </div>
                         </td>
 
                         <td className="py-3 text-right font-mono font-medium text-slate-300">
-                          {dist.total_enrolled.toLocaleString()}
+                          {(dist.total_enrolled || 0).toLocaleString()}
                         </td>
 
                         <td className="py-3 text-right">
                           <span
                             className={`font-mono font-bold tabular-nums ${
-                              dist.placement_rate >= 70
+                              (dist.placement_rate || 0) >= 70
                                 ? "text-emerald-400"
-                                : dist.placement_rate >= 40
+                                : (dist.placement_rate || 0) >= 40
                                 ? "text-sky-400"
                                 : "text-rose-400"
                             }`}
                           >
-                            {dist.placement_rate}%
+                            {dist.placement_rate || 0}%
                           </span>
                         </td>
 
                         <td className="py-3 text-right font-mono font-semibold text-slate-200">
-                          {dist.retention_rate}%
+                          {dist.retention_rate ?? dist.retention_rate_180d ?? 0}%
                         </td>
 
                         <td className="py-3">
@@ -493,14 +507,14 @@ export default function RegionalIntelligence() {
                     <div className="h-1.5 w-full rounded bg-[#1e293b]" />
                   </div>
                 ))
-              ) : districts.slice(0, 5).map((item) => (
-                <div key={item.district_id} className="py-3 first:pt-0 last:pb-0">
+              ) : (districts || []).slice(0, 5).map((item, idx) => (
+                <div key={item.district_id || item.id || idx} className="py-3 first:pt-0 last:pb-0">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-heading font-semibold text-white">
-                      {item.name}
+                      {item.name || item.district_name || "District"}
                     </span>
                     <span className="font-mono font-bold text-rose-400">
-                      {item.divergence_score}% Deficit
+                      {item.divergence_score ?? 0}% Deficit
                     </span>
                   </div>
 
@@ -509,26 +523,26 @@ export default function RegionalIntelligence() {
                     <div className="flex items-center justify-between font-mono text-[10px] text-slate-400">
                       <span>Employer Demand</span>
                       <span className="font-bold text-sky-400">
-                        {item.employer_demand_index}%
+                        {item.employer_demand_index ?? 0}%
                       </span>
                     </div>
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#070d18]">
                       <div
                         className="h-full rounded-full bg-sky-400 transition-all"
-                        style={{ width: `${Math.min(100, item.employer_demand_index)}%` }}
+                        style={{ width: `${Math.min(100, Math.max(0, item.employer_demand_index || 0))}%` }}
                       />
                     </div>
 
                     <div className="flex items-center justify-between pt-0.5 font-mono text-[10px] text-slate-400">
                       <span>Trained Supply</span>
                       <span className="text-slate-300">
-                        {item.workforce_supply_index}%
+                        {item.workforce_supply_index ?? 0}%
                       </span>
                     </div>
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#070d18]">
                       <div
                         className="h-full rounded-full bg-slate-500 transition-all"
-                        style={{ width: `${Math.min(100, item.workforce_supply_index)}%` }}
+                        style={{ width: `${Math.min(100, Math.max(0, item.workforce_supply_index || 0))}%` }}
                       />
                     </div>
                   </div>
@@ -538,7 +552,7 @@ export default function RegionalIntelligence() {
           </div>
 
           <div className="mt-4 rounded-lg border border-sky-500/30 bg-sky-950/40 p-2.5 text-center font-mono text-xs text-sky-300">
-            Automated divergence tracking across {districts.length} active districts.
+            Automated divergence tracking across {(districts || []).length} active districts.
           </div>
         </div>
       </section>
@@ -552,7 +566,7 @@ export default function RegionalIntelligence() {
           subtitle="Targeted policy and curriculum adjustments formulated for underperforming clusters"
           badge={
             <StatusBadge variant="danger" size="sm">
-              {priorityClusters.length} Targeted Clusters
+              {(priorityClusters || []).length} Targeted Clusters
             </StatusBadge>
           }
         />
@@ -569,14 +583,14 @@ export default function RegionalIntelligence() {
                 <div className="h-4 w-24 rounded bg-[#1e293b]" />
               </div>
             ))
-          ) : priorityClusters.length === 0 ? (
+          ) : (priorityClusters || []).length === 0 ? (
             <div className="col-span-full rounded-xl border border-[#1e293b] bg-[#0b1528] p-6 text-center font-mono text-xs text-slate-400">
               No critical priority clusters identified for the selected state/tier.
             </div>
           ) : (
-            priorityClusters.slice(0, 3).map((item) => (
+            (priorityClusters || []).slice(0, 3).map((item, idx) => (
               <div
-                key={item.district_id}
+                key={item.district_id || item.id || idx}
                 className="flex flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 transition-all hover:border-slate-700 shadow-sm"
               >
                 <div>
@@ -584,22 +598,22 @@ export default function RegionalIntelligence() {
                     <div className="flex items-center gap-1.5">
                       <MapPin size={15} className="text-rose-400" />
                       <h3 className="font-heading text-sm font-bold tracking-tight text-white">
-                        {item.district_name}
+                        {item.district_name || item.name || "Priority District"}
                       </h3>
                     </div>
                     <StatusBadge variant="danger" size="sm" dot>
-                      Rank #{item.rank}
+                      Rank #{item.rank || idx + 1}
                     </StatusBadge>
                   </div>
 
                   <div className="mt-3 rounded-lg border border-rose-500/30 bg-rose-950/30 p-2.5">
                     <p className="font-mono text-[11px] font-semibold text-rose-300">
-                      Vulnerability Score: {item.composite_priority_score}/100
+                      Vulnerability Score: {item.composite_priority_score ?? 0}/100
                     </p>
                     <div className="mt-1 flex items-baseline justify-between font-mono text-xs">
                       <span className="text-slate-400">Demand Deficit:</span>
                       <span className="font-bold text-rose-400">
-                        {item.divergence_score}% ({item.learners_at_risk} candidates affected)
+                        {item.divergence_score ?? 0}% ({item.learners_at_risk ?? 0} candidates affected)
                       </span>
                     </div>
                   </div>
