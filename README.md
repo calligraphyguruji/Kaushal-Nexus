@@ -12,6 +12,7 @@ Longitudinal skilling outcomes and impact measurement for India's skilling ecosy
 [![Lucide React](https://img.shields.io/badge/Lucide-1.34-F56565)](https://lucide.dev)
 [![Status](https://img.shields.io/badge/Status-Prototype-amber)]()
 [![SIH 2026](https://img.shields.io/badge/SIH-2026-1E3A8A)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 [Repository](https://github.com/calligraphyguruji/Kaushal-Nexus.git) · [Problem Statement](#-problem-statement-sih26135) · [Architecture](#-platform-architecture) · [Roadmap](#-roadmap)
 
@@ -478,7 +479,31 @@ These outcomes are aspirational goals the platform **is designed to** support �
 
 ## 📄 License
 
-License information will be added before final release.
+This project is open source and available under the **[MIT License](LICENSE)**.
+
+```text
+MIT License
+
+Copyright (c) 2026 KaushalNexus Team (Vedaris)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
 
 ---
 
