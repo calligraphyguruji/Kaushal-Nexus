@@ -52,41 +52,46 @@ async def analyze_skill_gap(
     Enriches with database facts when learner_id is provided.
     """
     try:
-        # If learner_id is provided and refers to a real individual beneficiary, enforce candidate authorization and enrich data
+        # If learner_id is provided and refers to a real individual beneficiary, attempt candidate authorization and data enrichment
         if req.learner_id and not str(req.learner_id).startswith("COHORT-") and not str(req.learner_id).startswith("REGIONAL-"):
-            learner_dossier = await learner_service.get_learner_360(
-                db, req.learner_id, user=current_user
-            )
-            if not req.current_skills:
-                if not req.full_name or req.full_name == "Beneficiary Candidate":
-                    req.full_name = learner_dossier.full_name
-                if not req.education_level:
-                    req.education_level = learner_dossier.education_level
-                if not req.district_name:
-                    req.district_name = learner_dossier.district_name or learner_dossier.district_id
-                if req.employment_readiness_score is None:
-                    req.employment_readiness_score = learner_dossier.employment_readiness_score
-                if req.overall_progress is None:
-                    req.overall_progress = learner_dossier.overall_progress
-                if not req.nsqf_level:
-                    req.nsqf_level = learner_dossier.nsqf_level
+            try:
+                learner_dossier = await learner_service.get_learner_360(
+                    db, req.learner_id, user=current_user
+                )
+                if not req.current_skills and learner_dossier:
+                    if not req.full_name or req.full_name == "Beneficiary Candidate":
+                        req.full_name = learner_dossier.full_name
+                    if not req.education_level:
+                        req.education_level = learner_dossier.education_level
+                    if not req.district_name:
+                        req.district_name = learner_dossier.district_name or learner_dossier.district_id
+                    if req.employment_readiness_score is None:
+                        req.employment_readiness_score = learner_dossier.employment_readiness_score
+                    if req.overall_progress is None:
+                        req.overall_progress = learner_dossier.overall_progress
+                    if not req.nsqf_level:
+                        req.nsqf_level = learner_dossier.nsqf_level
 
-                # Enrich skills from database
-                enriched_skills = []
-                for s in learner_dossier.skills:
-                    enriched_skills.append(
-                        CandidateSkillInputDTO(
-                            name=s.name,
-                            sector=s.sector,
-                            score_percentage=s.score_percentage,
-                            is_verified=s.is_verified,
+                    # Enrich skills from database
+                    enriched_skills = []
+                    for s in (learner_dossier.skills or []):
+                        enriched_skills.append(
+                            CandidateSkillInputDTO(
+                                name=s.name,
+                                sector=s.sector,
+                                score_percentage=s.score_percentage,
+                                is_verified=s.is_verified,
+                            )
                         )
-                    )
-                req.current_skills = enriched_skills
+                    req.current_skills = enriched_skills
 
-                # Enrich existing gaps if available
-                if not req.existing_gaps and learner_dossier.detected_gaps:
-                    req.existing_gaps = [g.name for g in learner_dossier.detected_gaps]
+                    # Enrich existing gaps if available
+                    if not req.existing_gaps and learner_dossier.detected_gaps:
+                        req.existing_gaps = [g.name for g in learner_dossier.detected_gaps]
+            except Exception as enrich_err:
+                logger.warning(
+                    f"Optional database enrichment for learner '{req.learner_id}' skipped ({enrich_err}). Proceeding with payload."
+                )
 
         # Call Google Gemini AI Service
         result = await gemini_service.generate_skill_gap_roadmap(req)

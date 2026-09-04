@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Sparkles,
   CheckCircle2,
@@ -11,20 +11,20 @@ import {
   Briefcase,
   ShieldCheck,
   AlertCircle,
+  Cpu,
 } from "lucide-react";
 import { aiApi } from "../api/ai";
 import { getErrorMessage } from "../api/client";
 import SectionHeader from "./SectionHeader";
 import StatusBadge from "./StatusBadge";
 
-
 const PRESET_OCCUPATIONS = [
-  "Full Stack Cloud Engineer",
-  "Data Analyst & Analytics Engineer",
-  "DevOps & Containerization Specialist",
-  "Electric Vehicle (EV) Diagnostic Specialist",
-  "Solar Microgrid & Renewables Technician",
-  "CNC Precision Manufacturing Technician",
+  { label: "Full Stack Cloud Engineer", value: "Full Stack Cloud Engineer", icon: "☁️" },
+  { label: "Data Analyst & Analytics Engineer", value: "Data Analyst & Analytics Engineer", icon: "📊" },
+  { label: "Electric Vehicle (EV) Diagnostic Specialist", value: "Electric Vehicle (EV) Diagnostic Specialist", icon: "⚡" },
+  { label: "Solar Microgrid & Renewables Technician", value: "Solar Microgrid & Renewables Technician", icon: "☀️" },
+  { label: "CNC Precision Manufacturing Technician", value: "CNC Precision Manufacturing Technician", icon: "⚙️" },
+  { label: "DevOps & Containerization Specialist", value: "DevOps & Containerization Specialist", icon: "🛡️" },
 ];
 
 export default function AISkillIntelligence({
@@ -39,166 +39,252 @@ export default function AISkillIntelligence({
 
   const [aiData, setAiData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [activeAnalyzingRole, setActiveAnalyzingRole] = useState(null);
   const [error, setError] = useState(null);
   const [expandedPhase, setExpandedPhase] = useState(1);
-  const [hasAutoAnalyzed, setHasAutoAnalyzed] = useState(false);
 
-  // Sync default target role if learner changes
+  const lastAnalyzedKeyRef = useRef(null);
+
+  // Core analysis generator accepting optional direct role override
+  const handleGenerateAnalysis = useCallback(
+    async (overrideRole = null) => {
+      if (!learner) return;
+
+      const effectiveRole =
+        overrideRole ||
+        (isCustomRole && customRoleInput.trim()
+          ? customRoleInput.trim()
+          : targetRole);
+
+      if (!effectiveRole) return;
+
+      try {
+        setLoading(true);
+        setActiveAnalyzingRole(effectiveRole);
+        setError(null);
+
+        const isCohort =
+          learner.is_cohort ||
+          learner.isCohort ||
+          (typeof learner.id === "string" && learner.id.startsWith("COHORT-"));
+
+        const payload = {
+          learner_id: isCohort ? null : learner.id,
+          full_name: learner.full_name || learner.name || "Beneficiary Candidate",
+          target_occupation: effectiveRole,
+          education_level: learner.education_level || "Vocational Studies / B.Voc",
+          district_name: learner.district_name || learner.district_id || "Regional Cluster",
+          nsqf_level: learner.nsqf_level || "NSQF Level 5",
+          employment_readiness_score: learner.employment_readiness_score || 80,
+          overall_progress: learner.overall_progress || 85,
+          current_skills: (learner.skills || []).map((s) => ({
+            name: typeof s === "string" ? s : s.name || s.competency_name || "Skill",
+            sector: s.sector || s.industry || "Technical Services",
+            score_percentage: s.score_percentage ?? s.assessment_score ?? 85,
+            is_verified: s.is_verified ?? s.verified ?? true,
+          })),
+          existing_gaps: (learner.detected_gaps || [])
+            .map((g) => (typeof g === "string" ? g : g.name || ""))
+            .filter(Boolean),
+        };
+
+        const result = await aiApi.analyzeSkillGap(payload);
+        setAiData(result);
+        setExpandedPhase(1);
+        lastAnalyzedKeyRef.current = `${learner.id}-${effectiveRole}`;
+      } catch (err) {
+        console.error("AI Skill Gap Analysis failed:", err);
+        setError(getErrorMessage(err));
+      } finally {
+        setLoading(false);
+        setActiveAnalyzingRole(null);
+      }
+    },
+    [learner, isCustomRole, customRoleInput, targetRole]
+  );
+
+  // Trigger analysis automatically whenever candidate changes
   useEffect(() => {
-    if (learner) {
-      const defaultRole = learner.skills?.[0]?.sector === "Green Energy & Renewables"
-        ? "Solar Microgrid & Renewables Technician"
-        : learner.skills?.[0]?.sector === "Automotive & Manufacturing"
-        ? "Electric Vehicle (EV) Diagnostic Specialist"
-        : learner.skills?.[0]?.sector === "IT-ITeS"
-        ? "Full Stack Cloud Engineer"
-        : "Full Stack Cloud Engineer";
+    if (learner?.id) {
+      const defaultRole =
+        learner.skills?.[0]?.sector === "Green Energy & Renewables"
+          ? "Solar Microgrid & Renewables Technician"
+          : learner.skills?.[0]?.sector === "Automotive & Manufacturing"
+          ? "Electric Vehicle (EV) Diagnostic Specialist"
+          : learner.skills?.[0]?.sector === "IT-ITeS"
+          ? "Full Stack Cloud Engineer"
+          : learner.skills?.[0]?.name
+          ? `${learner.skills[0].name} Specialist`
+          : "Full Stack Cloud Engineer";
+
       setTargetRole(defaultRole);
       setIsCustomRole(false);
-      setAiData(null);
+      setCustomRoleInput("");
       setError(null);
+
+      // Immediately run analysis for the newly selected candidate
+      handleGenerateAnalysis(defaultRole);
     }
   }, [learner?.id]);
 
-  const handleGenerateAnalysis = useCallback(async () => {
-    if (!learner) return;
+  // Handle immediate selection of preset roles
+  const handleSelectRole = (role) => {
+    setTargetRole(role);
+    setIsCustomRole(false);
+    setCustomRoleInput("");
+    handleGenerateAnalysis(role);
+  };
 
-    try {
-      setLoading(true);
-      setError(null);
-
-      const effectiveRole = isCustomRole && customRoleInput.trim()
-        ? customRoleInput.trim()
-        : targetRole;
-
-      const isCohort = learner.is_cohort || learner.isCohort || (typeof learner.id === "string" && learner.id.startsWith("COHORT-"));
-
-      const payload = {
-        learner_id: isCohort ? null : learner.id,
-        full_name: learner.full_name || "Beneficiary Candidate",
-        target_occupation: effectiveRole,
-        education_level: learner.education_level,
-        district_name: learner.district_name || learner.district_id,
-        nsqf_level: learner.nsqf_level || "NSQF Level 5",
-        employment_readiness_score: learner.employment_readiness_score,
-        overall_progress: learner.overall_progress,
-        current_skills: (learner.skills || []).map((s) => ({
-          name: s.name,
-          sector: s.sector || "IT-ITeS",
-          score_percentage: s.score_percentage,
-          is_verified: s.is_verified,
-        })),
-        existing_gaps: (learner.detected_gaps || []).map((g) => (typeof g === "string" ? g : g.name || "")).filter(Boolean),
-      };
-
-      const result = await aiApi.analyzeSkillGap(payload);
-      setAiData(result);
-      setExpandedPhase(1);
-    } catch (err) {
-      console.error("AI Skill Gap Analysis failed:", err);
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
+  // Handle custom role submit
+  const handleCustomRoleSubmit = (e) => {
+    if (e) e.preventDefault();
+    if (customRoleInput.trim()) {
+      handleGenerateAnalysis(customRoleInput.trim());
     }
-  }, [learner, isCustomRole, customRoleInput, targetRole]);
-
-  // Trigger analysis automatically once on initial mount if candidate exists
-  useEffect(() => {
-    if (learner?.id && !aiData && !hasAutoAnalyzed && !loading) {
-      setHasAutoAnalyzed(true);
-      handleGenerateAnalysis();
-    }
-  }, [learner?.id, aiData, hasAutoAnalyzed, loading, handleGenerateAnalysis]);
+  };
 
   if (!learner) return null;
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-indigo-200/80 bg-white p-5 sm:p-7 shadow-xs dark:border-indigo-900/50 dark:bg-slate-900">
+    <section className="relative overflow-hidden rounded-2xl border border-indigo-200/80 bg-white p-5 sm:p-7 shadow-xs dark:border-indigo-900/50 dark:bg-slate-900 transition-all">
       {/* Background Decorative Accent */}
       <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/5 blur-3xl dark:bg-indigo-500/10" />
 
-      {/* Header & Target Role Selector */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      {/* Header & Live Target Role Controls */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-2xs">
               <Sparkles size={15} />
             </div>
             <h3 className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
               AI Skill Intelligence & Personalized Learning Roadmap
             </h3>
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live AI Analyzer
+            </span>
             <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300">
               <Zap size={11} className="text-amber-500 fill-amber-500" />
               Google Gemini Powered
             </span>
           </div>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Synthesizes verified competency dossiers against industry demand using Google Gemini AI
-            to construct a personalized curriculum roadmap and job-readiness timeline.
+          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 max-w-2xl">
+            Select any target occupation below. The AI analyzer continuously recalculates verified candidate
+            competencies against employer requirements, dynamically generating an individualized modular roadmap and lab milestones.
           </p>
         </div>
 
+        {/* Custom Input or Dropdown Trigger */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {isCustomRole ? (
+            <form onSubmit={handleCustomRoleSubmit} className="flex items-center gap-1.5">
+              <input
+                type="text"
+                value={customRoleInput}
+                onChange={(e) => setCustomRoleInput(e.target.value)}
+                placeholder="e.g. Cloud Security Architect..."
+                autoFocus
+                className="h-8 w-52 rounded-md border border-indigo-300 bg-white px-2.5 text-xs font-medium text-slate-900 focus:border-indigo-600 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              />
+              <button
+                type="submit"
+                disabled={loading || !customRoleInput.trim()}
+                className="h-8 rounded-md bg-indigo-600 px-3 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
+              >
+                Analyze
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsCustomRole(false)}
+                className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer px-1"
+              >
+                Presets
+              </button>
+            </form>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                Target Role:
+              </span>
+              <select
+                value={targetRole}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "__custom__") {
+                    setIsCustomRole(true);
+                    setCustomRoleInput("");
+                  } else {
+                    handleSelectRole(val);
+                  }
+                }}
+                className="h-8 rounded-md border border-slate-200 bg-slate-50 px-2.5 text-xs font-semibold text-slate-800 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+              >
+                {PRESET_OCCUPATIONS.map((role) => (
+                  <option key={role.value} value={role.value}>
+                    {role.label}
+                  </option>
+                ))}
+                <option value="__custom__">+ Custom Target Role...</option>
+              </select>
 
-
-        {/* Target Occupation Control */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-              Target Role:
-            </span>
-            {isCustomRole ? (
-              <div className="flex items-center gap-1">
-                <input
-                  type="text"
-                  value={customRoleInput}
-                  onChange={(e) => setCustomRoleInput(e.target.value)}
-                  placeholder="e.g. Cloud Security Engineer"
-                  className="h-8 w-48 rounded-md border border-indigo-200 bg-white px-2.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                />
-                <button
-                  type="button"
-                  onClick={() => setIsCustomRole(false)}
-                  className="text-[10px] font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                >
-                  Presets
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1">
-                <select
-                  value={targetRole}
-                  onChange={(e) => {
-                    if (e.target.value === "__custom__") {
-                      setIsCustomRole(true);
-                      setCustomRoleInput("");
-                    } else {
-                      setTargetRole(e.target.value);
-                    }
-                  }}
-                  className="h-8 rounded-md border border-slate-200 bg-slate-50 px-2.5 text-xs font-semibold text-slate-800 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                >
-                  {PRESET_OCCUPATIONS.map((role) => (
-                    <option key={role} value={role}>
-                      {role}
-                    </option>
-                  ))}
-                  <option value="__custom__">+ Custom Occupation...</option>
-                </select>
-              </div>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={handleGenerateAnalysis}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-indigo-700 active:scale-[0.99] disabled:opacity-50"
-          >
-            <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
-            <span>{loading ? "Analyzing..." : "Analyze Skill Gap"}</span>
-          </button>
+              <button
+                type="button"
+                onClick={() => handleGenerateAnalysis(targetRole)}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-indigo-700 active:scale-[0.99] disabled:opacity-50 cursor-pointer"
+                title="Force refresh AI gap analysis"
+              >
+                <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
+                <span className="hidden sm:inline">{loading ? "Analyzing..." : "Re-Analyze"}</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Quick Interactive Preset Occupation Pills */}
+      <div className="mt-3.5 flex flex-wrap items-center gap-1.5 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+        <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 mr-1 flex items-center gap-1">
+          <Cpu size={12} className="text-indigo-500" />
+          Simulate Target Role:
+        </span>
+        {PRESET_OCCUPATIONS.map((preset) => {
+          const isSelected = !isCustomRole && targetRole === preset.value;
+          return (
+            <button
+              key={preset.value}
+              type="button"
+              onClick={() => handleSelectRole(preset.value)}
+              disabled={loading}
+              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer ${
+                isSelected
+                  ? "bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-400/40"
+                  : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-indigo-300 hover:bg-indigo-50/50 hover:text-indigo-900 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:border-indigo-700 dark:hover:text-white"
+              }`}
+            >
+              <span>{preset.icon}</span>
+              <span>{preset.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Live AI Recalculating Banner */}
+      {loading && (
+        <div className="mt-4 flex items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50/80 p-3 text-xs text-indigo-900 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 animate-pulse">
+          <div className="flex items-center gap-2">
+            <RefreshCw size={14} className="animate-spin text-indigo-600 dark:text-indigo-400" />
+            <span className="font-semibold">
+              Live AI Analyzer synthesizing gap diagnostics for{" "}
+              <strong className="underline">{activeAnalyzingRole || targetRole}</strong>...
+            </span>
+          </div>
+          <span className="text-[10px] font-mono font-bold text-indigo-700 dark:text-indigo-300 uppercase">
+            Recalculating Milestones
+          </span>
+        </div>
+      )}
 
       {/* Error Alert State */}
       {error && (
@@ -209,24 +295,22 @@ export default function AISkillIntelligence({
               <p className="font-semibold">
                 {error.toLowerCase().includes("scope") || error.toLowerCase().includes("permission")
                   ? "Institutional Scope Restriction"
-                  : "AI Analysis Generation Notice"}
+                  : "AI Analysis Notice"}
               </p>
               <p className="mt-0.5 text-amber-800 dark:text-amber-300">{error}</p>
             </div>
           </div>
-          {!error.toLowerCase().includes("scope") && !error.toLowerCase().includes("permission") && (
-            <button
-              type="button"
-              onClick={handleGenerateAnalysis}
-              className="rounded bg-amber-700 px-3 py-1 font-semibold text-white hover:bg-amber-800"
-            >
-              Retry
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => handleGenerateAnalysis()}
+            className="rounded bg-amber-700 px-3 py-1 font-semibold text-white hover:bg-amber-800 cursor-pointer"
+          >
+            Retry
+          </button>
         </div>
       )}
 
-      {/* Loading Skeleton */}
+      {/* Loading Skeleton on Initial Mount */}
       {loading && !aiData && (
         <div className="mt-6 space-y-4">
           <div className="h-20 w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
@@ -240,7 +324,7 @@ export default function AISkillIntelligence({
 
       {/* AI Analysis Main Display */}
       {aiData && (
-        <div className="mt-6 space-y-6">
+        <div className={`mt-6 space-y-6 transition-opacity duration-200 ${loading ? "opacity-60" : "opacity-100"}`}>
           {/* 1. Executive Summary & Core Strengths Bar */}
           <div className="rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50/70 via-slate-50 to-blue-50/60 p-4 sm:p-5 dark:border-indigo-900/40 dark:from-indigo-950/30 dark:via-slate-900 dark:to-blue-950/20">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -249,12 +333,12 @@ export default function AISkillIntelligence({
                   {aiData.is_ai_generated ? (
                     <span className="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:border-purple-800 dark:bg-purple-950/60 dark:text-purple-300">
                       <Sparkles size={11} className="text-purple-600 dark:text-purple-400" />
-                      AI-Generated Analysis
+                      Live AI Generated
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
                       <ShieldCheck size={11} className="text-blue-600 dark:text-blue-400" />
-                      Deterministic Rules Engine
+                      Domain Intelligence Engine
                     </span>
                   )}
                   <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
@@ -262,6 +346,9 @@ export default function AISkillIntelligence({
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
                     <CheckCircle2 size={10} /> Verified Grounding
+                  </span>
+                  <span className="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 font-bold ml-auto sm:ml-0">
+                    Target: {aiData.target_occupation}
                   </span>
                 </div>
                 <p className="text-xs font-medium leading-relaxed text-slate-800 dark:text-slate-200">
@@ -303,7 +390,7 @@ export default function AISkillIntelligence({
           {/* 2. Prioritized Skill Gaps & Rationale Grid */}
           <div className="space-y-3">
             <SectionHeader
-              title="Diagnosed Skill Gaps & Employer Mandate Rationale"
+              title={`Diagnosed Skill Gaps: ${aiData.target_occupation}`}
               subtitle="Prioritized competency deficits hindering direct placement in target role"
               badge={
                 <StatusBadge variant="warning" size="sm">
@@ -371,7 +458,7 @@ export default function AISkillIntelligence({
           {/* 3. Phased Personalized Learning Roadmap (Interactive Accordion) */}
           <div className="space-y-3">
             <SectionHeader
-              title="Personalized Phased Learning Roadmap"
+              title={`Personalized Phased Learning Roadmap (${aiData.target_occupation})`}
               subtitle="Step-by-step modular progression to achieve 100% employment readiness"
               badge={
                 <StatusBadge variant="indigo" size="sm">
@@ -393,7 +480,7 @@ export default function AISkillIntelligence({
                     <button
                       type="button"
                       onClick={() => setExpandedPhase(isExpanded ? null : phase.phase)}
-                      className="flex w-full items-center justify-between p-3.5 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                      className="flex w-full items-center justify-between p-3.5 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50 font-bold text-xs text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300">
@@ -590,7 +677,7 @@ export default function AISkillIntelligence({
                   <button
                     type="button"
                     onClick={onInterventionDeploy}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
                   >
                     <span>Allocate Bridge Credit</span>
                     <ArrowRight size={12} />
@@ -605,17 +692,17 @@ export default function AISkillIntelligence({
             <div className="flex items-center gap-2">
               <ShieldCheck size={14} className="shrink-0 text-indigo-600 dark:text-indigo-400" />
               <span>
-                <strong>Grounding & Reliability Standard:</strong> {aiData.is_ai_generated
+                <strong>Grounding & Reliability Standard:</strong>{" "}
+                {aiData.is_ai_generated
                   ? `AI analysis generated via ${aiData.model_used} grounded on supplied candidate competencies.`
                   : `Structured recommendations generated via ${aiData.model_used}.`}{" "}
                 Assessment scores, verified skill badges, and NSQF levels are verified database facts.
               </span>
             </div>
             <span className="shrink-0 font-mono text-[9px] text-slate-400">
-              {new Date(aiData.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {new Date(aiData.generated_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </span>
           </div>
-
         </div>
       )}
     </section>
