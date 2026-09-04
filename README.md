@@ -471,7 +471,7 @@ These outcomes are aspirational goals the platform **is designed to** support â€
 | Anand Maurya | Web Developer |
 | Ritesh Kumar Patel | Vibe Coder |
 | Aaliya Fatima | Ideation Lead |
-| Ayushi Baliyan | Ideation Management |
+| Amlan Chakrabarty | Ideation Management |
 
 **Team:** Vedaris
 
