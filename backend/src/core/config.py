@@ -62,13 +62,20 @@ class Settings(BaseSettings):
     @classmethod
     def assemble_db_connection(cls, v: Optional[str], info) -> str:
         if isinstance(v, str) and v.strip():
+            # Sanitize accidental quotes, whitespace, or copy-paste prefixes
+            cleaned = v.strip().strip("'\"").strip()
+            if cleaned.startswith("DATABASE_URL="):
+                cleaned = cleaned.split("DATABASE_URL=", 1)[1].strip().strip("'\"").strip()
+            if cleaned.startswith("psql "):
+                cleaned = cleaned.replace("psql ", "", 1).strip().strip("'\"").strip()
+
             # Cloud platforms (like Render or Heroku) supply postgres:// or postgresql://
             # SQLAlchemy asyncpg requires postgresql+asyncpg://
-            if v.startswith("postgres://"):
-                return v.replace("postgres://", "postgresql+asyncpg://", 1)
-            elif v.startswith("postgresql://") and not v.startswith("postgresql+asyncpg://"):
-                return v.replace("postgresql://", "postgresql+asyncpg://", 1)
-            return v
+            if cleaned.startswith("postgres://"):
+                return cleaned.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif cleaned.startswith("postgresql://") and not cleaned.startswith("postgresql+asyncpg://"):
+                return cleaned.replace("postgresql://", "postgresql+asyncpg://", 1)
+            return cleaned
         values = info.data
         user = values.get("POSTGRES_USER", "kaushal_admin")
         password = values.get("POSTGRES_PASSWORD", "kaushal_secret")

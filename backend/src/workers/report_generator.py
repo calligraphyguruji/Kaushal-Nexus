@@ -28,7 +28,12 @@ logger = get_task_logger(__name__)
 
 # Persistent storage directory for generated artifacts
 REPORTS_DIR = Path(__file__).resolve().parent.parent.parent / "generated_reports"
-REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+try:
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+except (PermissionError, OSError):
+    import tempfile
+    REPORTS_DIR = Path(tempfile.gettempdir()) / "generated_reports"
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _generate_pdf_artifact(file_path: Path, metadata: Dict[str, Any]) -> None:

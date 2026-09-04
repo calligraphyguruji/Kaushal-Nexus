@@ -51,8 +51,10 @@ COPY --from=builder --chown=appuser:appgroup /root/.local /home/appuser/.local
 # Copy application source code and migrations
 COPY --chown=appuser:appgroup . .
 
-# Grant execute permissions to entrypoint script
-RUN chmod +x /app/entrypoint.sh
+# Grant execute permissions to entrypoint script and pre-create storage directories
+RUN chmod +x /app/entrypoint.sh && \
+    mkdir -p /app/generated_reports && \
+    chown -R appuser:appgroup /app
 
 # Switch to non-root execution context
 USER appuser
