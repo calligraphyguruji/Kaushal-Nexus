@@ -113,6 +113,7 @@ export default function LearnerIntelligence() {
   // Status & Loading States
   const [listLoading, setListLoading] = useState(true);
   const [dossierLoading, setDossierLoading] = useState(Boolean(initialTargetId));
+  const [pdfExporting, setPdfExporting] = useState(false);
   const [error, setError] = useState(null);
   const [actionSuccessMsg, setActionSuccessMsg] = useState(null);
 
@@ -534,18 +535,27 @@ export default function LearnerIntelligence() {
 
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
                 if (currentLearner) {
-                  exportLearnerDossierPDF(currentLearner, placements, retentionAudit);
-                  setActionSuccessMsg(`✅ Downloaded Candidate 360° Dossier for ${currentLearner.full_name} (${currentLearner.id}).`);
+                  try {
+                    setPdfExporting(true);
+                    exportLearnerDossierPDF(currentLearner, placements, retentionAudit);
+                    const candidateName = currentLearner.full_name || currentLearner.name || "Candidate";
+                    setActionSuccessMsg(`✅ Downloaded Candidate 360° Dossier for ${candidateName} (${currentLearner.id}).`);
+                  } catch (err) {
+                    console.error("PDF export error:", err);
+                    setError("Error exporting PDF dossier: " + (err?.message || "Unknown error"));
+                  } finally {
+                    setPdfExporting(false);
+                  }
                 }
               }}
-              disabled={!currentLearner}
+              disabled={!currentLearner || pdfExporting}
               className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
               title="Download Candidate 360 Dossier & NCVET Certificate PDF"
             >
-              <Download size={13} className="text-sky-400" />
-              <span>Download Dossier (PDF)</span>
+              <Download size={13} className={pdfExporting ? "animate-bounce text-sky-400" : "text-sky-400"} />
+              <span>{pdfExporting ? "Generating PDF..." : "Download Dossier (PDF)"}</span>
             </button>
 
             {permissions.canVerifyCredential && (
@@ -634,8 +644,13 @@ export default function LearnerIntelligence() {
             <button
               type="button"
               onClick={() => {
-                exportLearnersCSV(learnersList, debouncedSearch);
-                setActionSuccessMsg(`✅ Exported ${learnersList.length} candidate records to CSV.`);
+                try {
+                  exportLearnersCSV(learnersList, debouncedSearch);
+                  setActionSuccessMsg(`✅ Exported ${learnersList.length} candidate records to CSV.`);
+                } catch (err) {
+                  console.error("CSV Export failed:", err);
+                  setError("Failed to export candidates CSV: " + (err?.message || "Unknown error"));
+                }
               }}
               disabled={learnersList.length === 0}
               className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#070d18] px-2.5 py-1.5 font-mono text-xs font-semibold text-slate-300 hover:border-slate-700 hover:text-white disabled:opacity-50 cursor-pointer"

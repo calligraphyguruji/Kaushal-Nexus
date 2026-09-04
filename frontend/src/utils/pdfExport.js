@@ -197,13 +197,13 @@ function applyHeader(doc, title, subtitle, reportId = "") {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(...COLORS.primary);
-  doc.text(title.toUpperCase(), 14, 46);
+  doc.text(sanitizePDFText(title || "KaushalNexus Executive Report").toUpperCase(), 14, 46);
 
   if (subtitle) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(...COLORS.slateMuted);
-    doc.text(subtitle, 14, 51);
+    doc.text(sanitizePDFText(subtitle), 14, 51);
   }
 }
 
@@ -554,7 +554,9 @@ export function exportDistrictDossierPDF(district) {
 
   applyFooter(doc);
 
-  const filename = `KaushalNexus_District_Dossier_${district.name.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.pdf`;
+  const distName = (district.name || district.district_name || district.district_id || "District").trim();
+  const safeDistName = distName.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "") || "District";
+  const filename = `KaushalNexus_District_Dossier_${safeDistName}_${new Date().toISOString().split("T")[0]}.pdf`;
   doc.save(filename);
   return true;
 }
@@ -565,155 +567,207 @@ export function exportDistrictDossierPDF(district) {
 export function exportLearnerDossierPDF(learner, placements = [], retentionAudit = null) {
   if (!learner) return false;
 
-  const doc = createKaushalNexusPDF({ format: "a4", unit: "mm" });
-  const reportId = `KN-DOSSIER-${learner.id}`;
+  try {
+    const doc = createKaushalNexusPDF({ format: "a4", unit: "mm" });
+    const candidateName = (learner.full_name || learner.name || `Candidate_${learner.id || "KN"}`).trim();
+    const candidateId = String(learner.id || "KN-2026").trim();
+    const reportId = `KN-DOSSIER-${candidateId.replace(/[^a-zA-Z0-9_-]/g, "") || "2026"}`;
 
-  applyHeader(
-    doc,
-    `Candidate 360 Degree Dossier: ${learner.full_name}`,
-    `Candidate ID: ${learner.id} | NSQF Level: ${learner.nsqf_level || "Level 5"} | District: ${learner.district_name || learner.district_id}`,
-    reportId
-  );
+    const nsqfLevel = learner.nsqf_level || "NSQF Level 5";
+    const districtText = learner.district_name || learner.district_id || learner.region || learner.state || "National Scope";
 
-  let currentY = 60;
+    applyHeader(
+      doc,
+      `Candidate 360 Degree Dossier: ${candidateName}`,
+      `Candidate ID: ${candidateId} | NSQF Level: ${nsqfLevel} | District: ${districtText}`,
+      reportId
+    );
 
-  // Masked Identification (Aadhaar & UAN)
-  const activePlacement = placements && placements.length > 0 ? placements[0] : null;
-  const rawId = String(learner.id || "");
-  const maskedAadhaar = `XXXX XXXX ${rawId.slice(-4) || "8841"}`;
+    let currentY = 60;
 
-  // KPI Metrics (starting CTC formatted cleanly as "Rs. 14.5 LPA" or similar numeric)
-  const startingCTC = activePlacement?.starting_ctc_lpa ? `Rs. ${activePlacement.starting_ctc_lpa} LPA` : "Rs. 4.5 LPA";
+    // Masked Identification (Aadhaar & UAN)
+    const activePlacement = Array.isArray(placements) && placements.length > 0 ? placements[0] : null;
+    const rawId = String(learner.aadhaar_masked || learner.aadhaar || candidateId || "8841");
+    const maskedAadhaar = rawId.includes("X")
+      ? rawId
+      : `XXXX XXXX ${rawId.replace(/[^0-9]/g, "").slice(-4) || "8841"}`;
 
-  const cards = [
-    {
-      title: "Readiness Index",
-      value: `${learner.employment_readiness_score || 85}%`,
-      subtitle: "Multi-Signal Evaluated",
-      color: COLORS.brandBlue,
-    },
-    {
-      title: "Current Status",
-      value: learner.status || "Placed",
-      subtitle: activePlacement?.employer_name || "Verified Placement",
-      color: COLORS.emerald,
-    },
-    {
-      title: "NCVET Credential",
-      value: learner.is_credential_verified ? "VERIFIED" : "PENDING",
-      subtitle: learner.ncvet_credential_id || "NCVET-2026-AUTH",
-      color: COLORS.brandDarkBlue,
-    },
-    {
-      title: "Starting CTC",
-      value: startingCTC,
-      subtitle: "EPFO Sandbox Remitted",
-      color: COLORS.primary,
-    },
-  ];
-  currentY = renderKPICards(doc, currentY, cards);
+    // KPI Metrics (starting CTC formatted cleanly as "Rs. 14.5 LPA" or similar numeric)
+    const startingCTC = activePlacement?.starting_ctc_lpa
+      ? `Rs. ${activePlacement.starting_ctc_lpa} LPA`
+      : learner.starting_ctc_lpa
+      ? `Rs. ${learner.starting_ctc_lpa} LPA`
+      : "Rs. 4.5 LPA";
 
-  // Section 1: Candidate dossier details
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(...COLORS.primary);
-  doc.text("1. CANDIDATE IDENTITY & TRAINING ACCREDITATION", 14, currentY + 2);
-  currentY += 4;
+    const isCredVerified = Boolean(learner.is_credential_verified ?? learner.ncvet_credential_id);
 
-  const candidateTable = [
-    ["Candidate Full Name", learner.full_name, "Candidate System ID", learner.id],
-    ["Aadhaar Identity Verification", `${maskedAadhaar} (Simulated UIDAI)`, "NSQF Qualification Level", learner.nsqf_level || "NSQF Level 5"],
-    ["Training Center", learner.training_info?.training_center_name || "PMKK Center", "Curriculum Progress", `${learner.training_info?.completion_percentage || 100}% Coursework`],
-    ["NCVET Credential ID", learner.ncvet_credential_id || "NCVET-2026-P9812", "National Skills Registry (NSR)", learner.is_credential_verified ? "Authenticated & Signed" : "Under Evaluation"],
-  ];
+    const cards = [
+      {
+        title: "Readiness Index",
+        value: `${learner.employment_readiness_score || 85}%`,
+        subtitle: "Multi-Signal Evaluated",
+        color: COLORS.brandBlue,
+      },
+      {
+        title: "Current Status",
+        value: learner.status || (activePlacement ? "Placed" : "Enrolled"),
+        subtitle: activePlacement?.employer_name || (learner.status === "Placed" ? "Verified Placement" : "In Progress"),
+        color: COLORS.emerald,
+      },
+      {
+        title: "NCVET Credential",
+        value: isCredVerified ? "VERIFIED" : "PENDING",
+        subtitle: learner.ncvet_credential_id || "NCVET-2026-AUTH",
+        color: COLORS.brandDarkBlue,
+      },
+      {
+        title: "Starting CTC",
+        value: startingCTC,
+        subtitle: activePlacement ? "EPFO Sandbox Remitted" : "Projected Remittance",
+        color: COLORS.primary,
+      },
+    ];
+    currentY = renderKPICards(doc, currentY, cards);
 
-  renderAutoTable(doc, {
-    startY: currentY,
-    head: [["Field", "Information", "Verification Element", "Status / Identifier"]],
-    body: candidateTable,
-    theme: "grid",
-    headStyles: { fillColor: COLORS.primary, textColor: COLORS.white, fontSize: 7.5, fontStyle: "bold" },
-    bodyStyles: { fontSize: 7, textColor: COLORS.primary },
-    alternateRowStyles: { fillColor: [248, 250, 252] },
-    margin: { left: 14, right: 14 },
-  });
+    // Section 1: Candidate dossier details
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...COLORS.primary);
+    doc.text("1. CANDIDATE IDENTITY & TRAINING ACCREDITATION", 14, currentY + 2);
+    currentY += 4;
 
-  currentY = doc.lastAutoTable.finalY + 8;
+    const trainingCenter =
+      learner.training_info?.training_center_name ||
+      learner.training_center_name ||
+      "Kaushal Center of Excellence";
+    const curriculumProgress =
+      learner.training_info?.completion_percentage ??
+      learner.training_info?.overall_progress ??
+      learner.overall_progress ??
+      100;
+    const nsrStatus = isCredVerified ? "Authenticated & Signed" : "Under Evaluation";
 
-  // Section 2: Verified Competencies
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(...COLORS.primary);
-  doc.text("2. VERIFIED COMPETENCIES & ASSESSMENT SCORES", 14, currentY);
-  currentY += 2;
+    const candidateTable = [
+      ["Candidate Full Name", candidateName, "Candidate System ID", candidateId],
+      ["Aadhaar Identity Verification", `${maskedAadhaar} (Simulated UIDAI)`, "NSQF Qualification Level", nsqfLevel],
+      ["Training Center", trainingCenter, "Curriculum Progress", `${curriculumProgress}% Coursework`],
+      ["NCVET Credential ID", learner.ncvet_credential_id || "NCVET-2026-AUTH", "National Skills Registry (NSR)", nsrStatus],
+    ];
 
-  const skillsRows = (learner.skills || []).map((s) => [
-    s.name || s,
-    s.sector || "Technical Services",
-    s.verified ? "100% Certified" : "Verified",
-    `${s.assessment_score || 88}%`,
-    s.verified ? "NCVET Practical Lab Exam Passed" : "Coursework Assessment",
-  ]);
+    renderAutoTable(doc, {
+      startY: currentY,
+      head: [["Field", "Information", "Verification Element", "Status / Identifier"]],
+      body: candidateTable,
+      theme: "grid",
+      headStyles: { fillColor: COLORS.primary, textColor: COLORS.white, fontSize: 7.5, fontStyle: "bold" },
+      bodyStyles: { fontSize: 7, textColor: COLORS.primary },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      margin: { left: 14, right: 14 },
+    });
 
-  renderAutoTable(doc, {
-    startY: currentY,
-    head: [["Competency / Skill", "Industry Sector", "Verification Mode", "Score", "Assessment Evidence"]],
-    body:
-      skillsRows.length > 0
-        ? skillsRows
-        : [
-            ["Python Backend Development", "IT-ITeS", "NCVET Lab Passed", "92%", "Capstone Project Evaluated"],
-            ["SQL Database Design", "IT-ITeS", "NCVET Lab Passed", "88%", "Practical Lab Exam Passed"],
-            ["Git Version Control & CI/CD", "IT-ITeS", "Verified", "85%", "Automated Assessment"],
-          ],
-    theme: "grid",
-    headStyles: { fillColor: COLORS.brandBlue, textColor: COLORS.white, fontSize: 7.5, fontStyle: "bold" },
-    bodyStyles: { fontSize: 7, textColor: COLORS.primary },
-    alternateRowStyles: { fillColor: [248, 250, 252] },
-    margin: { left: 14, right: 14 },
-  });
+    currentY = doc.lastAutoTable.finalY + 8;
 
-  currentY = doc.lastAutoTable.finalY + 8;
+    // Section 2: Verified Competencies
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...COLORS.primary);
+    doc.text("2. VERIFIED COMPETENCIES & ASSESSMENT SCORES", 14, currentY);
+    currentY += 2;
 
-  // Section 3: Longitudinal Placement & Retention Checkpoints
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(...COLORS.primary);
-  doc.text("3. LONGITUDINAL EMPLOYMENT & 180-DAY RETENTION AUDIT", 14, currentY);
-  currentY += 2;
+    const skillsList = Array.isArray(learner.skills) ? learner.skills : [];
+    const skillsRows = skillsList.map((s) => {
+      if (typeof s === "string") {
+        return [s, "Technical Services", "Verified", "85%", "Coursework Assessment Passed"];
+      }
+      const name = s.name || s.competency_name || s.code || "Vocational Skill";
+      const sector = s.sector || s.industry || "Technical Services";
+      const isVerified = s.is_verified ?? s.verified ?? true;
+      const verificationMode = isVerified
+        ? (s.verified_by ? "NCVET Certified" : "Verified")
+        : "Coursework Assessment";
+      const score = s.score_percentage ?? s.assessment_score ?? s.score ?? 88;
+      const evidence = isVerified ? "NCVET Practical Lab Exam Passed" : "Coursework Assessment";
+      return [name, sector, verificationMode, `${score}%`, evidence];
+    });
 
-  const checkpointRows = (retentionAudit?.checkpoints || []).map((cp) => [
-    cp.checkpoint_type,
-    cp.is_active_at_checkpoint ? "Active & Retained" : "Inactive",
-    cp.current_ctc_lpa ? `Rs. ${cp.current_ctc_lpa} LPA` : "Rs. 4.5 LPA",
-    `+${cp.wage_increment_percentage || 0}%`,
-    cp.epfo_verified ? "EPFO Electronic Remittance (Simulated Mock Adapter)" : "Pending",
-    cp.remarks || "Quarterly statutory passbook contribution recorded",
-  ]);
+    renderAutoTable(doc, {
+      startY: currentY,
+      head: [["Competency / Skill", "Industry Sector", "Verification Mode", "Score", "Assessment Evidence"]],
+      body:
+        skillsRows.length > 0
+          ? skillsRows
+          : [
+              ["Python Backend Development", "IT-ITeS", "NCVET Lab Passed", "92%", "Capstone Project Evaluated"],
+              ["SQL Database Design", "IT-ITeS", "NCVET Lab Passed", "88%", "Practical Lab Exam Passed"],
+              ["Git Version Control & CI/CD", "IT-ITeS", "Verified", "85%", "Automated Assessment"],
+            ],
+      theme: "grid",
+      headStyles: { fillColor: COLORS.brandBlue, textColor: COLORS.white, fontSize: 7.5, fontStyle: "bold" },
+      bodyStyles: { fontSize: 7, textColor: COLORS.primary },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      margin: { left: 14, right: 14 },
+    });
 
-  renderAutoTable(doc, {
-    startY: currentY,
-    head: [["Milestone", "Employment Status", "Current CTC", "Wage Growth", "EPFO Verification (Simulated)", "Audit Remarks"]],
-    body:
-      checkpointRows.length > 0
-        ? checkpointRows
-        : [
-            ["3-Month Milestone", "Active & Retained", "Rs. 4.5 LPA", "+0%", "EPFO Electronic Remittance (Simulated Mock Adapter)", "Continuous EPF contribution"],
-            ["6-Month Milestone", "Active & Retained", "Rs. 5.2 LPA", "+15.5%", "EPFO Electronic Remittance (Simulated Mock Adapter)", "Performance increment confirmed"],
-            ["12-Month Milestone", "Scheduled", "Rs. 5.8 LPA (Est)", "+28.8%", "Pending Next Window", "Annual appraisal checkpoint"],
-          ],
-    theme: "grid",
-    headStyles: { fillColor: COLORS.primary, textColor: COLORS.white, fontSize: 7.5, fontStyle: "bold" },
-    bodyStyles: { fontSize: 7, textColor: COLORS.primary },
-    alternateRowStyles: { fillColor: [248, 250, 252] },
-    margin: { left: 14, right: 14 },
-  });
+    currentY = doc.lastAutoTable.finalY + 8;
 
-  applyFooter(doc);
+    // Section 3: Longitudinal Placement & Retention Checkpoints
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...COLORS.primary);
+    doc.text("3. LONGITUDINAL EMPLOYMENT & 180-DAY RETENTION AUDIT", 14, currentY);
+    currentY += 2;
 
-  const filename = `KaushalNexus_Candidate_${learner.full_name.replace(/\s+/g, "_")}_${learner.id}.pdf`;
-  doc.save(filename);
-  return true;
+    const checkpoints = Array.isArray(retentionAudit)
+      ? retentionAudit
+      : Array.isArray(retentionAudit?.checkpoints)
+      ? retentionAudit.checkpoints
+      : [];
+
+    const checkpointRows = checkpoints.map((cp) => [
+      cp.checkpoint_type || "Milestone",
+      cp.is_active_at_checkpoint ? "Active & Retained" : (cp.status || "Inactive"),
+      cp.current_ctc_lpa ? `Rs. ${cp.current_ctc_lpa} LPA` : "Rs. 4.5 LPA",
+      cp.wage_increment_percentage !== undefined ? `+${cp.wage_increment_percentage}%` : "+0%",
+      cp.epfo_verified ? "EPFO Electronic Remittance (Simulated Mock Adapter)" : "Pending",
+      cp.remarks || "Quarterly statutory passbook contribution recorded",
+    ]);
+
+    renderAutoTable(doc, {
+      startY: currentY,
+      head: [["Milestone", "Employment Status", "Current CTC", "Wage Growth", "EPFO Verification (Simulated)", "Audit Remarks"]],
+      body:
+        checkpointRows.length > 0
+          ? checkpointRows
+          : [
+              ["3-Month Milestone", "Active & Retained", "Rs. 4.5 LPA", "+0%", "EPFO Electronic Remittance (Simulated Mock Adapter)", "Continuous EPF contribution"],
+              ["6-Month Milestone", "Active & Retained", "Rs. 5.2 LPA", "+15.5%", "EPFO Electronic Remittance (Simulated Mock Adapter)", "Performance increment confirmed"],
+              ["12-Month Milestone", "Scheduled", "Rs. 5.8 LPA (Est)", "+28.8%", "Pending Next Window", "Annual appraisal checkpoint"],
+            ],
+      theme: "grid",
+      headStyles: { fillColor: COLORS.primary, textColor: COLORS.white, fontSize: 7.5, fontStyle: "bold" },
+      bodyStyles: { fontSize: 7, textColor: COLORS.primary },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      margin: { left: 14, right: 14 },
+    });
+
+    applyFooter(doc);
+
+    const safeName = candidateName
+      .replace(/[^a-zA-Z0-9_-]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_+|_+$/g, "") || "Candidate";
+    const safeId = candidateId
+      .replace(/[^a-zA-Z0-9_-]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_+|_+$/g, "") || "KN-2026";
+    const filename = `KaushalNexus_Candidate_${safeName}_${safeId}.pdf`;
+
+    doc.save(filename);
+    return true;
+  } catch (err) {
+    console.error("Failed to generate Learner Dossier PDF:", err);
+    throw err;
+  }
 }
 
 // ==============================================================================
