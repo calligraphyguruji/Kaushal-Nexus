@@ -206,10 +206,52 @@ export default function LearnerPipelineWizard({ onProfileUpdated, onOpenRemediat
       setError(null);
       await learnerPipelineApi.setMyAspiringRole(role.id);
       setSelectedRole(role);
-      showNotification(`Aspiring role set to ${role.title}!`);
+      showNotification(`Aspiring role set to ${role.title}! Generating your assessment...`);
       const prof = await learnerPipelineApi.getMyProfile();
       setProfile(prof);
+
+      // Auto-generate role-specific MCQ assessment
+      try {
+        const generatedAssessment = await assessmentsApi.generateForRole(role.id);
+        setCurrentAssessment(generatedAssessment);
+        setAnswers({});
+        showNotification(
+          `Assessment generated: ${generatedAssessment.questions?.length || 0} MCQs covering ${role.title} competencies!`
+        );
+      } catch (genErr) {
+        console.warn("Could not generate role assessment, falling back:", genErr);
+        // Fallback: try to match from existing assessments
+        if (assessments && assessments.length > 0) {
+          const titleLower = (role.title || "").toLowerCase();
+          const matched = assessments.find((a) => {
+            const aTitle = (a.title || "").toLowerCase();
+            if (titleLower.includes("python") || titleLower.includes("data")) {
+              return aTitle.includes("python") || aTitle.includes("data");
+            }
+            return aTitle.includes("software") || aTitle.includes("full-stack") || aTitle.includes("web");
+          });
+          if (matched) {
+            const detail = await assessmentsApi.getAssessmentById(matched.id);
+            setCurrentAssessment(detail);
+            setAnswers({});
+          }
+        }
+      }
+
       setCurrentStep(4);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSelectAssessment = async (assessId) => {
+    try {
+      setSaving(true);
+      const detail = await assessmentsApi.getAssessmentById(assessId);
+      setCurrentAssessment(detail);
+      setAnswers({});
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -795,9 +837,53 @@ export default function LearnerPipelineWizard({ onProfileUpdated, onOpenRemediat
               </h3>
             </div>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Target Role: <strong className="text-sky-600 dark:text-sky-400">{selectedRole?.title || "Python Developer"}</strong>. Each response conditionally updates your latent mastery probability $P(L_t)$ via BKT.
+              Target Role: <strong className="text-sky-600 dark:text-sky-400">{selectedRole?.title || "Python Developer"}</strong>
+              {currentAssessment && (
+                <span className="ml-2 text-slate-400">
+                  — {currentAssessment.questions?.length || 0} MCQs
+                  {currentAssessment.description && (
+                    <span className="ml-1 text-[11px]">({currentAssessment.description})</span>
+                  )}
+                </span>
+              )}
             </p>
           </div>
+
+          {/* Test Switcher Pills */}
+          {assessments && assessments.length > 1 && (
+            <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-800/40">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Select Test:
+              </span>
+              {assessments.map((a) => {
+                const isActive = currentAssessment?.id === a.id;
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => handleSelectAssessment(a.id)}
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                      isActive
+                        ? "bg-sky-600 text-white shadow-xs"
+                        : "border border-slate-200 bg-white text-slate-700 hover:border-sky-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    }`}
+                  >
+                    <BrainCircuit size={13} className={isActive ? "text-white" : "text-sky-500"} />
+                    <span>{a.title}</span>
+                    <span
+                      className={`ml-1 rounded px-1.5 py-0.2 text-[10px] font-mono ${
+                        isActive
+                          ? "bg-sky-700 text-white"
+                          : "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-300"
+                      }`}
+                    >
+                      {a.total_questions || 10} Qs
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {currentAssessment && currentAssessment.questions?.length > 0 ? (
             <div className="mt-6 space-y-6">

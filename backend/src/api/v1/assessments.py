@@ -47,6 +47,27 @@ async def list_assessments(
     return await assessment_service.list_assessments(db=db, sector=sector)
 
 
+@router.post(
+    "/generate-for-role/{role_id}",
+    response_model=AssessmentDetailResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Generate Role-Based Diagnostic Assessment",
+    description=(
+        "Dynamically assembles a diagnostic MCQ assessment from the question bank, "
+        "selecting questions that map to the competencies required by the target role. "
+        "Returns a balanced mix of EASY/MEDIUM/HARD questions (correct answers withheld)."
+    ),
+)
+async def generate_assessment_for_role(
+    role_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_AUTHENTICATED_ROLES)),
+) -> AssessmentDetailResponseDTO:
+    """Generates a role-specific assessment dynamically."""
+    return await assessment_service.generate_assessment_for_role(db=db, role_id=role_id)
+
+
+
 @router.get(
     "/{assessment_id}",
     response_model=AssessmentDetailResponseDTO,

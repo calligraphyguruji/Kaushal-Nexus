@@ -33,6 +33,7 @@ import {
 
 import { learnersApi } from "../api/learners";
 import { placementsApi } from "../api/placements";
+import { learnerPipelineApi } from "../api/learnerPipeline";
 import { authApi } from "../api/auth";
 import { getErrorMessage } from "../api/client";
 import { exportLearnerDossierPDF } from "../utils/pdfExport";
@@ -107,9 +108,17 @@ export default function LearnerIntelligence() {
   const urlSearch = searchParams.get("search") || "";
   const initialTargetId = learnerId || routeId || searchParams.get("id") || "";
 
-  // View Mode: 'career' (Phase 4 Journey & ML), 'remediation' (Phase 3 Loop), 'pipeline' (Phase 2), 'dossier' (Candidate 360)
+  // View Mode: 'pipeline' (Phase 2 & Diagnostics for learners), 'career' (Phase 4), 'remediation' (Phase 3), 'dossier' (Candidate 360)
   const tabParam = searchParams.get("tab");
-  const [viewMode, setViewMode] = useState(tabParam || (initialTargetId ? "dossier" : "career"));
+  const [viewMode, setViewMode] = useState(
+    tabParam || (permissions.isLearner ? "pipeline" : (initialTargetId ? "dossier" : "career"))
+  );
+
+  useEffect(() => {
+    if (permissions.isLearner && !tabParam && viewMode === "career") {
+      setViewMode("pipeline");
+    }
+  }, [permissions.isLearner, tabParam]);
 
   // Candidate List & Pagination States
   const [learnersList, setLearnersList] = useState([]);
@@ -210,6 +219,20 @@ export default function LearnerIntelligence() {
       setError(null);
       await authApi.ensureAuthenticated();
 
+      if (permissions.isLearner) {
+        try {
+          const myProf = await learnerPipelineApi.getMyProfile();
+          if (myProf) {
+            setLearnersList([myProf]);
+            setTotalLearners(1);
+            setSelectedLearnerId(myProf.id);
+          }
+        } catch (err) {
+          console.error("Failed to load candidate self profile:", err);
+        }
+        return;
+      }
+
       const res = await learnersApi.list({
         search: debouncedSearch || undefined,
         page: currentPage,
@@ -230,7 +253,7 @@ export default function LearnerIntelligence() {
     } finally {
       setListLoading(false);
     }
-  }, [debouncedSearch, currentPage, pageSize]);
+  }, [debouncedSearch, currentPage, pageSize, permissions.isLearner]);
 
   useEffect(() => {
     fetchLearnersList();
@@ -822,10 +845,45 @@ export default function LearnerIntelligence() {
       ) : (
         <>
           {/* =====================================================
-              2. COHORT SELECTOR & PAGINATED BROWSER
+              2. COHORT SELECTOR & PAGINATED BROWSER (OR LEARNER SELF-BANNER)
           ====================================================== */}
-          <section className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-4 sm:p-5 shadow-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {permissions.isLearner ? (
+            <section className="rounded-xl border border-sky-400/30 bg-gradient-to-r from-sky-950/40 via-[#0b1528] to-indigo-950/30 p-4 sm:p-5 shadow-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500 text-slate-950 font-bold font-mono">
+                    {getInitials(currentLearner?.full_name || "Learner")}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-heading text-sm font-bold text-white">
+                        {currentLearner?.full_name || "Candidate Dossier"}
+                      </span>
+                      <span className="rounded-md bg-sky-500/20 border border-sky-400/30 px-2 py-0.5 text-[10px] font-mono font-bold text-sky-300">
+                        {selectedLearnerId}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Status: <strong className="text-sky-300">{currentLearner?.status || "In Training"}</strong> · Readiness: <strong className="text-emerald-400">{currentLearner?.employment_readiness_score || 0}%</strong>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("pipeline")}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-sky-500 transition-all cursor-pointer shadow-xs"
+                  >
+                    <Sparkles size={14} />
+                    <span>Open Diagnostic Pipeline &amp; Assessment</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+          ) : (
+            <section className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-4 sm:p-5 shadow-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <UserCheck size={16} className="text-sky-400" />
             <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-300">
@@ -964,6 +1022,7 @@ export default function LearnerIntelligence() {
           </div>
         )}
       </section>
+    )}
 
       {/* =====================================================
           3. SELECTED LEARNER 360° MASTER HEADER CARD

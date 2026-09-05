@@ -801,7 +801,7 @@ async def list_learners(
 async def get_learner_by_id(
     learner_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES, UserRole.LEARNER)),
 ) -> Learner360ResponseDTO:
     """Retrieves a complete 360° candidate intelligence dossier."""
     return await learner_service.get_learner_360(db, learner_id, user=current_user)

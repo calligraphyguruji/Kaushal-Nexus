@@ -53,32 +53,22 @@ export const assessmentsApi = {
               options: ["<class 'list'>", "<class 'array'>", "<class 'tuple'>", "<class 'dict'>"],
               difficulty: 'EASY',
             },
-            {
-              id: 'q2',
-              skill_id: 's2',
-              skill_name: 'Python OOP',
-              question_text: 'What is inheritance in Python?',
-              options: [
-                'Mechanism allowing a child class to inherit attributes and methods from a parent class',
-                'A technique to declare global variables shared across all threads',
-                'A way to serialize classes into JSON strings',
-                'Direct low-level memory allocation in the Python heap',
-              ],
-              difficulty: 'EASY',
-            },
-            {
-              id: 'q3',
-              skill_id: 's3',
-              skill_name: 'SQL',
-              question_text: 'Which SQL clause is used to filter aggregated grouped records after a GROUP BY statement?',
-              options: ['HAVING', 'WHERE', 'FILTER', 'LIMIT'],
-              difficulty: 'EASY',
-            },
           ],
         };
       }
       throw err;
     }
+  },
+
+  /**
+   * Generates a role-specific MCQ assessment from the question bank.
+   * Questions are selected based on the role's required competencies.
+   * @param {string} roleId - UUID of the target aspiring role
+   * @returns {Object} AssessmentDetailResponseDTO with questions (no answers)
+   */
+  async generateForRole(roleId) {
+    const response = await apiClient.post(`/assessments/generate-for-role/${roleId}`);
+    return response.data;
   },
 
   /**
@@ -100,3 +90,8 @@ export const assessmentsApi = {
     return response.data;
   },
 };
+
+// Backward-compatible aliases used by LearnerPipelineWizard
+assessmentsApi.listAssessments = assessmentsApi.list;
+assessmentsApi.getAssessmentById = assessmentsApi.getById;
+assessmentsApi.submitAssessment = assessmentsApi.submit;

@@ -271,6 +271,10 @@ class ScopeAuthorizationService:
 
             return learner_state == scope.state
 
+        # LEARNER: Authorized to access their own candidate dossier
+        if user.role == UserRole.LEARNER.value:
+            return learner.user_id == user.id or learner.email == user.email
+
         # TRAINING_PROVIDER: Learner must be assigned to provider's training center
         if user.role == UserRole.TRAINING_PROVIDER.value:
             if learner.training_center_id and learner.training_center_id in scope.training_center_ids:

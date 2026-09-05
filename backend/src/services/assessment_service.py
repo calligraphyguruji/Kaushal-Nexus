@@ -517,4 +517,166 @@ class AssessmentService:
         )
 
 
+    @staticmethod
+    async def generate_assessment_for_role(
+        db: AsyncSession,
+        role_id: uuid.UUID,
+    ) -> AssessmentDetailResponseDTO:
+        """
+        Dynamically generates a diagnostic MCQ assessment based on the
+        competencies required by the selected role.
+
+        Steps:
+        1. Load the role and its competency requirements
+        2. Find all active questions mapped to those competencies
+        3. Select a balanced mix of EASY/MEDIUM/HARD questions per competency
+        4. Return the assembled assessment (questions without correct answers)
+        """
+        from src.models.role import Role, RoleRequirement
+
+        # 1. Load role with competency requirements
+        role_stmt = (
+            select(Role)
+            .where(Role.id == role_id)
+            .options(
+                selectinload(Role.requirements).selectinload(RoleRequirement.competency)
+            )
+        )
+        role_res = await db.execute(role_stmt)
+        role = role_res.scalar_one_or_none()
+        if not role:
+            raise NotFoundException(message=f"Role with ID '{role_id}' not found.")
+
+        if not role.requirements:
+            raise BadRequestException(
+                message=f"Role '{role.title}' has no competency requirements defined."
+            )
+
+        # 2. Collect required competency IDs
+        competency_ids = [req.competency_id for req in role.requirements]
+        competency_weights = {
+            req.competency_id: req.weight for req in role.requirements
+        }
+
+        # 3. Fetch all active questions for these competencies
+        q_stmt = (
+            select(AssessmentQuestion)
+            .where(
+                AssessmentQuestion.skill_id.in_(competency_ids),
+                AssessmentQuestion.is_active.is_(True),
+            )
+            .options(selectinload(AssessmentQuestion.skill))
+            .order_by(AssessmentQuestion.skill_id, AssessmentQuestion.difficulty)
+        )
+        q_res = await db.execute(q_stmt)
+        all_questions = q_res.scalars().all()
+
+        if not all_questions:
+            raise BadRequestException(
+                message=f"No questions found for competencies required by role '{role.title}'."
+            )
+
+        # 4. Select balanced questions per competency
+        # Higher-weight competencies get more questions
+        import random
+        from collections import defaultdict
+
+        questions_by_comp: Dict[uuid.UUID, List[AssessmentQuestion]] = defaultdict(list)
+        for q in all_questions:
+            questions_by_comp[q.skill_id].append(q)
+
+        selected_questions: List[AssessmentQuestion] = []
+        for comp_id, qs in questions_by_comp.items():
+            weight = competency_weights.get(comp_id, 1.0)
+            # Base: 2 questions per competency, +1 per weight point above 1
+            target_count = min(len(qs), max(2, int(2 + (weight - 1))))
+
+            # Try to get a mix of difficulties
+            easy = [q for q in qs if q.difficulty == "EASY"]
+            medium = [q for q in qs if q.difficulty == "MEDIUM"]
+            hard = [q for q in qs if q.difficulty == "HARD"]
+
+            picked: List[AssessmentQuestion] = []
+            # Pick 1 easy, then mediums, then hards, then remaining easys
+            for pool in [easy, medium, hard]:
+                random.shuffle(pool)
+                for q in pool:
+                    if len(picked) >= target_count:
+                        break
+                    if q not in picked:
+                        picked.append(q)
+
+            # If still need more, add any remaining
+            if len(picked) < target_count:
+                remaining = [q for q in qs if q not in picked]
+                random.shuffle(remaining)
+                picked.extend(remaining[: target_count - len(picked)])
+
+            selected_questions.extend(picked)
+
+        # Shuffle the final question set
+        random.shuffle(selected_questions)
+
+        # 5. Build the response DTO (no correct answers exposed)
+        questions_dto: List[AssessmentQuestionResponseDTO] = []
+        for q in selected_questions:
+            try:
+                options = json.loads(q.options_json) if q.options_json else []
+            except Exception:
+                options = []
+
+            questions_dto.append(
+                AssessmentQuestionResponseDTO(
+                    id=q.id,
+                    skill_id=q.skill_id,
+                    skill_name=q.skill.name if q.skill else "General Competency",
+                    question_text=q.question_text,
+                    options=options,
+                    difficulty=q.difficulty,
+                )
+            )
+
+        # 6. Check if a matching assessment already exists, else create one on the fly
+        code = f"ASSESS-{role.code.replace('ROLE-', '')}-AUTO"
+        existing_stmt = select(Assessment).where(Assessment.code == code)
+        existing_res = await db.execute(existing_stmt)
+        existing = existing_res.scalar_one_or_none()
+
+        if existing:
+            assess_id = existing.id
+        else:
+            new_assessment = Assessment(
+                title=f"{role.title} — Diagnostic Assessment",
+                code=code,
+                description=f"Auto-generated diagnostic assessment covering {len(questions_by_comp)} competencies required for {role.title}.",
+                sector=role.sector,
+                duration_minutes=max(15, len(selected_questions) * 2),
+                is_active=True,
+            )
+            db.add(new_assessment)
+            await db.flush()
+            assess_id = new_assessment.id
+
+            # Link selected questions to this assessment (update their assessment_id)
+            for q in selected_questions:
+                if q.assessment_id is None:
+                    q.assessment_id = assess_id
+            await db.flush()
+
+        logger.info(
+            f"Generated role-based assessment for '{role.title}': "
+            f"{len(selected_questions)} questions across {len(questions_by_comp)} competencies."
+        )
+
+        return AssessmentDetailResponseDTO(
+            id=assess_id,
+            code=code,
+            title=f"{role.title} — Diagnostic Assessment",
+            description=f"Diagnostic assessment covering {len(questions_by_comp)} competencies required for {role.title}.",
+            sector=role.sector,
+            duration_minutes=max(15, len(selected_questions) * 2),
+            questions=questions_dto,
+        )
+
+
 assessment_service = AssessmentService()
