@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   BrainCircuit,
   Search,
@@ -9,7 +9,6 @@ import {
   Download,
   Users,
   Target,
-  Layers,
 } from "lucide-react";
 
 import { skillGapsApi } from "../api/skillGaps";
@@ -25,7 +24,6 @@ import TechStatCard from "../components/TechStatCard";
 import StatusBadge from "../components/StatusBadge";
 import ActionModal from "../components/ActionModal";
 import AISkillIntelligence from "../components/AISkillIntelligence";
-import StateView from "../components/StateView";
 
 export default function SkillGapIntelligence() {
   const permissions = usePermissions();
@@ -95,10 +93,12 @@ export default function SkillGapIntelligence() {
     const target = skill || (prioritySkills.length > 0 ? prioritySkills[0] : null);
     setSelectedSkillAction(target);
     if (target) {
-      setTargetCapacity(Math.max(50, Math.min(500, target.learners_affected || 150)));
-      setBudgetINR(500000);
+      setTargetCapacity(target.is_learner_gap ? 1 : Math.max(50, Math.min(500, target.learners_affected || 150)));
+      setBudgetINR(target.is_learner_gap ? 25000 : 500000);
       setInterventionNotes(
-        `Automated NQR-aligned bridge course deployment for ${target.competency_name} in ${target.district_name || target.district_id}.`
+        target.is_learner_gap
+          ? `Personalized diagnostic bridge course deployment for candidate ${target.learner_name || "Learner"} to remediate -${target.deficit_pct}% deficit in ${target.competency_name}.`
+          : `Automated NQR-aligned bridge course deployment for ${target.competency_name} in ${target.district_name || target.district_id}.`
       );
     }
     setIsInterventionModalOpen(true);
@@ -296,6 +296,47 @@ export default function SkillGapIntelligence() {
         </div>
       )}
 
+      {/* Learner Assessment Gaps Detected Banner */}
+      {prioritySkills.some((s) => s.is_learner_gap) && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-rose-500/40 bg-gradient-to-r from-rose-950/60 via-[#0b1528] to-[#0b1528] p-4 text-xs shadow-md">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-inner">
+              <BrainCircuit size={20} className="animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-heading font-bold text-white text-sm">
+                  Active Candidate Assessment Skill Gaps Detected
+                </span>
+                <span className="rounded-full bg-rose-500/20 px-2 py-0.5 font-mono text-[10px] font-bold text-rose-300 border border-rose-500/40">
+                  Live Diagnostic Feedback
+                </span>
+              </div>
+              <p className="mt-0.5 text-slate-300 text-xs">
+                Evaluated from{" "}
+                <strong className="text-white font-semibold">
+                  {prioritySkills.find((s) => s.is_learner_gap)?.learner_name || "Candidate Learner"}
+                </strong>
+                &apos;s recent diagnostic test. Competencies with mastery deficit are prioritized below for immediate bridge remediation.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                const firstLearnerGap = prioritySkills.find((s) => s.is_learner_gap);
+                if (firstLearnerGap) handleOpenInterventionModal(firstLearnerGap);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 font-mono text-xs font-bold text-white hover:bg-rose-500 transition-colors cursor-pointer shadow-sm"
+            >
+              <span>Deploy Candidate Remediation</span>
+              <ArrowUpRight size={13} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* =====================================================
           2. CORE NATIONAL SKILL GAP KPIS (TechStatCard)
       ====================================================== */}
@@ -316,7 +357,7 @@ export default function SkillGapIntelligence() {
             <TechStatCard
               title="Critical Skill Deficits"
               value={criticalCount.toString()}
-              subtitle={`${criticalCount} competencies require bridge modules`}
+              subtitle={`${criticalCount} Critical & ${highCount} High priority`}
               trend="Action Mandated"
               trendDirection="down"
               icon={AlertCircle}
@@ -396,6 +437,18 @@ export default function SkillGapIntelligence() {
                     <option value="High">High</option>
                     <option value="Moderate">Moderate</option>
                   </select>
+
+                  <select
+                    value={selectedSector}
+                    onChange={(e) => setSelectedSector(e.target.value)}
+                    className="h-8 rounded-lg border border-[#1e293b] bg-[#070d18] px-2 font-mono text-xs font-semibold text-slate-300 focus:border-sky-400 focus:outline-none cursor-pointer"
+                  >
+                    <option value="All">All Sectors</option>
+                    <option value="IT-ITeS">IT-ITeS</option>
+                    <option value="Analytics">Analytics & BFSI</option>
+                    <option value="Automotive">Automotive & Heavy</option>
+                    <option value="Digital">Digital Economy</option>
+                  </select>
                 </div>
               }
             />
@@ -436,7 +489,11 @@ export default function SkillGapIntelligence() {
                       <tr
                         key={skill.id || `${skill.competency_id}-${skill.district_id}`}
                         onClick={() => handleOpenInterventionModal(skill)}
-                        className="cursor-pointer transition-colors hover:bg-[#0f1c33]"
+                        className={`cursor-pointer transition-colors ${
+                          skill.is_learner_gap
+                            ? "bg-rose-950/20 hover:bg-rose-950/35 border-l-2 border-l-rose-500"
+                            : "hover:bg-[#0f1c33]"
+                        }`}
                         title="Click to deploy curriculum intervention"
                       >
                         <td className="py-3 font-semibold text-white">
@@ -445,7 +502,18 @@ export default function SkillGapIntelligence() {
                               #{skill.priority_rank}
                             </span>
                             <div>
-                              <div>{skill.competency_name}</div>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span>{skill.competency_name}</span>
+                                {skill.is_learner_gap && (
+                                  <span
+                                    className="inline-flex items-center gap-1 rounded bg-rose-500/20 px-1.5 py-0.5 font-mono text-[9px] font-bold text-rose-300 border border-rose-500/40"
+                                    title={`Evaluated from ${skill.learner_name || "Candidate"}'s Diagnostic Assessment`}
+                                  >
+                                    <span className="h-1.5 w-1.5 rounded-full bg-rose-400 animate-pulse" />
+                                    Learner Assessed
+                                  </span>
+                                )}
+                              </div>
                               <span className="font-mono text-[10px] font-normal text-slate-400">
                                 {skill.sector}
                               </span>
@@ -456,7 +524,7 @@ export default function SkillGapIntelligence() {
                         {/* District */}
                         <td className="py-3 text-slate-300">
                           <span className="rounded border border-[#1e293b] bg-[#070d18] px-1.5 py-0.5 font-mono text-[10px] font-medium text-slate-300">
-                            {skill.district_name || skill.district_id}
+                            {skill.district_name || skill.district_id || "National Aggregate"}
                           </span>
                         </td>
 
@@ -466,11 +534,11 @@ export default function SkillGapIntelligence() {
                             <div className="h-1.5 w-14 overflow-hidden rounded-full bg-[#070d18]">
                               <div
                                 className="h-full rounded-full bg-sky-400 transition-all"
-                                style={{ width: `${Math.min(100, skill.employer_demand_pct)}%` }}
+                                style={{ width: `${Math.min(100, skill.employer_demand_pct || 85)}%` }}
                               />
                             </div>
                             <span className="font-mono font-bold tabular-nums text-white">
-                              {skill.employer_demand_pct}%
+                              {skill.employer_demand_pct || 85}%
                             </span>
                           </div>
                         </td>
@@ -481,40 +549,40 @@ export default function SkillGapIntelligence() {
                             <div className="h-1.5 w-14 overflow-hidden rounded-full bg-[#070d18]">
                               <div
                                 className="h-full rounded-full bg-slate-500 transition-all"
-                                style={{ width: `${Math.min(100, skill.workforce_supply_pct)}%` }}
+                                style={{ width: `${Math.min(100, skill.workforce_supply_pct || 40)}%` }}
                               />
                             </div>
                             <span className="font-mono font-semibold tabular-nums text-slate-300">
-                              {skill.workforce_supply_pct}%
+                              {skill.workforce_supply_pct || 40}%
                             </span>
                           </div>
                         </td>
 
                         {/* Gap % */}
                         <td className="py-3 text-right font-mono font-bold tabular-nums text-rose-400">
-                          -{skill.deficit_pct}%
+                          -{skill.deficit_pct || skill.gap_percentage || skill.gap || 0}%
                         </td>
 
                         {/* Affected count */}
                         <td className="py-3 text-right font-mono font-semibold tabular-nums text-slate-300">
-                          {Number(skill.learners_affected || 0).toLocaleString()}
+                          {Number(skill.learners_affected || skill.candidates_impacted_count || 1).toLocaleString()}
                         </td>
 
                         {/* Severity */}
                         <td className="py-3 text-right">
                           <StatusBadge
                             variant={
-                              skill.severity === "Critical"
+                              skill.severity === "Critical" || skill.severity_level === "CRITICAL"
                                 ? "danger"
-                                : skill.severity === "High"
+                                : skill.severity === "High" || skill.severity_level === "HIGH"
                                 ? "warning"
-                                : skill.severity === "Moderate"
+                                : skill.severity === "Moderate" || skill.severity_level === "MODERATE"
                                 ? "info"
                                 : "success"
                             }
                             size="sm"
                           >
-                            {skill.severity}
+                            {skill.severity || (skill.severity_level ? skill.severity_level.charAt(0) + skill.severity_level.slice(1).toLowerCase() : "Critical")}
                           </StatusBadge>
                         </td>
                       </tr>

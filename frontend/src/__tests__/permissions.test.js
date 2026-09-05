@@ -20,6 +20,7 @@ describe("KaushalNexus Frontend RBAC & Authorization Suite", () => {
         "EMPLOYER",
         "EVALUATOR",
         "SYSTEM_ADMIN",
+        "LEARNER",
       ];
       assert.deepEqual(Object.values(UserRole).sort(), expectedRoles.sort());
     });

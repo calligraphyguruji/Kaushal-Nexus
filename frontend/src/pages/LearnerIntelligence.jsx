@@ -39,6 +39,7 @@ import { getErrorMessage } from "../api/client";
 import { exportLearnerDossierPDF } from "../utils/pdfExport";
 import { exportLearnersCSV } from "../utils/csvExport";
 import { usePermissions } from "../hooks/usePermissions";
+import { getCandidateById } from "../utils/candidateRegistry";
 
 import PageHeader from "../components/PageHeader";
 import SectionHeader from "../components/SectionHeader";
@@ -111,14 +112,26 @@ export default function LearnerIntelligence() {
   // View Mode: 'pipeline' (Phase 2 & Diagnostics for learners), 'career' (Phase 4), 'remediation' (Phase 3), 'dossier' (Candidate 360)
   const tabParam = searchParams.get("tab");
   const [viewMode, setViewMode] = useState(
-    tabParam || (permissions.isLearner ? "pipeline" : (initialTargetId ? "dossier" : "career"))
+    permissions.isLearner
+      ? (tabParam === "remediation" ? "remediation" : "pipeline")
+      : (tabParam || (initialTargetId ? "dossier" : "career"))
   );
 
   useEffect(() => {
-    if (permissions.isLearner && !tabParam && viewMode === "career") {
-      setViewMode("pipeline");
+    if (permissions.isLearner) {
+      if (tabParam === "remediation") {
+        setViewMode("remediation");
+      } else {
+        setViewMode("pipeline");
+      }
+    } else if (tabParam) {
+      setViewMode(tabParam);
     }
   }, [permissions.isLearner, tabParam]);
+
+  const effectiveViewMode = permissions.isLearner
+    ? (viewMode === "remediation" ? "remediation" : "pipeline")
+    : viewMode;
 
   // Candidate List & Pagination States
   const [learnersList, setLearnersList] = useState([]);
@@ -193,15 +206,25 @@ export default function LearnerIntelligence() {
   // Sync route / URL parameters when route changes
   useEffect(() => {
     const routeParamId = learnerId || routeId || searchParams.get("id");
-    if (routeParamId && routeParamId !== selectedLearnerId) {
-      setSelectedLearnerId(routeParamId);
+    if (routeParamId) {
+      if (routeParamId !== selectedLearnerId) {
+        setSelectedLearnerId(routeParamId);
+      }
+      if (!permissions.isLearner) {
+        setViewMode(tabParam || "dossier");
+      }
+    } else if (tabParam && !permissions.isLearner) {
+      setViewMode(tabParam);
     }
     const queryParamSearch = searchParams.get("search");
     if (queryParamSearch !== null && queryParamSearch !== searchQuery) {
       setSearchQuery(queryParamSearch);
       setDebouncedSearch(queryParamSearch);
+      if (!permissions.isLearner && !tabParam) {
+        setViewMode("dossier");
+      }
     }
-  }, [learnerId, routeId, searchParams]);
+  }, [learnerId, routeId, searchParams, permissions.isLearner, tabParam]);
 
   // Debounce search query input
   useEffect(() => {
@@ -244,7 +267,10 @@ export default function LearnerIntelligence() {
       setTotalLearners(res.total || 0);
 
       setSelectedLearnerId((prev) => {
-        if (prev) return prev;
+        const routeParamId = learnerId || routeId || searchParams.get("id");
+        if (routeParamId) return routeParamId;
+        if (prev && items.some((it) => it.id === prev)) return prev;
+        if (prev && !items.length) return prev;
         return items.length > 0 ? items[0].id : null;
       });
     } catch (err) {
@@ -261,6 +287,10 @@ export default function LearnerIntelligence() {
 
   // Fetch full Candidate 360 dossier & placement/retention records when selection changes
   const fetchLearnerDossier = useCallback(async (id) => {
+    if (permissions.isLearner) {
+      setDossierLoading(false);
+      return;
+    }
     if (!id || id === "0" || id === "undefined" || id === "null") {
       setCurrentLearner(null);
       setPlacements([]);
@@ -297,6 +327,14 @@ export default function LearnerIntelligence() {
       ]);
 
       if (!dossier || !dossier.id) {
+        const localCandidate = getCandidateById(id);
+        if (localCandidate) {
+          setCurrentLearner(localCandidate);
+          setDossierNotFound(false);
+          setDossierForbidden(false);
+          setPlacements([]);
+          return;
+        }
         setCurrentLearner(null);
         setDossierNotFound(true);
         setDossierForbidden(false);
@@ -325,6 +363,14 @@ export default function LearnerIntelligence() {
       }
     } catch (err) {
       console.error(`Failed to fetch dossier for learner ${id}:`, err);
+      const localCandidate = getCandidateById(id);
+      if (localCandidate) {
+        setCurrentLearner(localCandidate);
+        setDossierNotFound(false);
+        setDossierForbidden(false);
+        setPlacements([]);
+        return;
+      }
       setCurrentLearner(null);
       if (err.response?.status === 403) {
         setDossierForbidden(true);
@@ -352,7 +398,10 @@ export default function LearnerIntelligence() {
   const handleSelectCandidate = (candidateId) => {
     if (!candidateId) return;
     setSelectedLearnerId(candidateId);
-    navigate(`/learner/${encodeURIComponent(candidateId)}`);
+    if (!permissions.isLearner) {
+      setViewMode("dossier");
+    }
+    navigate(`/learner/${encodeURIComponent(candidateId)}?tab=dossier`);
   };
 
   const handleVerifyCredential = async () => {
@@ -550,73 +599,88 @@ export default function LearnerIntelligence() {
       {/* =====================================================
           1. PAGE HEADER & ACTIONS
       ====================================================== */}
-      <PageHeader
-        badge="LEARNER INTELLIGENCE"
-        badgeVariant="cyan"
-        title="Learner 360"
-        description="Individual learner readiness, skill-gap, placement, and longitudinal outcome intelligence."
-        breadcrumbs={["National Platform", "Learner Intelligence"]}
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                fetchLearnersList();
-                if (selectedLearnerId) fetchLearnerDossier(selectedLearnerId);
-              }}
-              disabled={listLoading || dossierLoading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
-            >
-              <RefreshCw
-                size={13}
-                className={listLoading || dossierLoading ? "animate-spin text-sky-400" : "text-sky-400"}
-              />
-              <span>Sync</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={async () => {
-                if (currentLearner) {
-                  try {
-                    setPdfExporting(true);
-                    exportLearnerDossierPDF(currentLearner, placements, retentionAudit);
-                    const candidateName = currentLearner.full_name || currentLearner.name || "Candidate";
-                    setActionSuccessMsg(`✅ Downloaded Candidate 360° Dossier for ${candidateName} (${currentLearner.id}).`);
-                  } catch (err) {
-                    console.error("PDF export error:", err);
-                    setError("Error exporting PDF dossier: " + (err?.message || "Unknown error"));
-                  } finally {
-                    setPdfExporting(false);
-                  }
-                }
-              }}
-              disabled={!currentLearner || pdfExporting}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
-              title="Download Candidate 360 Dossier & NCVET Certificate PDF"
-            >
-              <Download size={13} className={pdfExporting ? "animate-bounce text-sky-400" : "text-sky-400"} />
-              <span>{pdfExporting ? "Generating PDF..." : "Download Dossier (PDF)"}</span>
-            </button>
-
-            {permissions.canVerifyCredential && (
+      {permissions.isLearner ? (
+        <PageHeader
+          badge="CANDIDATE PORTAL"
+          badgeVariant="cyan"
+          title="My Assessment & Learning Path"
+          description="Your diagnostic MCQ assessment, BKT skill mastery gaps, and personalized remedial learning curriculum."
+          breadcrumbs={[
+            "Candidate Portal",
+            effectiveViewMode === "remediation"
+              ? "Recommended Learning Path"
+              : "Assessment & Skill Gaps",
+          ]}
+        />
+      ) : (
+        <PageHeader
+          badge="LEARNER INTELLIGENCE"
+          badgeVariant="cyan"
+          title="Learner 360"
+          description="Individual learner readiness, skill-gap, placement, and longitudinal outcome intelligence."
+          breadcrumbs={["National Platform", "Learner Intelligence"]}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => setIsDossierModalOpen(true)}
-                disabled={!currentLearner}
-                className="group inline-flex items-center gap-2 rounded-lg bg-sky-400 hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-slate-950 shadow-xs transition glow-cyan disabled:opacity-50 cursor-pointer"
+                onClick={() => {
+                  fetchLearnersList();
+                  if (selectedLearnerId) fetchLearnerDossier(selectedLearnerId);
+                }}
+                disabled={listLoading || dossierLoading}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
               >
-                <Award size={14} />
-                <span>Verify NCVET Credential</span>
-                <ArrowUpRight
-                  size={12}
-                  className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                <RefreshCw
+                  size={13}
+                  className={listLoading || dossierLoading ? "animate-spin text-sky-400" : "text-sky-400"}
                 />
+                <span>Sync</span>
               </button>
-            )}
-          </div>
-        }
-      />
+
+              <button
+                type="button"
+                onClick={async () => {
+                  if (currentLearner) {
+                    try {
+                      setPdfExporting(true);
+                      exportLearnerDossierPDF(currentLearner, placements, retentionAudit);
+                      const candidateName = currentLearner.full_name || currentLearner.name || "Candidate";
+                      setActionSuccessMsg(`✅ Downloaded Candidate 360° Dossier for ${candidateName} (${currentLearner.id}).`);
+                    } catch (err) {
+                      console.error("PDF export error:", err);
+                      setError("Error exporting PDF dossier: " + (err?.message || "Unknown error"));
+                    } finally {
+                      setPdfExporting(false);
+                    }
+                  }
+                }}
+                disabled={!currentLearner || pdfExporting}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
+                title="Download Candidate 360 Dossier & NCVET Certificate PDF"
+              >
+                <Download size={13} className={pdfExporting ? "animate-bounce text-sky-400" : "text-sky-400"} />
+                <span>{pdfExporting ? "Generating PDF..." : "Download Dossier (PDF)"}</span>
+              </button>
+
+              {permissions.canVerifyCredential && (
+                <button
+                  type="button"
+                  onClick={() => setIsDossierModalOpen(true)}
+                  disabled={!currentLearner}
+                  className="group inline-flex items-center gap-2 rounded-lg bg-sky-400 hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-slate-950 shadow-xs transition glow-cyan disabled:opacity-50 cursor-pointer"
+                >
+                  <Award size={14} />
+                  <span>Verify NCVET Credential</span>
+                  <ArrowUpRight
+                    size={12}
+                    className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  />
+                </button>
+              )}
+            </div>
+          }
+        />
+      )}
 
       {/* Success Notification Alert */}
       {actionSuccessMsg && (
@@ -656,158 +720,258 @@ export default function LearnerIntelligence() {
       )}
 
       {/* =====================================================
-          VIEW SWITCHER: Phase 5 Placement vs Phase 4 Career vs Phase 3 Remediation vs Phase 2 Pipeline vs Candidate 360 Dossier
+          VIEW SWITCHER: Candidate Portal (2 Tabs) vs Institutional 360 (7 Tabs)
       ====================================================== */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 rounded-xl border border-[#1e293b] bg-[#070d18]">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setViewMode("impact")}
-            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
-              viewMode === "impact"
-                ? "bg-indigo-500 text-slate-950 font-bold shadow-md shadow-indigo-500/20"
-                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
-            }`}
-          >
-            <TrendingUp size={14} className={viewMode === "impact" ? "text-slate-950" : "text-indigo-400"} />
-            <span>Impact &amp; Optimization</span>
-            <span
-              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
-                viewMode === "impact" ? "bg-slate-950/20 text-slate-950" : "bg-indigo-500/10 text-indigo-400"
+      {permissions.isLearner ? (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#070d18]">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode("pipeline");
+                navigate("/learner?tab=pipeline");
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold transition cursor-pointer ${
+                effectiveViewMode === "pipeline"
+                  ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#0b1528]"
               }`}
             >
-              Phase 7
-            </span>
-          </button>
+              <BrainCircuit
+                size={15}
+                className={effectiveViewMode === "pipeline" ? "text-slate-950" : "text-sky-500"}
+              />
+              <span>My Assessment &amp; Skill Gaps</span>
+              <span
+                className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                  effectiveViewMode === "pipeline"
+                    ? "bg-slate-950/20 text-slate-950"
+                    : "bg-sky-500/10 text-sky-600 dark:text-sky-400"
+                }`}
+              >
+                Diagnostic &amp; Gaps
+              </span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setViewMode("intelligence")}
-            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
-              viewMode === "intelligence"
-                ? "bg-cyan-400 text-slate-950 font-bold shadow-md shadow-cyan-400/20"
-                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
-            }`}
-          >
-            <Compass size={14} className={viewMode === "intelligence" ? "text-slate-950" : "text-cyan-400"} />
-            <span>Career Intelligence</span>
-            <span
-              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
-                viewMode === "intelligence" ? "bg-slate-950/20 text-slate-950" : "bg-cyan-500/10 text-cyan-400"
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode("remediation");
+                navigate("/learner?tab=remediation");
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold transition cursor-pointer ${
+                effectiveViewMode === "remediation"
+                  ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#0b1528]"
               }`}
             >
-              Phase 6
-            </span>
-          </button>
+              <GraduationCap
+                size={15}
+                className={effectiveViewMode === "remediation" ? "text-slate-950" : "text-emerald-500"}
+              />
+              <span>Recommended Learning Path</span>
+              <span
+                className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                  effectiveViewMode === "remediation"
+                    ? "bg-slate-950/20 text-slate-950"
+                    : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                }`}
+              >
+                Adaptive Learning
+              </span>
+            </button>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => setViewMode("placement")}
-            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
-              viewMode === "placement"
-                ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
-                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
-            }`}
-          >
-            <Activity size={14} className={viewMode === "placement" ? "text-slate-950" : "text-sky-400"} />
-            <span>AI Placement &amp; ML Studio</span>
-            <span
-              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
-                viewMode === "placement" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
-              }`}
-            >
-              Phase 5
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setViewMode("career")}
-            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
-              viewMode === "career"
-                ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
-                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
-            }`}
-          >
-            <Compass size={14} className={viewMode === "career" ? "text-slate-950" : "text-sky-400"} />
-            <span>Career Journey &amp; Outcomes</span>
-            <span
-              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
-                viewMode === "career" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
-              }`}
-            >
-              Phase 4
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setViewMode("remediation")}
-            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
-              viewMode === "remediation"
-                ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
-                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
-            }`}
-          >
-            <BrainCircuit size={14} className={viewMode === "remediation" ? "text-slate-950" : "text-sky-400"} />
-            <span>Adaptive Learning &amp; Remediation</span>
-            <span
-              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
-                viewMode === "remediation" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
-              }`}
-            >
-              Phase 3 Loop
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setViewMode("pipeline")}
-            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
-              viewMode === "pipeline"
-                ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
-                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
-            }`}
-          >
-            <Sparkles size={14} className={viewMode === "pipeline" ? "text-slate-950" : "text-sky-400"} />
-            <span>Learner Pipeline (7 Stages)</span>
-            <span
-              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
-                viewMode === "pipeline" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
-              }`}
-            >
-              Phase 2
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setViewMode("dossier")}
-            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
-              viewMode === "dossier"
-                ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
-                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
-            }`}
-          >
-            <UserRound size={14} className={viewMode === "dossier" ? "text-slate-950" : "text-sky-400"} />
-            <span>Candidate 360° Dossier</span>
-            <span
-              className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
-                viewMode === "dossier" ? "bg-slate-950/20 text-slate-950" : "bg-slate-800 text-slate-400"
-              }`}
-            >
-              {totalLearners} Candidates
-            </span>
-          </button>
+          <div className="hidden lg:flex items-center gap-2 pr-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+            <Sparkles size={13} className="text-sky-500" />
+            <span>AI Diagnostic Engine · BKT Skill Tracing Active</span>
+          </div>
         </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 rounded-xl border border-[#1e293b] bg-[#070d18]">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode("impact");
+                navigate("/learner?tab=impact");
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+                viewMode === "impact"
+                  ? "bg-indigo-500 text-slate-950 font-bold shadow-md shadow-indigo-500/20"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+              }`}
+            >
+              <TrendingUp size={14} className={viewMode === "impact" ? "text-slate-950" : "text-indigo-400"} />
+              <span>Impact &amp; Optimization</span>
+              <span
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                  viewMode === "impact" ? "bg-slate-950/20 text-slate-950" : "bg-indigo-500/10 text-indigo-400"
+                }`}
+              >
+                Phase 7
+              </span>
+            </button>
 
-        <div className="hidden lg:flex items-center gap-2 pr-3 font-mono text-[11px] text-slate-400">
-          <BrainCircuit size={13} className="text-sky-400" />
-          <span>BKT Updates · Career Outcomes · Calibrated XGBoost</span>
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode("intelligence");
+                navigate("/learner?tab=intelligence");
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+                viewMode === "intelligence"
+                  ? "bg-cyan-400 text-slate-950 font-bold shadow-md shadow-cyan-400/20"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+              }`}
+            >
+              <Compass size={14} className={viewMode === "intelligence" ? "text-slate-950" : "text-cyan-400"} />
+              <span>Career Intelligence</span>
+              <span
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                  viewMode === "intelligence" ? "bg-slate-950/20 text-slate-950" : "bg-cyan-500/10 text-cyan-400"
+                }`}
+              >
+                Phase 6
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode("placement");
+                navigate("/learner?tab=placement");
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+                viewMode === "placement"
+                  ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+              }`}
+            >
+              <Activity size={14} className={viewMode === "placement" ? "text-slate-950" : "text-sky-400"} />
+              <span>AI Placement &amp; ML Studio</span>
+              <span
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                  viewMode === "placement" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
+                }`}
+              >
+                Phase 5
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode("career");
+                navigate("/learner?tab=career");
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+                viewMode === "career"
+                  ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+              }`}
+            >
+              <Compass size={14} className={viewMode === "career" ? "text-slate-950" : "text-sky-400"} />
+              <span>Career Journey &amp; Outcomes</span>
+              <span
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                  viewMode === "career" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
+                }`}
+              >
+                Phase 4
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode("remediation");
+                navigate("/learner?tab=remediation");
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+                viewMode === "remediation"
+                  ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+              }`}
+            >
+              <BrainCircuit size={14} className={viewMode === "remediation" ? "text-slate-950" : "text-sky-400"} />
+              <span>Adaptive Learning &amp; Remediation</span>
+              <span
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                  viewMode === "remediation" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
+                }`}
+              >
+                Phase 3 Loop
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode("pipeline");
+                navigate("/learner?tab=pipeline");
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+                viewMode === "pipeline"
+                  ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+              }`}
+            >
+              <Sparkles size={14} className={viewMode === "pipeline" ? "text-slate-950" : "text-sky-400"} />
+              <span>Learner Pipeline (7 Stages)</span>
+              <span
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                  viewMode === "pipeline" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
+                }`}
+              >
+                Phase 2
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode("dossier");
+                navigate(selectedLearnerId ? `/learner/${encodeURIComponent(selectedLearnerId)}?tab=dossier` : "/learner?tab=dossier");
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+                viewMode === "dossier"
+                  ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+              }`}
+            >
+              <UserRound size={14} className={viewMode === "dossier" ? "text-slate-950" : "text-sky-400"} />
+              <span>Candidate 360° Dossier</span>
+              <span
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
+                  viewMode === "dossier" ? "bg-slate-950/20 text-slate-950" : "bg-slate-800 text-slate-400"
+                }`}
+              >
+                {totalLearners} Candidates
+              </span>
+            </button>
+          </div>
+
+          <div className="hidden lg:flex items-center gap-2 pr-3 font-mono text-[11px] text-slate-400">
+            <BrainCircuit size={13} className="text-sky-400" />
+            <span>BKT Updates · Career Outcomes · Calibrated XGBoost</span>
+          </div>
         </div>
-      </div>
+      )}
 
-      {viewMode === "impact" ? (
+      {permissions.isLearner ? (
+        effectiveViewMode === "remediation" ? (
+          <AdaptiveLearningWorkspace onProgressUpdated={fetchLearnersList} />
+        ) : (
+          <LearnerPipelineWizard
+            onProfileUpdated={fetchLearnersList}
+            onOpenRemediation={() => {
+              setViewMode("remediation");
+              navigate("/learner?tab=remediation");
+            }}
+          />
+        )
+      ) : viewMode === "impact" ? (
         <div className="space-y-8">
           <ImpactProgress learnerId={selectedLearnerId} />
           <ImpactIntelligenceDashboard />
@@ -929,25 +1093,37 @@ export default function LearnerIntelligence() {
 
         {/* Learner Switcher Grid */}
         <div className="mt-3 flex flex-wrap gap-2">
-          {listLoading ? (
-            Array.from({ length: 6 }).map((_, idx) => (
-              <div
-                key={idx}
-                className="flex h-12 w-64 animate-pulse items-center gap-2.5 rounded-lg border border-[#1e293b] bg-[#070d18] p-2"
-              >
-                <div className="h-7 w-7 rounded-md bg-[#1e293b]" />
-                <div className="flex-1 space-y-1">
-                  <div className="h-3 w-24 rounded bg-[#1e293b]" />
-                  <div className="h-2 w-32 rounded bg-[#1e293b]" />
+          {(() => {
+            const displayCandidates = currentLearner && !learnersList.some((it) => it.id === currentLearner.id)
+              ? [currentLearner, ...learnersList]
+              : learnersList;
+
+            if (listLoading) {
+              return Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="flex h-12 w-64 animate-pulse items-center gap-2.5 rounded-lg border border-[#1e293b] bg-[#070d18] p-2"
+                >
+                  <div className="h-7 w-7 rounded-md bg-[#1e293b]" />
+                  <div className="flex-1 space-y-1">
+                    <div className="h-3 w-24 rounded bg-[#1e293b]" />
+                    <div className="h-2 w-32 rounded bg-[#1e293b]" />
+                  </div>
                 </div>
-              </div>
-            ))
-          ) : learnersList.length === 0 ? (
-            <div className="w-full py-6 text-center font-mono text-xs text-slate-400">
-              No beneficiary records found matching "{searchQuery}".
-            </div>
-          ) : (
-            learnersList.map((learner) => {
+              ));
+            }
+
+            if (displayCandidates.length === 0) {
+              return (
+                <div className="w-full py-6 text-center font-mono text-xs text-slate-400">
+                  {searchQuery
+                    ? `No beneficiary records found matching "${searchQuery}".`
+                    : "No registered candidate records found in registry. New candidates will appear here as soon as they register or complete assessments."}
+                </div>
+              );
+            }
+
+            return displayCandidates.map((learner) => {
               const isSelected = learner.id === selectedLearnerId;
               const avatarGrad = getAvatarGradient(learner.full_name);
               const initials = getInitials(learner.full_name);
@@ -975,7 +1151,7 @@ export default function LearnerIntelligence() {
                         {learner.full_name}
                       </span>
                       <span className="rounded border border-sky-400/20 bg-sky-500/10 px-1.5 py-0.2 font-mono text-[9px] font-bold text-sky-300">
-                        {learner.employment_readiness_score}%
+                        {learner.employment_readiness_score ?? learner.readiness_score ?? 75}%
                       </span>
                     </div>
                     <p className="max-w-[170px] truncate font-mono text-[10px] text-slate-400">
@@ -984,8 +1160,8 @@ export default function LearnerIntelligence() {
                   </div>
                 </button>
               );
-            })
-          )}
+            });
+          })()}
         </div>
 
         {/* Pagination Bar */}

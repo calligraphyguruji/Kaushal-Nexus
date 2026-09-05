@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, Fragment } from "react";
 import {
   User,
   FileText,
@@ -11,26 +11,16 @@ import {
   Upload,
   ArrowRight,
   ArrowLeft,
-  Briefcase,
-  GraduationCap,
-  Building,
-  Calendar,
-  ExternalLink,
   Loader2,
-  TrendingUp,
   Cpu,
-  Layers,
-  ChevronRight,
-  Clock,
   Code2,
-  RefreshCw,
   ShieldCheck,
-  Award,
 } from "lucide-react";
 
 import { learnerPipelineApi } from "../api/learnerPipeline";
 import { assessmentsApi } from "../api/assessments";
 import { getErrorMessage } from "../api/client";
+import { upsertCandidateInRegistry } from "../utils/candidateRegistry";
 import BKTSkillMasteryCard from "./BKTSkillMasteryCard";
 
 const STEPS = [
@@ -59,7 +49,6 @@ export default function LearnerPipelineWizard({ onProfileUpdated, onOpenRemediat
   const [currentAssessment, setCurrentAssessment] = useState(null);
   const [answers, setAnswers] = useState({});
   const [submissionResult, setSubmissionResult] = useState(null);
-  const [bktSkills, setBktSkills] = useState([]);
   const [roleMatches, setRoleMatches] = useState(null);
   const [mlFeatures, setMlFeatures] = useState(null);
 
@@ -80,93 +69,270 @@ export default function LearnerPipelineWizard({ onProfileUpdated, onOpenRemediat
     linkedin_url: "",
   });
 
-  // Load initial candidate profile and roles
-  const loadInitialData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // 1. Fetch current profile
-      const prof = await learnerPipelineApi.getMyProfile();
-      setProfile(prof);
-      setProfileForm({
-        full_name: prof.full_name || "",
-        phone: prof.phone || "",
-        education_level: prof.education_level || "",
-        institution: prof.institution || "",
-        graduation_year: prof.graduation_year || 2026,
-        experience_years: prof.experience_years || 0.0,
-        bio: prof.bio || "",
-        github_url: prof.github_url || "",
-        linkedin_url: prof.linkedin_url || "",
-      });
-
-      // 2. Fetch available roles
-      const rolesList = await learnerPipelineApi.listRoles();
-      setRoles(rolesList || []);
-
-      if (prof.aspiring_role_id) {
-        const found = rolesList.find((r) => r.id === prof.aspiring_role_id);
-        setSelectedRole(found || null);
-      }
-
-      // 3. Check for active resume
+  // Load initial candidate profile and roles on mount
+  useEffect(() => {
+    let isMounted = true;
+    async function loadData() {
       try {
-        const rData = await learnerPipelineApi.getMyResume();
-        setResume(rData);
-      } catch (err) {
-        // No active resume is fine
-      }
+        // 1. Fetch current profile
+        try {
+          const prof = await learnerPipelineApi.getMyProfile();
+          if (!isMounted) return;
+          setProfile(prof);
+          setProfileForm({
+            full_name: prof.full_name || "",
+            phone: prof.phone || "",
+            education_level: prof.education_level || "",
+            institution: prof.institution || "",
+            graduation_year: prof.graduation_year || 2026,
+            experience_years: prof.experience_years || 0.0,
+            bio: prof.bio || "",
+            github_url: prof.github_url || "",
+            linkedin_url: prof.linkedin_url || "",
+          });
 
-      // 4. Fetch available assessments
-      try {
-        const aList = await assessmentsApi.listAssessments();
-        setAssessments(aList || []);
-        if (aList && aList.length > 0) {
-          const detail = await assessmentsApi.getAssessmentById(aList[0].id);
-          setCurrentAssessment(detail);
+          // 2. Fetch available roles
+          try {
+            const rolesList = await learnerPipelineApi.listRoles();
+            if (!isMounted) return;
+            setRoles(rolesList || []);
+            if (prof.aspiring_role_id) {
+              const found = (rolesList || []).find((r) => r.id === prof.aspiring_role_id);
+              setSelectedRole(found || null);
+            }
+          } catch {
+            // Fallback roles already handled
+          }
+        } catch (profErr) {
+          console.warn("Could not load remote profile, using local fallback:", profErr);
+        }
+
+        // 3. Check for active resume
+        try {
+          const rData = await learnerPipelineApi.getMyResume();
+          if (isMounted) setResume(rData);
+        } catch {
+          // No active resume is fine
+        }
+
+        // 4. Fetch available assessments
+        try {
+          const aList = await assessmentsApi.listAssessments();
+          if (isMounted) {
+            setAssessments(aList || []);
+            if (aList && aList.length > 0) {
+              const detail = await assessmentsApi.getAssessmentById(aList[0].id);
+              if (isMounted) setCurrentAssessment(detail);
+            }
+          }
+        } catch (err) {
+          console.warn("Could not load assessments:", err);
         }
       } catch (err) {
-        console.warn("Could not load assessments:", err);
+        if (isMounted) {
+          console.error("Pipeline initialization error:", err);
+          setError(getErrorMessage(err));
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      console.error("Pipeline initialization error:", err);
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
     }
-  }, []);
 
-  useEffect(() => {
-    loadInitialData();
-  }, [loadInitialData]);
+    loadData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const showNotification = (msg) => {
     setSuccessMsg(msg);
     setTimeout(() => setSuccessMsg(null), 4000);
   };
 
+  /**
+   * Sanitizes, normalizes, and validates optional GitHub and LinkedIn URLs
+   */
+  const sanitizeSocialLinks = () => {
+    let gh = (profileForm.github_url || "").trim();
+    let li = (profileForm.linkedin_url || "").trim();
+
+    // 1. Process GitHub link
+    if (gh) {
+      gh = gh.replace(/\/+$/, "");
+      // Detect incomplete fragments: e.g. "https://", "github", "https://github.com", "github.com" without a handle
+      if (
+        /^https?:\/\/?$/i.test(gh) ||
+        /^(https?:\/\/)?(www\.)?github\.com\/?$/i.test(gh) ||
+        /^github$/i.test(gh)
+      ) {
+        return {
+          valid: false,
+          error: "GitHub Profile URL is incomplete. Please enter your profile username (e.g. https://github.com/username) or clear the field (it is optional).",
+        };
+      }
+      // Normalize handle / domain without https
+      if (!/^https?:\/\//i.test(gh)) {
+        if (gh.toLowerCase().startsWith("github.com/")) {
+          gh = `https://${gh}`;
+        } else if (gh.startsWith("@")) {
+          gh = `https://github.com/${gh.slice(1)}`;
+        } else if (!gh.includes("/")) {
+          gh = `https://github.com/${gh}`;
+        } else {
+          gh = `https://${gh}`;
+        }
+      }
+    }
+
+    // 2. Process LinkedIn link
+    if (li) {
+      li = li.replace(/\/+$/, "");
+      // Detect incomplete fragments: e.g. "https://", "linkedin", "linkedin.com", "linkedin.com/in" without a handle
+      if (
+        /^https?:\/\/?$/i.test(li) ||
+        /^(https?:\/\/)?(www\.)?linkedin\.com\/?(in)?\/?$/i.test(li) ||
+        /^linkedin$/i.test(li)
+      ) {
+        return {
+          valid: false,
+          error: "LinkedIn Profile URL is incomplete. Please enter your profile path (e.g. https://linkedin.com/in/username) or clear the field (it is optional).",
+        };
+      }
+      // Normalize handle / domain without https
+      if (!/^https?:\/\//i.test(li)) {
+        if (li.toLowerCase().startsWith("linkedin.com/")) {
+          li = `https://${li}`;
+        } else if (li.toLowerCase().startsWith("in/")) {
+          li = `https://linkedin.com/${li}`;
+        } else if (!li.includes("/")) {
+          li = `https://linkedin.com/in/${li}`;
+        } else {
+          li = `https://${li}`;
+        }
+      }
+    }
+
+    return { valid: true, github_url: gh, linkedin_url: li };
+  };
+
   // STEP 1: Save Profile
   const handleSaveProfile = async (e) => {
     e?.preventDefault();
+    const linkCheck = sanitizeSocialLinks();
+    if (!linkCheck.valid) {
+      setError(linkCheck.error);
+      return;
+    }
+
     try {
       setSaving(true);
       setError(null);
-      const updated = await learnerPipelineApi.updateMyProfile({
-        full_name: profileForm.full_name,
-        phone: profileForm.phone,
-        education_level: profileForm.education_level,
-        institution: profileForm.institution,
+      const payload = {
+        full_name: profileForm.full_name?.trim() || "Candidate Learner",
+        phone: profileForm.phone?.trim() || "",
+        education_level: profileForm.education_level?.trim() || "",
+        institution: profileForm.institution?.trim() || "",
         graduation_year: parseInt(profileForm.graduation_year) || 2026,
         experience_years: parseFloat(profileForm.experience_years) || 0.0,
-        bio: profileForm.bio,
-        github_url: profileForm.github_url,
-        linkedin_url: profileForm.linkedin_url,
-      });
+        bio: profileForm.bio?.trim() || "",
+        github_url: linkCheck.github_url,
+        linkedin_url: linkCheck.linkedin_url,
+      };
+
+      let updated;
+      try {
+        updated = await learnerPipelineApi.updateMyProfile(payload);
+      } catch (apiErr) {
+        console.warn("API update failed, saving locally:", apiErr);
+        updated = {
+          ...profileForm,
+          ...payload,
+          id: profile?.id || "KN-2026-9812",
+        };
+        localStorage.setItem("kn_current_learner", JSON.stringify(updated));
+      }
+
+      if (updated) {
+        upsertCandidateInRegistry(updated);
+      }
+
       setProfile(updated);
+      setProfileForm((prev) => ({
+        ...prev,
+        github_url: linkCheck.github_url,
+        linkedin_url: linkCheck.linkedin_url,
+      }));
       showNotification("Profile details saved successfully!");
       if (onProfileUpdated) onProfileUpdated();
       setCurrentStep(2);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // STEP 1: Save Profile and Immediately Launch MCQ Assessment
+  const handleSaveAndTakeAssessment = async (e) => {
+    e?.preventDefault();
+    const linkCheck = sanitizeSocialLinks();
+    if (!linkCheck.valid) {
+      setError(linkCheck.error);
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError(null);
+      const payload = {
+        full_name: profileForm.full_name?.trim() || "Candidate Learner",
+        phone: profileForm.phone?.trim() || "",
+        education_level: profileForm.education_level?.trim() || "",
+        institution: profileForm.institution?.trim() || "",
+        graduation_year: parseInt(profileForm.graduation_year) || 2026,
+        experience_years: parseFloat(profileForm.experience_years) || 0.0,
+        bio: profileForm.bio?.trim() || "",
+        github_url: linkCheck.github_url,
+        linkedin_url: linkCheck.linkedin_url,
+      };
+
+      let updated;
+      try {
+        updated = await learnerPipelineApi.updateMyProfile(payload);
+      } catch (apiErr) {
+        console.warn("API update failed, saving locally:", apiErr);
+        updated = {
+          ...profileForm,
+          ...payload,
+          id: profile?.id || "KN-2026-9812",
+        };
+        localStorage.setItem("kn_current_learner", JSON.stringify(updated));
+      }
+
+      if (updated) {
+        upsertCandidateInRegistry(updated);
+      }
+
+      setProfile(updated);
+      setProfileForm((prev) => ({
+        ...prev,
+        github_url: linkCheck.github_url,
+        linkedin_url: linkCheck.linkedin_url,
+      }));
+      showNotification("Learner profile registered! Launching baseline MCQ Assessment...");
+      if (onProfileUpdated) onProfileUpdated();
+
+      if (!currentAssessment) {
+        try {
+          const generated = await assessmentsApi.generateForRole(selectedRole?.id || "role-fullstack");
+          setCurrentAssessment(generated);
+        } catch {
+          // Fallback to offline assessment if generation fails
+        }
+      }
+      setCurrentStep(4);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -289,8 +455,7 @@ export default function LearnerPipelineWizard({ onProfileUpdated, onOpenRemediat
       showNotification(`Assessment completed! Score: ${result.score_percentage}%`);
 
       // Refresh BKT knowledge state
-      const skillsResp = await learnerPipelineApi.getMySkills();
-      setBktSkills(skillsResp?.skills || []);
+      await learnerPipelineApi.getMySkills();
 
       setCurrentStep(5);
     } catch (err) {
@@ -350,7 +515,7 @@ export default function LearnerPipelineWizard({ onProfileUpdated, onOpenRemediat
             const isCurrent = s.id === currentStep;
 
             return (
-              <React.Fragment key={s.id}>
+              <Fragment key={s.id}>
                 <button
                   type="button"
                   onClick={() => setCurrentStep(s.id)}
@@ -380,7 +545,7 @@ export default function LearnerPipelineWizard({ onProfileUpdated, onOpenRemediat
                 {idx < STEPS.length - 1 && (
                   <div className="mx-1 h-0.5 w-6 bg-slate-200 dark:bg-slate-800 shrink-0" />
                 )}
-              </React.Fragment>
+              </Fragment>
             );
           })}
         </div>
@@ -511,28 +676,34 @@ export default function LearnerPipelineWizard({ onProfileUpdated, onOpenRemediat
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  GitHub Profile URL
+                  GitHub Profile URL <span className="font-normal text-slate-400">(Optional)</span>
                 </label>
                 <input
-                  type="url"
+                  type="text"
                   value={profileForm.github_url}
                   onChange={(e) => setProfileForm({ ...profileForm, github_url: e.target.value })}
-                  placeholder="https://github.com/your-handle"
+                  placeholder="https://github.com/your-handle or username"
                   className="mt-1 h-9 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 text-xs text-slate-900 focus:border-sky-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Optional. Leave blank or enter your profile URL / handle.
+                </p>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  LinkedIn Profile URL
+                  LinkedIn Profile URL <span className="font-normal text-slate-400">(Optional)</span>
                 </label>
                 <input
-                  type="url"
+                  type="text"
                   value={profileForm.linkedin_url}
                   onChange={(e) => setProfileForm({ ...profileForm, linkedin_url: e.target.value })}
-                  placeholder="https://linkedin.com/in/your-profile"
+                  placeholder="https://linkedin.com/in/your-profile or username"
                   className="mt-1 h-9 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 text-xs text-slate-900 focus:border-sky-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Optional. Leave blank or enter your profile URL / handle.
+                </p>
               </div>
             </div>
 
@@ -549,15 +720,25 @@ export default function LearnerPipelineWizard({ onProfileUpdated, onOpenRemediat
               />
             </div>
 
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={saving}
+                onClick={handleSaveAndTakeAssessment}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-sky-500/20 transition-all hover:brightness-110 disabled:opacity-50 cursor-pointer"
+              >
+                <BrainCircuit size={14} />
+                <span>Register &amp; Launch MCQ Assessment</span>
+                <ArrowRight size={14} />
+              </button>
+
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-sky-500 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
               >
                 {saving && <Loader2 size={14} className="animate-spin" />}
-                <span>Save Profile & Continue</span>
-                <ArrowRight size={14} />
+                <span>Save Profile Only</span>
               </button>
             </div>
           </form>
@@ -1226,7 +1407,15 @@ export default function LearnerPipelineWizard({ onProfileUpdated, onOpenRemediat
               <ArrowLeft size={14} />
               <span>Back to Knowledge State</span>
             </button>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <a
+                href="/skill-gap"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950/60 dark:text-rose-300 dark:hover:bg-rose-900/60 transition-all cursor-pointer"
+              >
+                <BarChart3 size={14} />
+                <span>View Skill-Gap Matrix</span>
+              </a>
+
               {onOpenRemediation && (
                 <button
                   type="button"

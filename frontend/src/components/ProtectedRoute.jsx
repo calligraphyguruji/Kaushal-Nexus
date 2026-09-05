@@ -12,6 +12,7 @@ export default function ProtectedRoute({
   children,
   requiredPermission,
   requiredRoles,
+  disallowedRoles,
 }) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
@@ -39,7 +40,27 @@ export default function ProtectedRoute({
     return children;
   }
 
-  // 3. Optional Permission Check
+  // 3. Disallowed Roles Check (e.g. Candidate Learner restricted from Officer screens)
+  if (disallowedRoles && Array.isArray(disallowedRoles) && disallowedRoles.includes(user.role)) {
+    if (user.role === "LEARNER") {
+      return <Navigate to="/learner" replace />;
+    }
+    return (
+      <DashboardLayout>
+        <div className="py-8">
+          <StateView
+            variant="forbidden"
+            title="Institutional Module Restricted"
+            message={`Your role (${user.role}) is restricted from accessing this administrative governance module.`}
+            backLink={user.role === "LEARNER" ? "/learner" : "/dashboard"}
+            backLabel={user.role === "LEARNER" ? "Return to My Learning Portal" : "Return to Overview"}
+          />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // 4. Optional Permission Check
   if (requiredPermission && !hasPermission(user, requiredPermission)) {
     return (
       <DashboardLayout>
@@ -48,15 +69,15 @@ export default function ProtectedRoute({
             variant="forbidden"
             title="Institutional Module Restricted"
             message={`Your role (${user.role}) does not have permission to access this module. If you require access, contact your MSDE or State System Administrator.`}
-            backLink="/dashboard"
-            backLabel="Return to Overview"
+            backLink={user.role === "LEARNER" ? "/learner" : "/dashboard"}
+            backLabel={user.role === "LEARNER" ? "Return to My Learning Portal" : "Return to Overview"}
           />
         </div>
       </DashboardLayout>
     );
   }
 
-  // 4. Optional Role Array Check
+  // 5. Optional Role Array Check
   if (requiredRoles && Array.isArray(requiredRoles) && !requiredRoles.includes(user.role)) {
     return (
       <DashboardLayout>
@@ -65,8 +86,8 @@ export default function ProtectedRoute({
             variant="forbidden"
             title="Role-Restricted Administration"
             message={`This administrative console is restricted to ${requiredRoles.join(", ")}. Your current role is ${user.role}.`}
-            backLink="/dashboard"
-            backLabel="Return to Overview"
+            backLink={user.role === "LEARNER" ? "/learner" : "/dashboard"}
+            backLabel={user.role === "LEARNER" ? "Return to My Learning Portal" : "Return to Overview"}
           />
         </div>
       </DashboardLayout>

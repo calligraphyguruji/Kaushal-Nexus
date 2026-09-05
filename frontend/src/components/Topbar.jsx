@@ -43,10 +43,18 @@ export default function Topbar({ onMenuClick }) {
     return ROLE_LABELS[r] || r || "MSDE Official";
   }
 
+  const isLearner = user?.role === "LEARNER";
   const roles = Object.values(ROLE_LABELS);
 
   // Compute Current Breadcrumb based on URL
-  const getBreadcrumb = (pathname) => {
+  const getBreadcrumb = (pathname, search = "") => {
+    if (isLearner) {
+      const isRemediation = search && search.includes("tab=remediation");
+      return {
+        group: "Candidate Portal",
+        section: isRemediation ? "Recommended Learning Path" : "Assessment & Skill Gaps",
+      };
+    }
     if (pathname.startsWith("/learner")) return { group: "Intelligence", section: "Learner Intelligence" };
     if (pathname.startsWith("/skill-gap")) return { group: "Intelligence", section: "Skill Gap Matrix" };
     if (pathname.startsWith("/regional")) return { group: "Intelligence", section: "Regional Intelligence" };
@@ -55,7 +63,7 @@ export default function Topbar({ onMenuClick }) {
     return { group: "Intelligence", section: "Overview & Impact" };
   };
 
-  const breadcrumb = getBreadcrumb(location.pathname);
+  const breadcrumb = getBreadcrumb(location.pathname, location.search);
 
   const notifications = [
     {
@@ -151,14 +159,14 @@ export default function Topbar({ onMenuClick }) {
     if (e) e.preventDefault();
     if (!searchQuery.trim()) return;
     setShowDropdown(false);
-    navigate(`/learner?search=${encodeURIComponent(searchQuery.trim())}`);
+    navigate(`/learner?search=${encodeURIComponent(searchQuery.trim())}&tab=dossier`);
   };
 
   const handleSelectLearner = (learner) => {
     setShowDropdown(false);
     setSearchQuery("");
     if (learner && learner.id) {
-      navigate(`/learner/${encodeURIComponent(learner.id)}`);
+      navigate(`/learner/${encodeURIComponent(learner.id)}?tab=dossier`);
     }
   };
 
@@ -209,175 +217,200 @@ export default function Topbar({ onMenuClick }) {
         <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-[#1e293b]" />
 
         {/* Role / Institutional Context Selector */}
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="h-8 cursor-pointer appearance-none rounded-lg border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] pl-2.5 pr-7 font-mono text-[11px] font-semibold text-slate-800 dark:text-slate-200 transition-colors hover:border-slate-400 dark:hover:border-slate-600 focus:border-sky-500 dark:focus:border-sky-400 focus:outline-none"
-            >
-              {roles.map((r) => (
-                <option key={r} value={r} className="bg-white dark:bg-[#0b1528] text-slate-800 dark:text-slate-200">
-                  {r}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              size={13}
-              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-          </div>
-
-          <span className="hidden xl:inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 px-2.5 py-0.5 text-[10px] font-mono">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-            Sandbox Active · NCVET
+        {isLearner ? (
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 font-mono text-[11px] font-semibold text-sky-700 dark:text-sky-300">
+            <ShieldCheck size={13} className="text-sky-500" />
+            Candidate Portal
           </span>
-        </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="h-8 cursor-pointer appearance-none rounded-lg border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] pl-2.5 pr-7 font-mono text-[11px] font-semibold text-slate-800 dark:text-slate-200 transition-colors hover:border-slate-400 dark:hover:border-slate-600 focus:border-sky-500 dark:focus:border-sky-400 focus:outline-none"
+              >
+                {roles.map((r) => (
+                  <option key={r} value={r} className="bg-white dark:bg-[#0b1528] text-slate-800 dark:text-slate-200">
+                    {r}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                size={13}
+                className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+            </div>
+
+            <span className="hidden xl:inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 px-2.5 py-0.5 text-[10px] font-mono">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+              Sandbox Active · NCVET
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Right Section: Global Search, Theme Toggle, Alerts, User Profile */}
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-        {/* Global Search Container */}
-        <div ref={searchContainerRef} className="relative hidden md:block">
-          <form onSubmit={handleSearchSubmit}>
-            <Search
-              size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              ref={inputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => {
-                if (searchQuery.trim().length >= 2) setShowDropdown(true);
-              }}
-              placeholder="Search candidate, district..."
-              className="h-8 w-52 lg:w-64 rounded-lg border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] pl-8 pr-7 font-sans text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:border-sky-500 dark:focus:border-sky-400 focus:bg-white dark:focus:bg-[#070d18] focus:outline-none"
-            />
-            {isSearching ? (
-              <Loader2
-                size={13}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 animate-spin text-sky-500 dark:text-sky-400"
+        {/* Global Search Container (Only available to Institutional Staff) */}
+        {!isLearner && (
+          <div ref={searchContainerRef} className="relative hidden md:block">
+            <form onSubmit={handleSearchSubmit}>
+              <Search
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               />
-            ) : searchQuery ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setShowDropdown(false);
+              <input
+                ref={inputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (searchQuery.trim().length >= 2) setShowDropdown(true);
                 }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
-              >
-                <X size={13} />
-              </button>
-            ) : (
-              <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-slate-200 dark:border-[#1e293b] bg-slate-200 dark:bg-[#070d18] px-1.5 py-0.5 font-mono text-[9px] text-slate-500 dark:text-slate-400">
-                /
-              </kbd>
-            )}
-          </form>
+                placeholder="Search candidate, district..."
+                className="h-8 w-52 lg:w-64 rounded-lg border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] pl-8 pr-7 font-sans text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:border-sky-500 dark:focus:border-sky-400 focus:bg-white dark:focus:bg-[#070d18] focus:outline-none"
+              />
+              {isSearching ? (
+                <Loader2
+                  size={13}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 animate-spin text-sky-500 dark:text-sky-400"
+                />
+              ) : searchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setShowDropdown(false);
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                >
+                  <X size={13} />
+                </button>
+              ) : (
+                <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-slate-200 dark:border-[#1e293b] bg-slate-200 dark:bg-[#070d18] px-1.5 py-0.5 font-mono text-[9px] text-slate-500 dark:text-slate-400">
+                  /
+                </kbd>
+              )}
+            </form>
 
-          {/* Instant Search Suggestions Dropdown */}
-          {showDropdown && searchQuery.trim().length >= 2 && (
-            <div className="absolute left-0 right-0 top-full mt-2 w-80 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-2.5 shadow-xl dark:shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
-              {hasSuggestions ? (
-                <div className="space-y-2">
-                  {/* Candidates Group */}
-                  {suggestions.learners.length > 0 && (
-                    <div>
-                      <span className="block px-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        Candidates ({suggestions.learners.length})
-                      </span>
-                      <div className="mt-1 space-y-0.5">
-                        {suggestions.learners.map((learner) => (
-                          <button
-                            key={learner.id}
-                            type="button"
-                            onClick={() => handleSelectLearner(learner)}
-                            className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs transition hover:bg-[#0f1c33]"
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <User size={13} className="shrink-0 text-sky-400" />
-                              <div className="min-w-0">
-                                <p className="truncate font-semibold text-slate-100">
-                                  {learner.full_name}
-                                </p>
-                                <p className="font-mono text-[10px] text-slate-400">
-                                  {learner.id} · {learner.district_name || learner.district_id}
-                                </p>
+            {/* Instant Search Suggestions Dropdown */}
+            {showDropdown && searchQuery.trim().length >= 2 && (
+              <div className="absolute left-0 right-0 top-full mt-2 w-80 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-2.5 shadow-xl dark:shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+                {hasSuggestions ? (
+                  <div className="space-y-2">
+                    {/* Candidates Group */}
+                    {suggestions.learners.length > 0 && (
+                      <div>
+                        <span className="block px-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          Candidates ({suggestions.learners.length})
+                        </span>
+                        <div className="mt-1 space-y-0.5">
+                          {suggestions.learners.map((learner) => (
+                            <button
+                              key={learner.id}
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleSelectLearner(learner);
+                              }}
+                              onClick={() => handleSelectLearner(learner)}
+                              className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs transition hover:bg-slate-100 dark:hover:bg-[#0f1c33] cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <User size={13} className="shrink-0 text-sky-400" />
+                                <div className="min-w-0">
+                                  <p className="truncate font-semibold text-slate-800 dark:text-slate-100">
+                                    {learner.full_name}
+                                  </p>
+                                  <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                                    {learner.id} · {learner.district_name || learner.district_id}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                            <span className="shrink-0 rounded border border-sky-400/20 bg-sky-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-sky-300">
-                              {learner.employment_readiness_score}%
-                            </span>
-                          </button>
-                        ))}
+                              <span className="shrink-0 rounded border border-sky-400/20 bg-sky-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-sky-600 dark:text-sky-300">
+                                {learner.employment_readiness_score}%
+                              </span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Districts Group */}
-                  {suggestions.districts.length > 0 && (
-                    <div className="border-t border-[#1e293b] pt-1.5">
-                      <span className="block px-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        Districts ({suggestions.districts.length})
-                      </span>
-                      <div className="mt-1 space-y-0.5">
-                        {suggestions.districts.map((dist) => (
-                          <button
-                            key={dist.district_id}
-                            type="button"
-                            onClick={() => handleSelectDistrict(dist)}
-                            className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs transition hover:bg-[#0f1c33]"
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <MapPin size={13} className="shrink-0 text-emerald-400" />
-                              <div>
-                                <p className="font-semibold text-slate-100">
-                                  {dist.name}
-                                </p>
-                                <p className="font-mono text-[10px] text-slate-400">
-                                  {dist.state} ({dist.tier})
-                                </p>
+                    {/* Districts Group */}
+                    {suggestions.districts.length > 0 && (
+                      <div className="border-t border-slate-200 dark:border-[#1e293b] pt-1.5">
+                        <span className="block px-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          Districts ({suggestions.districts.length})
+                        </span>
+                        <div className="mt-1 space-y-0.5">
+                          {suggestions.districts.map((dist) => (
+                            <button
+                              key={dist.district_id}
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleSelectDistrict(dist);
+                              }}
+                              onClick={() => handleSelectDistrict(dist)}
+                              className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs transition hover:bg-slate-100 dark:hover:bg-[#0f1c33] cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <MapPin size={13} className="shrink-0 text-emerald-400" />
+                                <div>
+                                  <p className="font-semibold text-slate-800 dark:text-slate-100">
+                                    {dist.name}
+                                  </p>
+                                  <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                                    {dist.state} ({dist.tier})
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                            <span className="font-mono text-[10px] font-semibold text-slate-400">
-                              {dist.placement_rate}% Placed
-                            </span>
-                          </button>
-                        ))}
+                              <span className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                                {dist.placement_rate}% Placed
+                              </span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Search All button */}
-                  <div className="border-t border-[#1e293b] pt-1.5">
+                    {/* Search All button */}
+                    <div className="border-t border-slate-200 dark:border-[#1e293b] pt-1.5">
+                      <button
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleSearchSubmit(e);
+                        }}
+                        onClick={handleSearchSubmit}
+                        className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-sky-500/10 border border-sky-400/20 py-1.5 font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 transition hover:bg-sky-500/20 cursor-pointer"
+                      >
+                        <span>Search for "{searchQuery}" in Registry</span>
+                        <ArrowRight size={12} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-3 text-center text-xs text-slate-400">
+                    <p>No exact candidate or district match.</p>
                     <button
                       type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleSearchSubmit(e);
+                      }}
                       onClick={handleSearchSubmit}
-                      className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-sky-500/10 border border-sky-400/20 py-1.5 font-mono text-xs font-semibold text-sky-400 transition hover:bg-sky-500/20"
+                      className="mt-1.5 font-mono text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
                     >
-                      <span>Search for "{searchQuery}" in Registry</span>
-                      <ArrowRight size={12} />
+                      Press Enter to search entire registry →
                     </button>
                   </div>
-                </div>
-              ) : (
-                <div className="py-3 text-center text-xs text-slate-400">
-                  <p>No exact candidate or district match.</p>
-                  <button
-                    type="button"
-                    onClick={handleSearchSubmit}
-                    className="mt-1.5 font-mono text-[11px] font-bold text-sky-400 hover:underline"
-                  >
-                    Press Enter to search entire registry →
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Theme Toggle Button */}
         <ThemeToggle />

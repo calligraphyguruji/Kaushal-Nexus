@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   UserRound,
@@ -11,13 +11,37 @@ import {
   Shield,
   X,
   Activity,
+  GraduationCap,
 } from "lucide-react";
 import { useSidebarStats } from "../hooks/useSidebarStats";
 import { usePermissions } from "../hooks/usePermissions";
 
 export default function Sidebar({ open, onClose }) {
+  const location = useLocation();
   const { stats } = useSidebarStats();
   const permissions = usePermissions();
+
+  const learnerNav = [
+    {
+      name: "Assessment & Skill Gaps",
+      path: "/learner?tab=pipeline",
+      icon: BrainCircuit,
+      badge: "Diagnostic",
+      badgeTone: "info",
+      isActive: (loc) =>
+        loc.pathname === "/learner" &&
+        (!loc.search || loc.search.includes("tab=pipeline") || !loc.search.includes("tab=remediation")),
+    },
+    {
+      name: "Recommended Learning Path",
+      path: "/learner?tab=remediation",
+      icon: GraduationCap,
+      badge: "Adaptive",
+      badgeTone: "success",
+      isActive: (loc) =>
+        loc.pathname === "/learner" && loc.search.includes("tab=remediation"),
+    },
+  ];
 
   const intelligenceNav = [
     {
@@ -56,6 +80,9 @@ export default function Sidebar({ open, onClose }) {
       badgeTone: stats.matching.tone,
     },
   ];
+
+  const navItems = permissions.isLearner ? learnerNav : intelligenceNav;
+  const navGroupTitle = permissions.isLearner ? "Candidate Portal" : "Intelligence";
 
   return (
     <>
@@ -108,61 +135,58 @@ export default function Sidebar({ open, onClose }) {
 
         {/* Navigation Sections */}
         <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
-          {/* Intelligence Group */}
+          {/* Main Navigation Group */}
           <div className="space-y-1">
             <div className="px-3 pb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400/80">
-              Intelligence
+              {navGroupTitle}
             </div>
 
-            {intelligenceNav.map((item) => {
+            {navItems.map((item) => {
               const Icon = item.icon;
+              const isItemActive = item.isActive
+                ? item.isActive(location)
+                : location.pathname === item.path;
 
               return (
                 <NavLink
                   key={item.path}
                   to={item.path}
                   onClick={onClose}
-                  className={({ isActive }) =>
-                    `group flex items-center justify-between rounded-lg px-3 py-2 text-xs font-sans transition-all duration-150 ${
-                      isActive
-                        ? "bg-sky-50 dark:bg-[#0b1528] text-sky-900 dark:text-white font-semibold border-l-2 border-sky-500 dark:border-sky-400 shadow-xs"
-                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#0b1528]/60 hover:text-slate-900 dark:hover:text-slate-200 font-medium"
-                    }`
-                  }
+                  className={`group flex items-center justify-between rounded-lg px-3 py-2 text-xs font-sans transition-all duration-150 ${
+                    isItemActive
+                      ? "bg-sky-50 dark:bg-[#0b1528] text-sky-900 dark:text-white font-semibold border-l-2 border-sky-500 dark:border-sky-400 shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#0b1528]/60 hover:text-slate-900 dark:hover:text-slate-200 font-medium"
+                  }`}
                 >
-                  {({ isActive }) => (
-                    <>
-                      <div className="flex items-center gap-2.5">
-                        <Icon
-                          size={16}
-                          strokeWidth={isActive ? 2.2 : 1.8}
-                          className={
-                            isActive
-                              ? "text-sky-600 dark:text-sky-400"
-                              : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300"
-                          }
-                        />
-                        <span>{item.name}</span>
-                      </div>
+                  <div className="flex items-center gap-2.5">
+                    <Icon
+                      size={16}
+                      strokeWidth={isItemActive ? 2.2 : 1.8}
+                      className={
+                        isItemActive
+                          ? "text-sky-600 dark:text-sky-400"
+                          : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300"
+                      }
+                    />
+                    <span>{item.name}</span>
+                  </div>
 
-                      {item.badge && (
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-[10px] font-mono tabular-nums border ${
-                            item.badgeTone === "danger"
-                              ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/70"
-                              : item.badgeTone === "warning"
-                              ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/70"
-                              : item.badgeTone === "info"
-                              ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/70"
-                              : isActive
-                              ? "bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-400/30 font-bold"
-                              : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-[#0b1528] dark:text-slate-400 dark:border-[#1e293b]"
-                          }`}
-                        >
-                          {item.badge}
-                        </span>
-                      )}
-                    </>
+                  {item.badge && (
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-mono tabular-nums border ${
+                        item.badgeTone === "danger"
+                          ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/70"
+                          : item.badgeTone === "warning"
+                          ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/70"
+                          : item.badgeTone === "info"
+                          ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/70"
+                          : isItemActive
+                          ? "bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-400/30 font-bold"
+                          : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-[#0b1528] dark:text-slate-400 dark:border-[#1e293b]"
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
                   )}
                 </NavLink>
               );
@@ -240,7 +264,7 @@ export default function Sidebar({ open, onClose }) {
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
                 <span className="font-heading text-[11px] font-bold text-slate-900 dark:text-white">
-                  National Engine
+                  {permissions.isLearner ? "Learner Portal" : "National Engine"}
                 </span>
               </div>
               <span className="rounded border border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 px-1.5 py-0.5 font-mono text-[9px] font-bold dark:text-emerald-300">
@@ -249,12 +273,16 @@ export default function Sidebar({ open, onClose }) {
             </div>
 
             <p className="mt-1.5 font-sans text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
-              {stats.footerSummary}
+              {permissions.isLearner
+                ? "AI-adaptive diagnostic remediation & targeted career readiness active."
+                : stats.footerSummary}
             </p>
 
             <div className="mt-2.5 flex items-center justify-between border-t border-slate-200 dark:border-[#1e293b] pt-2 font-mono text-[10px] text-slate-500">
-              <span>Sync: UIDAI / NCVET</span>
-              <span className="text-sky-600 dark:text-sky-400/80">Sandbox Active</span>
+              <span>{permissions.isLearner ? "NCVET · BKT Engine" : "Sync: UIDAI / NCVET"}</span>
+              <span className="text-sky-600 dark:text-sky-400/80">
+                {permissions.isLearner ? "Adaptive AI" : "Sandbox Active"}
+              </span>
             </div>
           </div>
         </div>

@@ -24,6 +24,7 @@ const SkillGapIntelligence = lazy(() => import("./pages/SkillGapIntelligence"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Experience = lazy(() => import("./pages/Experience"));
 const SaasTemplatePage = lazy(() => import("./pages/SaasTemplatePage"));
+const LearnerAssessmentPage = lazy(() => import("./pages/LearnerAssessmentPage"));
 
 // Lightweight cyber-navy fallback indicator
 function RouteFallback() {
@@ -64,7 +65,7 @@ function App() {
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute disallowedRoles={["LEARNER"]}>
                   <DashboardLayout>
                     <ImpactDashboard />
                   </DashboardLayout>
@@ -86,7 +87,7 @@ function App() {
             <Route
               path="/learner/:learnerId"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute disallowedRoles={["LEARNER"]}>
                   <DashboardLayout>
                     <LearnerIntelligence />
                   </DashboardLayout>
@@ -97,7 +98,7 @@ function App() {
             <Route
               path="/skill-gap"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute disallowedRoles={["LEARNER"]}>
                   <DashboardLayout>
                     <SkillGapIntelligence />
                   </DashboardLayout>
@@ -108,7 +109,7 @@ function App() {
             <Route
               path="/regional"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute disallowedRoles={["LEARNER"]}>
                   <DashboardLayout>
                     <RegionalIntelligence />
                   </DashboardLayout>
@@ -119,7 +120,7 @@ function App() {
             <Route
               path="/matching"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute disallowedRoles={["LEARNER"]}>
                   <DashboardLayout>
                     <EmployerMatching />
                   </DashboardLayout>
@@ -134,6 +135,15 @@ function App() {
                   <DashboardLayout>
                     <Settings />
                   </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/assessment"
+              element={
+                <ProtectedRoute>
+                  <LearnerAssessmentPage />
                 </ProtectedRoute>
               }
             />

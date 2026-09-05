@@ -1,5 +1,9 @@
 import { apiClient } from './client.js';
-import { learnersList } from '../data/learnerData.js';
+import {
+  listCandidatesFromRegistry,
+  getCandidateById,
+  upsertCandidateInRegistry,
+} from '../utils/candidateRegistry.js';
 
 export const learnersApi = {
   /**
@@ -9,27 +13,28 @@ export const learnersApi = {
   async list(params = {}) {
     try {
       const response = await apiClient.get('/learners', { params });
-      return response.data;
+      const remoteData = response.data || {};
+      const remoteItems = remoteData.items || (Array.isArray(remoteData) ? remoteData : []);
+      const localResult = listCandidatesFromRegistry(params);
+      const localItems = localResult.items || [];
+
+      // Combine candidates avoiding duplicates
+      const remoteIds = new Set(remoteItems.map((it) => it.id));
+      const combined = [
+        ...localItems.filter((c) => !remoteIds.has(c.id)),
+        ...remoteItems,
+      ];
+
+      return {
+        ...remoteData,
+        items: combined,
+        total: Math.max(remoteData.total || 0, combined.length),
+      };
     } catch (err) {
       if (!err.response) {
-        return {
-          items: learnersList.map((l) => ({
-            id: l.id,
-            full_name: l.name,
-            trade: l.trade,
-            district_name: l.location?.split(',')[0] || 'Lucknow',
-            status: l.status,
-            readiness_score: l.readiness,
-            nsqf_level: l.nsqfLevel,
-            aadhaar_verified: l.verified,
-          })),
-          total: learnersList.length,
-          page: 1,
-          page_size: 50,
-          pages: 1,
-        };
+        return listCandidatesFromRegistry(params);
       }
-      throw err;
+      return listCandidatesFromRegistry(params);
     }
   },
 
@@ -38,13 +43,21 @@ export const learnersApi = {
    * @param {string} learnerId
    */
   async getById(learnerId) {
+    if (!learnerId) return null;
     try {
-      const response = await apiClient.get(`/learners/${learnerId}`);
-      return response.data;
+      const response = await apiClient.get(`/learners/${encodeURIComponent(learnerId)}`);
+      if (response.data && response.data.id) {
+        return response.data;
+      }
+      const candidate = getCandidateById(learnerId);
+      return candidate || response.data;
     } catch (err) {
+      const candidate = getCandidateById(learnerId);
+      if (candidate) {
+        return candidate;
+      }
       if (!err.response) {
-        const found = learnersList.find((l) => l.id === learnerId);
-        return found || learnersList[0];
+        return null;
       }
       throw err;
     }
@@ -57,15 +70,13 @@ export const learnersApi = {
   async create(learnerData) {
     try {
       const response = await apiClient.post('/learners', learnerData);
+      try {
+        upsertCandidateInRegistry(response.data);
+      } catch {}
       return response.data;
     } catch (err) {
       if (!err.response) {
-        return {
-          id: `KN-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-          ...learnerData,
-          readiness_score: 85,
-          created_at: new Date().toISOString(),
-        };
+        return upsertCandidateInRegistry(learnerData);
       }
       throw err;
     }
@@ -79,10 +90,13 @@ export const learnersApi = {
   async update(learnerId, updateData) {
     try {
       const response = await apiClient.patch(`/learners/${learnerId}`, updateData);
+      try {
+        upsertCandidateInRegistry(response.data);
+      } catch {}
       return response.data;
     } catch (err) {
       if (!err.response) {
-        return { id: learnerId, ...updateData };
+        return upsertCandidateInRegistry({ id: learnerId, ...updateData });
       }
       throw err;
     }
@@ -324,6 +338,25 @@ export const learnersApi = {
       return response.data;
     } catch (err) {
       if (!err.response) {
+        const candidate = getCandidateById(learnerId);
+
+        if (candidate && Array.isArray(candidate.skills) && candidate.skills.length > 0) {
+          return {
+            learner_id: learnerId,
+            skills: candidate.skills.map((s, idx) => ({
+              skill_id: s.skill_id || s.id || `s${idx + 1}`,
+              skill: s.skill || s.name,
+              name: s.name || s.skill,
+              mastery_probability: typeof s.mastery_probability === 'number'
+                ? s.mastery_probability
+                : (s.score_percentage || 75) / 100,
+              score_percentage: s.score_percentage || Math.round((s.mastery_probability || 0.75) * 100),
+              status: s.status || (s.mastery_probability >= 0.75 ? 'mastered' : 'developing'),
+              questions_attempted: s.questions_attempted || 10,
+            })),
+          };
+        }
+
         return {
           learner_id: learnerId,
           skills: [
@@ -348,6 +381,35 @@ export const learnersApi = {
       return response.data;
     } catch (err) {
       if (!err.response) {
+        const candidate = getCandidateById(learnerId);
+        let candidateGaps = candidate?.detected_gaps || [];
+
+        if (!candidateGaps || candidateGaps.length === 0) {
+          try {
+            const activeGaps = JSON.parse(localStorage.getItem('kn_active_gaps') || '[]');
+            if (Array.isArray(activeGaps) && activeGaps.length > 0) {
+              candidateGaps = activeGaps;
+            }
+          } catch {
+            // Ignore
+          }
+        }
+
+        if (candidateGaps && candidateGaps.length > 0) {
+          return {
+            learner_id: learnerId,
+            role: roleId,
+            overall_alignment: 0.65,
+            skill_gaps: candidateGaps.map((g) => ({
+              skill: g.competency_name || g.name,
+              current_mastery: typeof g.workforce_supply_pct === 'number' ? g.workforce_supply_pct / 100 : 0.35,
+              required_mastery: typeof g.employer_demand_pct === 'number' ? g.employer_demand_pct / 100 : 0.85,
+              gap: typeof g.deficit_pct === 'number' ? g.deficit_pct / 100 : (typeof g.gap === 'number' ? (g.gap > 1 ? g.gap / 100 : g.gap) : 0.40),
+              priority: (g.severity || g.level || 'high').toLowerCase(),
+            })),
+          };
+        }
+
         return {
           learner_id: learnerId,
           role: roleId,

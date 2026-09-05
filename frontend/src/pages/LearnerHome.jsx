@@ -138,34 +138,55 @@ export default function LearnerHome() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden xl:flex items-center gap-8 h-full font-sans text-sm">
-            <Link
-              to="/learner"
-              className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
-            >
-              <Users size={16} className="text-sky-600 dark:text-sky-400" />
-              <span>Learner Intelligence</span>
-            </Link>
-            <Link
-              to="/skill-gap"
-              className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
-            >
-              <BrainCircuit size={16} className="text-indigo-600 dark:text-indigo-400" />
-              <span>Skill Gap Matrix</span>
-            </Link>
-            <Link
-              to="/regional"
-              className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
-            >
-              <MapPin size={16} className="text-emerald-600 dark:text-emerald-400" />
-              <span>Regional Analytics</span>
-            </Link>
-            <Link
-              to="/matching"
-              className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
-            >
-              <Briefcase size={16} className="text-amber-600 dark:text-amber-400" />
-              <span>Employer Network</span>
-            </Link>
+            {isAuthenticated && user?.role === "LEARNER" ? (
+              <>
+                <Link
+                  to="/learner?tab=pipeline"
+                  className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
+                >
+                  <BrainCircuit size={16} className="text-sky-600 dark:text-sky-400" />
+                  <span>Assessment &amp; Skill Gaps</span>
+                </Link>
+                <Link
+                  to="/learner?tab=remediation"
+                  className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
+                >
+                  <GraduationCap size={16} className="text-emerald-600 dark:text-emerald-400" />
+                  <span>Recommended Learning Path</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/learner"
+                  className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
+                >
+                  <Users size={16} className="text-sky-600 dark:text-sky-400" />
+                  <span>Learner Intelligence</span>
+                </Link>
+                <Link
+                  to="/skill-gap"
+                  className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
+                >
+                  <BrainCircuit size={16} className="text-indigo-600 dark:text-indigo-400" />
+                  <span>Skill Gap Matrix</span>
+                </Link>
+                <Link
+                  to="/regional"
+                  className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
+                >
+                  <MapPin size={16} className="text-emerald-600 dark:text-emerald-400" />
+                  <span>Regional Analytics</span>
+                </Link>
+                <Link
+                  to="/matching"
+                  className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
+                >
+                  <Briefcase size={16} className="text-amber-600 dark:text-amber-400" />
+                  <span>Employer Network</span>
+                </Link>
+              </>
+            )}
             <a
               href="#architecture"
               className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
@@ -199,10 +220,10 @@ export default function LearnerHome() {
             {isAuthenticated ? (
               <button
                 type="button"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate(user?.role === "LEARNER" ? "/learner" : "/dashboard")}
                 className="inline-flex items-center gap-2 rounded-lg bg-sky-400 hover:bg-sky-300 text-slate-950 px-4 py-2 text-xs font-bold font-sans uppercase tracking-wider transition-all glow-cyan cursor-pointer"
               >
-                <span>Dashboard</span>
+                <span>{user?.role === "LEARNER" ? "My Portal" : "Dashboard"}</span>
                 <ArrowRight size={14} />
               </button>
             ) : (
@@ -240,38 +261,61 @@ export default function LearnerHome() {
         {mobileMenuOpen && (
           <div className="xl:hidden border-b border-[#1e293b] bg-[#070d18]/95 px-6 py-5 shadow-2xl backdrop-blur-md">
             <nav className="flex flex-col space-y-3 font-mono text-xs">
-              <Link
-                to="/learner"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
-              >
-                <Users size={14} className="text-sky-400" />
-                <span>Learner Intelligence</span>
-              </Link>
-              <Link
-                to="/skill-gap"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
-              >
-                <BrainCircuit size={14} className="text-indigo-400" />
-                <span>Skill Gap Matrix</span>
-              </Link>
-              <Link
-                to="/regional"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
-              >
-                <MapPin size={14} className="text-emerald-400" />
-                <span>Regional Analytics</span>
-              </Link>
-              <Link
-                to="/matching"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
-              >
-                <Briefcase size={14} className="text-amber-400" />
-                <span>Employer Network</span>
-              </Link>
+              {isAuthenticated && user?.role === "LEARNER" ? (
+                <>
+                  <Link
+                    to="/learner?tab=pipeline"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
+                  >
+                    <BrainCircuit size={14} className="text-sky-400" />
+                    <span>Assessment &amp; Skill Gaps</span>
+                  </Link>
+                  <Link
+                    to="/learner?tab=remediation"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
+                  >
+                    <GraduationCap size={14} className="text-emerald-400" />
+                    <span>Recommended Learning Path</span>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/learner"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
+                  >
+                    <Users size={14} className="text-sky-400" />
+                    <span>Learner Intelligence</span>
+                  </Link>
+                  <Link
+                    to="/skill-gap"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
+                  >
+                    <BrainCircuit size={14} className="text-indigo-400" />
+                    <span>Skill Gap Matrix</span>
+                  </Link>
+                  <Link
+                    to="/regional"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
+                  >
+                    <MapPin size={14} className="text-emerald-400" />
+                    <span>Regional Analytics</span>
+                  </Link>
+                  <Link
+                    to="/matching"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400"
+                  >
+                    <Briefcase size={14} className="text-amber-400" />
+                    <span>Employer Network</span>
+                  </Link>
+                </>
+              )}
               <a
                 href="#architecture"
                 onClick={() => setMobileMenuOpen(false)}
