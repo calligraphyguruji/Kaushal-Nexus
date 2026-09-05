@@ -40,12 +40,24 @@ class Competency(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         index=True,
         doc="National Qualifications Register reference code",
     )
+    parent_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("competencies.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+        doc="Parent competency/skill standard for hierarchical subskills",
+    )
 
     # Relationships
     learner_skills: Mapped[List["LearnerSkill"]] = relationship(
         "LearnerSkill",
         back_populates="competency",
         cascade="all, delete-orphan",
+    )
+    parent: Mapped[Optional["Competency"]] = relationship(
+        "Competency",
+        remote_side="Competency.id",
+        backref="subskills",
     )
 
     __table_args__ = (
@@ -54,6 +66,10 @@ class Competency(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
     def __repr__(self) -> str:
         return f"<Competency(code='{self.code}', name='{self.name}', sector='{self.sector}')>"
+
+
+# Skill is an alias for Competency in KaushalNexus to maintain semantic compatibility
+Skill = Competency
 
 
 class LearnerSkill(Base, UUIDPrimaryKeyMixin, TimestampMixin):

@@ -43,3 +43,7 @@ generated_reports/
 *.njsproj
 *.sln
 *.sw?
+
+# Uploaded Files
+backend/uploads/
+uploads/

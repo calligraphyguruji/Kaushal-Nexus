@@ -9,6 +9,7 @@ export const UserRole = Object.freeze({
   EMPLOYER: "EMPLOYER",
   EVALUATOR: "EVALUATOR",
   SYSTEM_ADMIN: "SYSTEM_ADMIN",
+  LEARNER: "LEARNER",
 });
 
 /**
@@ -21,6 +22,7 @@ export const ROLE_LABELS = Object.freeze({
   [UserRole.EMPLOYER]: "Corporate Employer Partner",
   [UserRole.EVALUATOR]: "Assessment & Evaluation Agency",
   [UserRole.SYSTEM_ADMIN]: "System Administrator",
+  [UserRole.LEARNER]: "Candidate Learner / Intern",
 });
 
 export const ROLE_DESCRIPTIONS = Object.freeze({
@@ -30,6 +32,7 @@ export const ROLE_DESCRIPTIONS = Object.freeze({
   [UserRole.EMPLOYER]: "Hiring mandate management, semantic candidate discovery, and EPFO retention tracking.",
   [UserRole.EVALUATOR]: "Independent third-party skill assessments, NCVET credential validation, and verification audits.",
   [UserRole.SYSTEM_ADMIN]: "Full operational governance, queue monitoring, system audit inspection, and platform administration.",
+  [UserRole.LEARNER]: "Candidate intelligence portal, CV skill extraction, BKT knowledge state, and role matching.",
 });
 
 /**
@@ -168,6 +171,7 @@ export function computePermissions(user) {
     isEmployer: user?.role === UserRole.EMPLOYER,
     isEvaluator: user?.role === UserRole.EVALUATOR,
     isSystemAdmin: user?.role === UserRole.SYSTEM_ADMIN || user?.is_superuser === true,
+    isLearner: user?.role === UserRole.LEARNER,
     isSuperuser: Boolean(user?.is_superuser),
     role: user?.role,
     roleLabel: user?.role ? (ROLE_LABELS[user.role] || user.role) : "Unauthenticated",

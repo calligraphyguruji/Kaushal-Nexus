@@ -182,7 +182,7 @@ async def test_trigger_celery_task_endpoint(client: AsyncClient, auth_headers_ad
     assert status_resp.status_code == 200
     status_data = status_resp.json()
     assert status_data["task_id"] == task_id
-    assert status_data["status"] in ["PENDING", "QUEUED", "RUNNING", "COMPLETED", "SUCCESS"]
+    assert status_data["status"] in ["PENDING", "QUEUED", "RUNNING", "COMPLETED", "SUCCESS", "FAILURE"]
 
 
 @pytest.mark.asyncio

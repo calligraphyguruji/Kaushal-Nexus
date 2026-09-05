@@ -62,6 +62,32 @@ class AuthService:
         await db.commit()
         await db.refresh(db_user)
 
+        # If user registered as LEARNER, link or auto-provision candidate dossier
+        if db_user.role == "LEARNER":
+            from src.models.learner import Learner
+            from datetime import datetime
+            import uuid
+            l_stmt = select(Learner).where(Learner.email == db_user.email)
+            l_res = await db.execute(l_stmt)
+            learner = l_res.scalar_one_or_none()
+            if learner:
+                learner.user_id = db_user.id
+            else:
+                now_year = datetime.now().year
+                unique_suffix = uuid.uuid4().hex[:5].upper()
+                new_learner = Learner(
+                    id=f"KN-{now_year}-{unique_suffix}",
+                    user_id=db_user.id,
+                    full_name=db_user.full_name,
+                    email=db_user.email,
+                    district_id="UP-LUCKNOW",
+                    employment_readiness_score=0,
+                    overall_progress=0,
+                    status="In Training",
+                )
+                db.add(new_learner)
+            await db.commit()
+
         # Record registration audit log
         await audit_service.log_action(
             db=db,

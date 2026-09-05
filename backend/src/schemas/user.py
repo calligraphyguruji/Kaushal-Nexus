@@ -11,6 +11,7 @@ class UserRole(str, Enum):
     EMPLOYER = "EMPLOYER"
     EVALUATOR = "EVALUATOR"
     SYSTEM_ADMIN = "SYSTEM_ADMIN"
+    LEARNER = "LEARNER"
 
 
 class UserBase(BaseModel):

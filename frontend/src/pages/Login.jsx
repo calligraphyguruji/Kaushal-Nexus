@@ -68,12 +68,20 @@ const DEMO_PRESETS = [
     badge: "SysAdmin",
     desc: "Platform Governance & Audit Logs",
   },
+  {
+    roleName: "Candidate Learner",
+    role: "LEARNER",
+    email: "learner.demo@kaushalnexus.gov.in",
+    password: "KaushalNexus2026!",
+    badge: "Candidate Intern",
+    desc: "Learner Intelligence, CV Parsing, BKT & Matching",
+  },
 ];
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, user, isAuthenticated, isLoading } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
 
   const [email, setEmail] = useState("aman.mishra@msde.gov.in");
@@ -82,9 +90,11 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  // If already authenticated, redirect to /dashboard
+  // If already authenticated, redirect to appropriate portal
   if (!isLoading && isAuthenticated) {
-    const destination = location.state?.from?.pathname || "/dashboard";
+    const isLearner = user?.role === "LEARNER";
+    const defaultDest = isLearner ? "/learner" : "/dashboard";
+    const destination = location.state?.from?.pathname || defaultDest;
     return <Navigate to={destination} replace />;
   }
 
@@ -99,9 +109,11 @@ export default function Login() {
       setIsSubmitting(true);
       setError(null);
       localStorage.removeItem("kn_current_learner");
-      await login({ email: email.trim(), password });
+      const authData = await login({ email: email.trim(), password });
       window.dispatchEvent(new Event("kn-profile-updated"));
-      const destination = location.state?.from?.pathname || "/dashboard";
+      const isLearner = authData?.user?.role === "LEARNER";
+      const defaultDest = isLearner ? "/learner" : "/dashboard";
+      const destination = location.state?.from?.pathname || defaultDest;
       navigate(destination, { replace: true });
     } catch (err) {
       console.error("Login attempt failed:", err);

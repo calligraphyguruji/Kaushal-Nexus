@@ -282,6 +282,9 @@ export default function Register() {
                     <option value={UserRole.SYSTEM_ADMIN}>
                       SYSTEM_ADMIN — {ROLE_LABELS[UserRole.SYSTEM_ADMIN]}
                     </option>
+                    <option value={UserRole.LEARNER}>
+                      LEARNER — {ROLE_LABELS[UserRole.LEARNER]}
+                    </option>
                   </select>
                   <ChevronDown
                     size={14}

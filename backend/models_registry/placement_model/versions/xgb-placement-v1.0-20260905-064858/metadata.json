@@ -1,0 +1,207 @@
+{
+  "model_version": "xgb-placement-v1.0-20260905-064858",
+  "algorithm": "XGBoost + Isotonic CalibratedClassifierCV",
+  "trained_at": "2026-09-05T06:48:58.539331+00:00",
+  "dataset_records": 806,
+  "temporal_splits": {
+    "total_records": 806,
+    "train_count": 564,
+    "val_count": 121,
+    "test_count": 121,
+    "train_cutoff_range": "2024-06-01 to 2025-07-31",
+    "val_cutoff_range": "2025-08-02 to 2025-10-17",
+    "test_cutoff_range": "2025-10-17 to 2026-09-05",
+    "train_positives": 220,
+    "val_positives": 51,
+    "test_positives": 48
+  },
+  "metrics": {
+    "roc_auc": 0.8119,
+    "pr_auc": 0.6853,
+    "brier_score": 0.1791,
+    "log_loss": 0.7069,
+    "ece": 0.1041,
+    "accuracy": 0.7603,
+    "precision": 0.6508,
+    "recall": 0.8542,
+    "f1_score": 0.7387,
+    "best_threshold": 0.2,
+    "confusion_matrix": {
+      "tp": 41,
+      "fp": 22,
+      "tn": 51,
+      "fn": 7
+    }
+  },
+  "hyperparameters": {
+    "max_depth": 4,
+    "learning_rate": 0.05,
+    "n_estimators": 150,
+    "subsample": 0.85,
+    "colsample_bytree": 0.85,
+    "min_child_weight": 3,
+    "reg_lambda": 2.0
+  },
+  "calibration": {
+    "pre_calibration_brier": 0.1695,
+    "post_calibration_brier": 0.1791,
+    "pre_calibration_ece": 0.0761,
+    "post_calibration_ece": 0.1041,
+    "calibration_method": "isotonic",
+    "bins": [
+      {
+        "bin_index": 0,
+        "mean_predicted_prob": 0.0,
+        "fraction_of_positives": 0.0909,
+        "sample_count": 11
+      },
+      {
+        "bin_index": 1,
+        "mean_predicted_prob": 0.1109,
+        "fraction_of_positives": 0.1277,
+        "sample_count": 47
+      },
+      {
+        "bin_index": 2,
+        "mean_predicted_prob": 0.25,
+        "fraction_of_positives": 0.0,
+        "sample_count": 0
+      },
+      {
+        "bin_index": 3,
+        "mean_predicted_prob": 0.355,
+        "fraction_of_positives": 0.5263,
+        "sample_count": 19
+      },
+      {
+        "bin_index": 4,
+        "mean_predicted_prob": 0.4286,
+        "fraction_of_positives": 0.6429,
+        "sample_count": 14
+      },
+      {
+        "bin_index": 5,
+        "mean_predicted_prob": 0.5587,
+        "fraction_of_positives": 1.0,
+        "sample_count": 1
+      },
+      {
+        "bin_index": 6,
+        "mean_predicted_prob": 0.6406,
+        "fraction_of_positives": 1.0,
+        "sample_count": 2
+      },
+      {
+        "bin_index": 7,
+        "mean_predicted_prob": 0.76,
+        "fraction_of_positives": 0.65,
+        "sample_count": 20
+      },
+      {
+        "bin_index": 8,
+        "mean_predicted_prob": 0.8889,
+        "fraction_of_positives": 1.0,
+        "sample_count": 2
+      },
+      {
+        "bin_index": 9,
+        "mean_predicted_prob": 0.994,
+        "fraction_of_positives": 0.8,
+        "sample_count": 5
+      }
+    ]
+  },
+  "feature_importances": [
+    {
+      "feature_name": "Drill Remediation Efficacy",
+      "importance_score": 0.1041,
+      "importance_type": "gain",
+      "rank": 1
+    },
+    {
+      "feature_name": "Diagnostic Assessment Accuracy",
+      "importance_score": 0.0901,
+      "importance_type": "gain",
+      "rank": 2
+    },
+    {
+      "feature_name": "bkt_max_mastery",
+      "importance_score": 0.0606,
+      "importance_type": "gain",
+      "rank": 3
+    },
+    {
+      "feature_name": "skill_mastery_rate",
+      "importance_score": 0.0568,
+      "importance_type": "gain",
+      "rank": 4
+    },
+    {
+      "feature_name": "Python Fundamentals Mastery",
+      "importance_score": 0.0479,
+      "importance_type": "gain",
+      "rank": 5
+    },
+    {
+      "feature_name": "Aspiring Role Alignment Score",
+      "importance_score": 0.0302,
+      "importance_type": "gain",
+      "rank": 6
+    },
+    {
+      "feature_name": "SQL & Relational Databases Mastery",
+      "importance_score": 0.023,
+      "importance_type": "gain",
+      "rank": 7
+    },
+    {
+      "feature_name": "Critical Role Skill Gaps",
+      "importance_score": 0.0224,
+      "importance_type": "gain",
+      "rank": 8
+    },
+    {
+      "feature_name": "Composite Readiness Index",
+      "importance_score": 0.021,
+      "importance_type": "gain",
+      "rank": 9
+    },
+    {
+      "feature_name": "resume_project_count",
+      "importance_score": 0.0193,
+      "importance_type": "gain",
+      "rank": 10
+    },
+    {
+      "feature_name": "learning_activities_count",
+      "importance_score": 0.0193,
+      "importance_type": "gain",
+      "rank": 11
+    },
+    {
+      "feature_name": "Object-Oriented Programming Mastery",
+      "importance_score": 0.0186,
+      "importance_type": "gain",
+      "rank": 12
+    },
+    {
+      "feature_name": "bkt_min_mastery",
+      "importance_score": 0.0184,
+      "importance_type": "gain",
+      "rank": 13
+    },
+    {
+      "feature_name": "Verified Portfolio Projects",
+      "importance_score": 0.018,
+      "importance_type": "gain",
+      "rank": 14
+    },
+    {
+      "feature_name": "Skill Mastery Variance",
+      "importance_score": 0.0177,
+      "importance_type": "gain",
+      "rank": 15
+    }
+  ],
+  "is_active": false
+}

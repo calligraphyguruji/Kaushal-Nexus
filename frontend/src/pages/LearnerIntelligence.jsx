@@ -24,6 +24,11 @@ import {
   Building2,
   UserMinus,
   Plus,
+  Sparkles,
+  UserRound,
+  Compass,
+  Activity,
+  TrendingUp,
 } from "lucide-react";
 
 import { learnersApi } from "../api/learners";
@@ -40,6 +45,15 @@ import StatusBadge from "../components/StatusBadge";
 import IntelligenceCard from "../components/IntelligenceCard";
 import ActionModal from "../components/ActionModal";
 import AISkillIntelligence from "../components/AISkillIntelligence";
+import BKTSkillMasteryCard from "../components/BKTSkillMasteryCard";
+import LearnerPipelineWizard from "../components/LearnerPipelineWizard";
+import AdaptiveLearningWorkspace from "../components/AdaptiveLearningWorkspace";
+import CareerJourneyWorkspace from "../components/CareerJourneyWorkspace";
+import AIPlacementPredictionCard from "../components/AIPlacementPredictionCard";
+import MLModelStudio from "../components/MLModelStudio";
+import CareerIntelligenceCenter from "../components/CareerIntelligenceCenter";
+import ImpactProgress from "../components/ImpactProgress";
+import ImpactIntelligenceDashboard from "../components/ImpactIntelligenceDashboard";
 import StateView from "../components/StateView";
 
 // Deterministic color palette for candidate avatars
@@ -92,6 +106,10 @@ export default function LearnerIntelligence() {
 
   const urlSearch = searchParams.get("search") || "";
   const initialTargetId = learnerId || routeId || searchParams.get("id") || "";
+
+  // View Mode: 'career' (Phase 4 Journey & ML), 'remediation' (Phase 3 Loop), 'pipeline' (Phase 2), 'dossier' (Candidate 360)
+  const tabParam = searchParams.get("tab");
+  const [viewMode, setViewMode] = useState(tabParam || (initialTargetId ? "dossier" : "career"));
 
   // Candidate List & Pagination States
   const [learnersList, setLearnersList] = useState([]);
@@ -615,9 +633,198 @@ export default function LearnerIntelligence() {
       )}
 
       {/* =====================================================
-          2. COHORT SELECTOR & PAGINATED BROWSER
+          VIEW SWITCHER: Phase 5 Placement vs Phase 4 Career vs Phase 3 Remediation vs Phase 2 Pipeline vs Candidate 360 Dossier
       ====================================================== */}
-      <section className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-4 sm:p-5 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 rounded-xl border border-[#1e293b] bg-[#070d18]">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setViewMode("impact")}
+            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              viewMode === "impact"
+                ? "bg-indigo-500 text-slate-950 font-bold shadow-md shadow-indigo-500/20"
+                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+            }`}
+          >
+            <TrendingUp size={14} className={viewMode === "impact" ? "text-slate-950" : "text-indigo-400"} />
+            <span>Impact &amp; Optimization</span>
+            <span
+              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                viewMode === "impact" ? "bg-slate-950/20 text-slate-950" : "bg-indigo-500/10 text-indigo-400"
+              }`}
+            >
+              Phase 7
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setViewMode("intelligence")}
+            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              viewMode === "intelligence"
+                ? "bg-cyan-400 text-slate-950 font-bold shadow-md shadow-cyan-400/20"
+                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+            }`}
+          >
+            <Compass size={14} className={viewMode === "intelligence" ? "text-slate-950" : "text-cyan-400"} />
+            <span>Career Intelligence</span>
+            <span
+              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                viewMode === "intelligence" ? "bg-slate-950/20 text-slate-950" : "bg-cyan-500/10 text-cyan-400"
+              }`}
+            >
+              Phase 6
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setViewMode("placement")}
+            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              viewMode === "placement"
+                ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+            }`}
+          >
+            <Activity size={14} className={viewMode === "placement" ? "text-slate-950" : "text-sky-400"} />
+            <span>AI Placement &amp; ML Studio</span>
+            <span
+              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                viewMode === "placement" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
+              }`}
+            >
+              Phase 5
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setViewMode("career")}
+            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              viewMode === "career"
+                ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+            }`}
+          >
+            <Compass size={14} className={viewMode === "career" ? "text-slate-950" : "text-sky-400"} />
+            <span>Career Journey &amp; Outcomes</span>
+            <span
+              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                viewMode === "career" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
+              }`}
+            >
+              Phase 4
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setViewMode("remediation")}
+            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              viewMode === "remediation"
+                ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+            }`}
+          >
+            <BrainCircuit size={14} className={viewMode === "remediation" ? "text-slate-950" : "text-sky-400"} />
+            <span>Adaptive Learning &amp; Remediation</span>
+            <span
+              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                viewMode === "remediation" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
+              }`}
+            >
+              Phase 3 Loop
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setViewMode("pipeline")}
+            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              viewMode === "pipeline"
+                ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+            }`}
+          >
+            <Sparkles size={14} className={viewMode === "pipeline" ? "text-slate-950" : "text-sky-400"} />
+            <span>Learner Pipeline (7 Stages)</span>
+            <span
+              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                viewMode === "pipeline" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
+              }`}
+            >
+              Phase 2
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setViewMode("dossier")}
+            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              viewMode === "dossier"
+                ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+                : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
+            }`}
+          >
+            <UserRound size={14} className={viewMode === "dossier" ? "text-slate-950" : "text-sky-400"} />
+            <span>Candidate 360° Dossier</span>
+            <span
+              className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
+                viewMode === "dossier" ? "bg-slate-950/20 text-slate-950" : "bg-slate-800 text-slate-400"
+              }`}
+            >
+              {totalLearners} Candidates
+            </span>
+          </button>
+        </div>
+
+        <div className="hidden lg:flex items-center gap-2 pr-3 font-mono text-[11px] text-slate-400">
+          <BrainCircuit size={13} className="text-sky-400" />
+          <span>BKT Updates · Career Outcomes · Calibrated XGBoost</span>
+        </div>
+      </div>
+
+      {viewMode === "impact" ? (
+        <div className="space-y-8">
+          <ImpactProgress learnerId={selectedLearnerId} />
+          <ImpactIntelligenceDashboard />
+        </div>
+      ) : viewMode === "intelligence" ? (
+        <CareerIntelligenceCenter
+          learnerId={selectedLearnerId}
+          onNavigateAction={(action) => {
+            if (action.action_type === "PRACTICE_DRILL" || action.action_type === "REASSESS") setViewMode("remediation");
+            else if (action.action_type === "COMPLETE_PROJECT" || action.action_type === "APPLY_TO_ROLE") setViewMode("career");
+            else setViewMode("pipeline");
+          }}
+        />
+      ) : viewMode === "placement" ? (
+        <div className="space-y-6">
+          <AIPlacementPredictionCard
+            learnerId={selectedLearnerId}
+            onActionClick={(rec) => {
+              if (rec.category === "PRACTICE_DRILL") setViewMode("remediation");
+              else if (rec.category === "PROJECT" || rec.category === "APPLICATION") setViewMode("career");
+              else setViewMode("pipeline");
+            }}
+          />
+          <MLModelStudio onModelUpdated={fetchLearnersList} />
+        </div>
+      ) : viewMode === "career" ? (
+        <CareerJourneyWorkspace onJourneyUpdated={fetchLearnersList} />
+      ) : viewMode === "remediation" ? (
+        <AdaptiveLearningWorkspace onProgressUpdated={fetchLearnersList} />
+      ) : viewMode === "pipeline" ? (
+        <LearnerPipelineWizard
+          onProfileUpdated={fetchLearnersList}
+          onOpenRemediation={() => setViewMode("remediation")}
+        />
+      ) : (
+        <>
+          {/* =====================================================
+              2. COHORT SELECTOR & PAGINATED BROWSER
+          ====================================================== */}
+          <section className="rounded-xl border border-[#1e293b] bg-[#0b1528] p-4 sm:p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <UserCheck size={16} className="text-sky-400" />
@@ -1426,7 +1633,31 @@ export default function LearnerIntelligence() {
       )}
 
       {/* =====================================================
-          7. AI SKILL INTELLIGENCE & PERSONALIZED ROADMAP (GEMINI)
+          7. BAYESIAN KNOWLEDGE TRACING (BKT) SKILL MASTERY & GAPS
+      ====================================================== */}
+      {currentLearner && (
+        <BKTSkillMasteryCard
+          learnerId={currentLearner.id}
+          learnerName={currentLearner.full_name}
+        />
+      )}
+
+      {/* =====================================================
+          7.5. PHASE 5: CALIBRATED XGBOOST PLACEMENT PREDICTION
+      ====================================================== */}
+      {currentLearner && (
+        <AIPlacementPredictionCard
+          learnerId={currentLearner.id}
+          onActionClick={(rec) => {
+            if (rec.category === "PRACTICE_DRILL") setViewMode("remediation");
+            else if (rec.category === "PROJECT" || rec.category === "APPLICATION") setViewMode("career");
+            else setViewMode("pipeline");
+          }}
+        />
+      )}
+
+      {/* =====================================================
+          8. AI SKILL INTELLIGENCE & PERSONALIZED ROADMAP (GEMINI)
       ====================================================== */}
       {currentLearner && (
         <AISkillIntelligence
@@ -1875,6 +2106,8 @@ export default function LearnerIntelligence() {
               </div>
             </ActionModal>
           )}
+        </>
+      )}
         </>
       )}
     </div>

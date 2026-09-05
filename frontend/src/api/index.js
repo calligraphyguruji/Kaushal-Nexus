@@ -10,4 +10,9 @@ export { verificationApi } from './verification';
 export { auditApi } from './audit';
 export { tasksApi } from './tasks';
 export { aiApi } from './ai';
+export { learnerPipelineApi } from './learnerPipeline';
+export { mlPlacementApi } from './mlPlacement';
+export { careerIntelligenceApi } from './careerIntelligence';
+export * as impactApi from './impact';
+
 

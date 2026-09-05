@@ -1,10 +1,14 @@
+from datetime import datetime, timezone
 from typing import List, Optional
 import uuid
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter, Depends, File, Path, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.deps import get_current_user, require_role
+from src.api.deps import get_current_learner, get_current_user, require_role
 from src.core.database import get_db
+from src.core.exceptions import NotFoundException
+from src.models.learner import Learner
+from src.models.role import Role
 from src.models.user import User
 from src.schemas.common import PaginatedResponse
 from src.schemas.consent_dto import (
@@ -36,13 +40,65 @@ from src.schemas.self_employment_dto import (
     SelfEmploymentResponseDTO,
     SelfEmploymentVerifyDTO,
 )
+from src.schemas.bkt_dto import (
+    BKTFeatureVectorResponseDTO,
+    LearnerSkillGapsResponseDTO,
+    LearnerSkillsResponseDTO,
+)
 from src.schemas.user import UserRole
+from src.schemas.learner_intelligence_dto import (
+    AspiringRoleUpdateDTO,
+    LearnerOutcomeCreateDTO,
+    LearnerOutcomeResponseDTO,
+    LearnerProfileResponseDTO,
+    LearnerProfileUpdateDTO,
+    LearnerRoleMatchesResponseDTO,
+    MLFeatureVectorResponseDTO,
+    ResumeResponseDTO,
+    RoleDetailDTO,
+)
+from src.services.assessment_service import assessment_service
 from src.services.audit_service import audit_service
 from src.services.consent_service import consent_service
 from src.services.follow_up_service import follow_up_service
+from src.services.learner_profile_service import learner_profile_service
 from src.services.learner_service import learner_service
 from src.services.outcome_tracking_service import outcome_tracking_service
+from src.services.role_matching import role_matching_service
 from src.services.self_employment_service import self_employment_service
+from src.ml.feature_pipeline import ml_feature_service
+from src.schemas.adaptive_learning_dto import (
+    LearningActivityCreateDTO,
+    LearningActivityDTO,
+    LearningPlanDTO,
+    LearningPlanModuleDTO,
+    LearningProgressDTO,
+    PracticeQuestionSetDTO,
+    PracticeSubmitRequestDTO,
+    PracticeSubmitResponseDTO,
+)
+from src.services.learning_plan_service import LearningPlanService
+from src.services.adaptive_reassessment_service import AdaptiveReassessmentService
+from src.services.learning_progress_service import LearningProgressService
+from src.schemas.career_outcome_dto import (
+    CareerApplicationCreateDTO,
+    CareerApplicationResponseDTO,
+    CareerApplicationUpdateDTO,
+    CareerEventCreateDTO,
+    CareerEventResponseDTO,
+    CareerJourneyOverviewDTO,
+    LearnerProjectCreateDTO,
+    LearnerProjectResponseDTO,
+    MLFeatureSnapshotCreateDTO,
+    MLFeatureSnapshotResponseDTO,
+    OutcomeVerifyDTO,
+)
+from src.schemas.placement_ml_dto import LearnerPlacementPredictionDTO
+from src.schemas.career_intelligence_dto import CareerIntelligenceResponseDTO
+from src.services.career_tracking_service import career_tracking_service
+from src.services.ml_feature_snapshot_service import ml_feature_snapshot_service
+from src.services.placement_prediction_service import placement_prediction_service
+from src.services.career_intelligence_service import career_intelligence_service
 
 router = APIRouter()
 
@@ -73,6 +129,636 @@ CREDENTIAL_VERIFY_ROLES = (
     UserRole.EVALUATOR,
     UserRole.SYSTEM_ADMIN,
 )
+
+
+# ==============================================================================
+# Learner Self-Service & Intelligence Pipeline Endpoints (/me/...)
+# Strict candidate-level authorization: candidates only access their own dossier
+# ==============================================================================
+
+@router.get(
+    "/me/profile",
+    response_model=LearnerProfileResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Get Authenticated Learner Profile",
+    description="Retrieves current authenticated candidate profile, education, bio, and aspiring role.",
+)
+async def get_my_profile(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearnerProfileResponseDTO:
+    """Retrieves current candidate's profile."""
+    return await learner_profile_service.get_profile(db, current_learner)
+
+
+@router.put(
+    "/me/profile",
+    response_model=LearnerProfileResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Update Authenticated Learner Profile",
+    description="Updates candidate profile fields (institution, bio, links, graduation year, district).",
+)
+async def update_my_profile(
+    profile_in: LearnerProfileUpdateDTO,
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearnerProfileResponseDTO:
+    """Updates candidate's profile."""
+    return await learner_profile_service.update_profile(db, current_learner, profile_in)
+
+
+@router.patch(
+    "/me/profile",
+    response_model=LearnerProfileResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Partially Update Authenticated Learner Profile",
+)
+async def patch_my_profile(
+    profile_in: LearnerProfileUpdateDTO,
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearnerProfileResponseDTO:
+    """Partially updates candidate's profile."""
+    return await learner_profile_service.update_profile(db, current_learner, profile_in)
+
+
+@router.post(
+    "/me/resume",
+    response_model=ResumeResponseDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload Candidate Resume (PDF / DOCX)",
+    description=(
+        "Uploads candidate CV (up to 5MB), extracts raw text, detects and normalizes candidate skills "
+        "against competencies standard dictionary, and extracts project records. Resume skills are candidate "
+        "evidence and strictly NOT written to BKT mastery."
+    ),
+)
+async def upload_my_resume(
+    file: UploadFile = File(..., description="PDF or Word resume document"),
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> ResumeResponseDTO:
+    """Uploads and parses candidate CV."""
+    return await learner_profile_service.upload_and_process_resume(db, current_learner, file)
+
+
+@router.get(
+    "/me/resume",
+    response_model=ResumeResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Get Active Candidate Resume",
+    description="Retrieves current active resume with extracted skills and projects.",
+)
+async def get_my_resume(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> ResumeResponseDTO:
+    """Retrieves active resume for candidate."""
+    return await learner_profile_service.get_active_resume(db, current_learner)
+
+
+@router.delete(
+    "/me/resume",
+    status_code=status.HTTP_200_OK,
+    summary="Delete Active Candidate Resume",
+    description="Removes current active resume record and storage file.",
+)
+async def delete_my_resume(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> dict:
+    """Deletes active resume for candidate."""
+    return await learner_profile_service.delete_active_resume(db, current_learner)
+
+
+@router.get(
+    "/me/aspiring-role",
+    response_model=Optional[RoleDetailDTO],
+    status_code=status.HTTP_200_OK,
+    summary="Get Candidate Aspiring Role",
+    description="Retrieves details and competency requirements for the candidate's chosen target occupation.",
+)
+async def get_my_aspiring_role(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> Optional[RoleDetailDTO]:
+    """Retrieves candidate's target aspiring role standard."""
+    if not current_learner.aspiring_role_id:
+        return None
+    return await role_matching_service.get_role_by_id(db, current_learner.aspiring_role_id)
+
+
+@router.put(
+    "/me/aspiring-role",
+    response_model=RoleDetailDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Set Candidate Aspiring Role",
+    description="Associates a target internship or job role with the candidate.",
+)
+@router.post(
+    "/me/aspiring-role",
+    response_model=RoleDetailDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Set Candidate Aspiring Role (POST alias)",
+    description="Associates a target internship or job role with the candidate.",
+)
+async def set_my_aspiring_role(
+    req: AspiringRoleUpdateDTO,
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> RoleDetailDTO:
+    """Sets candidate's target aspiring role."""
+    return await learner_profile_service.set_aspiring_role(db, current_learner, req.role_id)
+
+
+@router.get(
+    "/me/skills",
+    response_model=LearnerSkillsResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Get My BKT Skill Masteries",
+    description="Returns estimated latent mastery probabilities for all competencies evaluated via BKT.",
+)
+async def get_my_skills(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearnerSkillsResponseDTO:
+    """Retrieves BKT estimated skill masteries for current learner."""
+    return await assessment_service.get_learner_skills(db, current_learner.id)
+
+
+@router.get(
+    "/me/skill-gaps",
+    response_model=LearnerSkillGapsResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Analyze My Skill Gaps against Aspiring Role",
+    description="Computes exact competency deficits against the candidate's aspiring role standard.",
+)
+async def get_my_skill_gaps(
+    role_id: Optional[str] = Query(None, description="Optional override role name or ID"),
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearnerSkillGapsResponseDTO:
+    """Calculates skill gaps against aspiring role standard."""
+    role_title = role_id
+    if not role_title and current_learner.aspiring_role_id:
+        r = await db.get(Role, current_learner.aspiring_role_id)
+        if r:
+            role_title = r.title
+    effective_role = role_title or "Python Developer Intern"
+    return await assessment_service.get_learner_skill_gaps(db, current_learner.id, effective_role)
+
+
+@router.get(
+    "/me/role-matches",
+    response_model=LearnerRoleMatchesResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Match Candidate to Industry Roles",
+    description=(
+        "Evaluates real-time BKT latent masteries against active role requirements. "
+        "Calculates weighted alignment score (0-100), strong skills, development areas, "
+        "and critical gaps for the aspiring role and top matching occupations."
+    ),
+)
+async def get_my_role_matches(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearnerRoleMatchesResponseDTO:
+    """Calculates deterministic role matches for current learner."""
+    return await role_matching_service.match_learner_to_roles(db, current_learner)
+
+
+@router.get(
+    "/me/bkt-features",
+    response_model=MLFeatureVectorResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Generate Leakage-Free Tabular Feature Vector (XGBoost Ready)",
+    description=(
+        "Produces clean, normalized numerical feature vector incorporating BKT masteries, "
+        "assessment engagement, resume evidence, and target role alignment prior to outcome events."
+    ),
+)
+async def get_my_bkt_features(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> MLFeatureVectorResponseDTO:
+    """Extracts leakage-free ML tabular feature vector for current learner."""
+    return await ml_feature_service.extract_learner_features(db, current_learner)
+
+
+@router.post(
+    "/me/outcomes",
+    response_model=LearnerOutcomeResponseDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Record Career Outcome Milestone",
+    description="Records ground-truth outcome (offer, placement, retention) in learner_outcomes.",
+)
+async def record_my_outcome(
+    outcome_in: LearnerOutcomeCreateDTO,
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearnerOutcomeResponseDTO:
+    """Records career outcome for current learner."""
+    return await ml_feature_service.record_learner_outcome(db, current_learner, outcome_in)
+
+
+@router.get(
+    "/me/outcomes",
+    response_model=List[LearnerOutcomeResponseDTO],
+    status_code=status.HTTP_200_OK,
+    summary="List Candidate Career Outcomes",
+    description="Retrieves historical career outcomes documented for candidate.",
+)
+async def list_my_outcomes(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> List[LearnerOutcomeResponseDTO]:
+    """Lists career outcomes for candidate."""
+    return await ml_feature_service.get_learner_outcomes(db, current_learner.id)
+
+
+# ==============================================================================
+# Phase 3: Adaptive Learning & Remediation Loop Endpoints (/me/...)
+# ==============================================================================
+
+@router.get(
+    "/me/learning-plan",
+    response_model=LearningPlanDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Get Active Personalized Learning Plan",
+    description="Retrieves the candidate's active remedial learning plan, sequential modules, gaps, and estimated hours.",
+)
+async def get_my_learning_plan(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearningPlanDTO:
+    """Retrieves active learning plan or auto-generates from BKT gaps if none exists."""
+    return await LearningPlanService.get_active_learning_plan(db, current_learner.id)
+
+
+@router.post(
+    "/me/learning-plan/generate",
+    response_model=LearningPlanDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Generate or Refresh Remedial Learning Plan",
+    description="Generates or regenerates a personalized learning plan based on live BKT knowledge state and aspiring role requirements.",
+)
+async def generate_my_learning_plan(
+    force_regenerate: bool = Query(False, description="Force rebuild plan from current BKT masteries"),
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearningPlanDTO:
+    """Generates or updates personalized learning plan."""
+    return await LearningPlanService.generate_or_get_learning_plan(
+        db, current_learner.id, force_regenerate=force_regenerate
+    )
+
+
+@router.get(
+    "/me/learning-plan/{module_id}",
+    response_model=LearningPlanModuleDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Get Learning Plan Module Details",
+    description="Retrieves specific competency module details, curated resources, and prerequisite requirements.",
+)
+async def get_my_learning_plan_module(
+    module_id: uuid.UUID = Path(..., description="Learning plan module unique identifier"),
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearningPlanModuleDTO:
+    """Retrieves module details with ownership validation."""
+    return await LearningPlanService.get_module_detail(db, current_learner.id, module_id)
+
+
+@router.get(
+    "/me/practice/{competency_id}",
+    response_model=PracticeQuestionSetDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Get Targeted Practice & Reassessment Items",
+    description="Fetches 3-5 targeted practice items matching the module's competency and current difficulty tier.",
+)
+async def get_my_practice_questions(
+    competency_id: uuid.UUID = Path(..., description="Target competency standard unique identifier"),
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> PracticeQuestionSetDTO:
+    """Retrieves targeted practice items for candidate's active module."""
+    return await AdaptiveReassessmentService.get_practice_questions_for_competency(
+        db, current_learner.id, competency_id
+    )
+
+
+@router.post(
+    "/me/practice/{competency_id}/submit",
+    response_model=PracticeSubmitResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Submit Practice / Reassessment Answers",
+    description=(
+        "Grades submitted answers, executes Bayesian Knowledge Tracing (BKT) updates, "
+        "evaluates gap convergence, and deterministically triggers adaptive interventions "
+        "(Advance to next gap, Difficulty Backoff, Prerequisite Remediation, or Spaced Repetition)."
+    ),
+)
+async def submit_my_practice(
+    competency_id: uuid.UUID = Path(..., description="Target competency standard unique identifier"),
+    submission_in: PracticeSubmitRequestDTO = ...,
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> PracticeSubmitResponseDTO:
+    """Submits practice attempt and runs closed-loop adaptive remediation engine."""
+    return await AdaptiveReassessmentService.submit_practice_attempt(
+        db, current_learner.id, competency_id, submission_in
+    )
+
+
+@router.post(
+    "/me/learning-activity",
+    response_model=LearningActivityDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Record Learning Activity",
+    description="Logs candidate educational resource engagement. Note: Activity does NOT directly modify BKT mastery.",
+)
+async def record_my_learning_activity(
+    activity_in: LearningActivityCreateDTO,
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearningActivityDTO:
+    """Logs candidate learning activity."""
+    return await LearningProgressService.record_learning_activity(
+        db, current_learner.id, activity_in
+    )
+
+
+@router.get(
+    "/me/learning-activity",
+    response_model=List[LearningActivityDTO],
+    status_code=status.HTTP_200_OK,
+    summary="Get Candidate Learning Activity History",
+    description="Retrieves recent learning engagement events for authenticated candidate.",
+)
+async def get_my_learning_activities(
+    limit: int = Query(50, ge=1, le=100, description="Max activities to retrieve"),
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> List[LearningActivityDTO]:
+    """Lists candidate learning activities."""
+    return await LearningProgressService.get_learning_activities(db, current_learner.id, limit=limit)
+
+
+@router.get(
+    "/me/learning-progress",
+    response_model=LearningProgressDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Get Overall Adaptive Learning Progress",
+    description="Summarizes overall remediation progress, completed vs remaining hours, skills mastered, and recent BKT deltas.",
+)
+async def get_my_learning_progress(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearningProgressDTO:
+    """Calculates overall learning progress and milestone summary."""
+    return await LearningProgressService.get_learning_progress(db, current_learner.id)
+
+
+# ==============================================================================
+# Phase 4: Career Outcome Tracking & ML Dataset Foundation Endpoints (/me/...)
+# ==============================================================================
+
+@router.post(
+    "/me/career-events",
+    response_model=CareerEventResponseDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Record Candidate Career Journey Event",
+    description="Records a timestamped career event (e.g. APPLICATION_SUBMITTED, INTERVIEW_ATTENDED, INTERNSHIP_ACCEPTED).",
+)
+async def record_my_career_event(
+    event_in: CareerEventCreateDTO,
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> CareerEventResponseDTO:
+    """Records a new career activity event for authenticated candidate."""
+    return await career_tracking_service.record_event(db, current_learner, event_in)
+
+
+@router.get(
+    "/me/career-events",
+    response_model=List[CareerEventResponseDTO],
+    status_code=status.HTTP_200_OK,
+    summary="List Candidate Career Events",
+    description="Retrieves chronological timeline of candidate career events with multi-criteria filters.",
+)
+async def list_my_career_events(
+    event_type: Optional[str] = Query(None, description="Filter by event type"),
+    role_id: Optional[uuid.UUID] = Query(None, description="Filter by associated role"),
+    date_from: Optional[datetime] = Query(None, description="Start date filter"),
+    date_to: Optional[datetime] = Query(None, description="End date filter"),
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> List[CareerEventResponseDTO]:
+    """Lists career events for authenticated candidate."""
+    return await career_tracking_service.list_events(
+        db=db,
+        learner_id=current_learner.id,
+        event_type=event_type,
+        role_id=role_id,
+        date_from=date_from,
+        date_to=date_to,
+    )
+
+
+@router.post(
+    "/me/applications",
+    response_model=CareerApplicationResponseDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Log Job or Internship Application",
+    description="Records a new internship or job application with company, role, status, and applied_at timestamp.",
+)
+async def create_my_application(
+    app_in: CareerApplicationCreateDTO,
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> CareerApplicationResponseDTO:
+    """Logs a candidate job or internship application."""
+    return await career_tracking_service.create_application(db, current_learner, app_in)
+
+
+@router.get(
+    "/me/applications",
+    response_model=List[CareerApplicationResponseDTO],
+    status_code=status.HTTP_200_OK,
+    summary="List Candidate Applications",
+    description="Retrieves active and historical job/internship applications submitted by candidate.",
+)
+async def list_my_applications(
+    status_filter: Optional[str] = Query(None, alias="status", description="Filter by application status"),
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> List[CareerApplicationResponseDTO]:
+    """Lists job applications for candidate."""
+    return await career_tracking_service.list_applications(
+        db=db,
+        learner_id=current_learner.id,
+        status_filter=status_filter,
+    )
+
+
+@router.patch(
+    "/me/applications/{application_id}",
+    response_model=CareerApplicationResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Update Application Status",
+    description="Updates application progression state (e.g. INTERVIEW, OFFERED, ACCEPTED, REJECTED).",
+)
+async def update_my_application(
+    application_id: uuid.UUID = Path(..., description="Application identifier"),
+    update_in: CareerApplicationUpdateDTO = ...,
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> CareerApplicationResponseDTO:
+    """Updates status or notes for an application."""
+    return await career_tracking_service.update_application(
+        db=db,
+        learner=current_learner,
+        application_id=application_id,
+        update_in=update_in,
+    )
+
+
+@router.post(
+    "/me/projects",
+    response_model=LearnerProjectResponseDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Log Practical Technical Project Evidence",
+    description="Adds a project implementation to candidate portfolio without directly inflating BKT knowledge mastery.",
+)
+async def create_my_project(
+    project_in: LearnerProjectCreateDTO,
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearnerProjectResponseDTO:
+    """Records a portfolio project for candidate."""
+    return await career_tracking_service.create_project(db, current_learner, project_in)
+
+
+@router.get(
+    "/me/projects",
+    response_model=List[LearnerProjectResponseDTO],
+    status_code=status.HTTP_200_OK,
+    summary="List Candidate Projects",
+    description="Lists portfolio projects completed by candidate.",
+)
+async def list_my_projects(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> List[LearnerProjectResponseDTO]:
+    """Lists portfolio projects for candidate."""
+    return await career_tracking_service.list_projects(db, current_learner.id)
+
+
+@router.get(
+    "/me/career-journey",
+    response_model=CareerJourneyOverviewDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Get Candidate 360° Career Journey Overview",
+    description="Synthesizes complete journey: role alignment, mastery, projects, applications, interviews, and real outcome milestones.",
+)
+async def get_my_career_journey(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> CareerJourneyOverviewDTO:
+    """Aggregates comprehensive career journey overview."""
+    return await career_tracking_service.get_career_journey_overview(db, current_learner)
+
+
+@router.post(
+    "/me/feature-snapshots",
+    response_model=MLFeatureSnapshotResponseDTO,
+    status_code=status.HTTP_201_CREATED,
+    summary="Generate Historical Feature Snapshot (Frozen at Cutoff T)",
+    description="Captures point-in-time tabular feature vector strictly respecting historical prediction cutoff T for leakage-free ML.",
+)
+async def create_my_feature_snapshot(
+    snapshot_in: Optional[MLFeatureSnapshotCreateDTO] = None,
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> MLFeatureSnapshotResponseDTO:
+    """Creates a frozen historical feature snapshot for candidate."""
+    cutoff = snapshot_in.prediction_cutoff if snapshot_in else None
+    version = snapshot_in.feature_version if snapshot_in else "v1"
+    role_id = snapshot_in.role_id if snapshot_in else None
+    return await ml_feature_snapshot_service.create_historical_snapshot(
+        db=db,
+        learner=current_learner,
+        cutoff=cutoff,
+        role_id=role_id,
+        feature_version=version,
+    )
+
+
+@router.get(
+    "/me/placement-prediction",
+    response_model=LearnerPlacementPredictionDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Get Candidate Calibrated AI Placement Prediction",
+    description="Forecasts calibrated placement probability (90-day horizon) using trained XGBoost with local TreeSHAP drivers and actionable recommendations.",
+)
+async def get_my_placement_prediction(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> LearnerPlacementPredictionDTO:
+    """Returns candidate personalized placement prediction and explainability report."""
+    return await placement_prediction_service.predict_for_learner(
+        db=db,
+        learner=current_learner,
+    )
+
+
+@router.get(
+    "/me/career-intelligence",
+    response_model=CareerIntelligenceResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Get Comprehensive Career Intelligence & Next-Best Actions",
+    description="Synthesizes BKT mastery, deterministic role matching, adaptive learning progress, portfolio evidence, and calibrated XGBoost placement probability into prioritized actions, strengths, and risk mitigations.",
+)
+async def get_my_career_intelligence(
+    db: AsyncSession = Depends(get_db),
+    current_learner: Learner = Depends(get_current_learner),
+) -> CareerIntelligenceResponseDTO:
+    """Returns candidate multi-component readiness, XGBoost estimate, and prioritized actions."""
+    return await career_intelligence_service.evaluate_career_intelligence(
+        db=db,
+        learner=current_learner,
+    )
+
+
+@router.patch(
+    "/outcomes/{outcome_id}/verify",
+    response_model=LearnerOutcomeResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Institutional Outcome Verification",
+    description="Allows authorized institutional staff or auditors to verify or reject self-reported outcomes.",
+)
+async def verify_outcome_endpoint(
+    outcome_id: uuid.UUID = Path(..., description="Outcome identifier"),
+    verify_in: OutcomeVerifyDTO = ...,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+) -> LearnerOutcomeResponseDTO:
+    """Verifies or rejects a reported career outcome."""
+    rec = await career_tracking_service.verify_outcome(db, outcome_id, verify_in)
+    return LearnerOutcomeResponseDTO(
+        id=rec.id,
+        learner_id=rec.learner_id,
+        role_id=rec.role_id,
+        role_title=rec.role.title if rec.role else None,
+        outcome_type=rec.outcome_type,
+        outcome_value=rec.outcome_value,
+        outcome_date=rec.outcome_date,
+        source=rec.source,
+        status=rec.status,
+        confidence=rec.confidence,
+        notes=rec.notes,
+        created_at=rec.created_at,
+    )
 
 
 @router.get(
@@ -567,3 +1253,116 @@ async def record_non_placement_reason(
         },
     )
     return res
+
+
+# ==============================================================================
+# Bayesian Knowledge Tracing (BKT) Mastery & Gap Analytics Endpoints
+# ==============================================================================
+
+@router.get(
+    "/{learner_id}/skills",
+    response_model=LearnerSkillsResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Get Learner Skill Masteries (BKT)",
+    description=(
+        "Returns estimated latent mastery probabilities and proficiency tiers ('weak', 'developing', "
+        "'proficient', 'mastered') for all competencies evaluated via Bayesian Knowledge Tracing."
+    ),
+)
+async def get_learner_skills(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier e.g. 'KN-2026-00561'"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+) -> LearnerSkillsResponseDTO:
+    """Retrieves BKT estimated skill masteries for learner."""
+    return await assessment_service.get_learner_skills(db, learner_id)
+
+
+@router.get(
+    "/{learner_id}/skill-gaps",
+    response_model=LearnerSkillGapsResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Analyze Skill Gaps against Benchmark Role",
+    description=(
+        "Computes exact competency deficits (required_mastery - current_mastery) against target occupation "
+        "standards (e.g. 'Python Developer Intern'), returning prioritized gaps sorted descending."
+    ),
+)
+async def get_learner_skill_gaps(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    role_id: Optional[str] = Query(None, description="Target role name or ID e.g. 'Python Developer Intern'"),
+    target_role: Optional[str] = Query(None, description="Alternative query param for role name"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+) -> LearnerSkillGapsResponseDTO:
+    """Calculates skill gaps against benchmark role using BKT mastery probabilities."""
+    effective_role = role_id or target_role or "Python Developer Intern"
+    return await assessment_service.get_learner_skill_gaps(db, learner_id, effective_role)
+
+
+@router.get(
+    "/{learner_id}/bkt-features",
+    response_model=BKTFeatureVectorResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Export BKT Feature Vector for XGBoost / ML Tabular Models",
+    description=(
+        "Produces clean, normalized numerical mastery feature vector (e.g. {'python_mastery': 0.82, "
+        "'sql_mastery': 0.64}) formatted for downstream XGBoost job readiness predictors."
+    ),
+)
+async def get_learner_bkt_features(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+) -> BKTFeatureVectorResponseDTO:
+    """Exports clean numerical BKT feature vector for ML training without data leakage."""
+    return await assessment_service.get_learner_bkt_features(db, learner_id)
+
+
+@router.post(
+    "/{learner_id}/placement-prediction",
+    response_model=LearnerPlacementPredictionDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Generate Learner Placement Prediction (Staff / Evaluator)",
+    description="Generates calibrated placement probability and local TreeSHAP explainability for any learner.",
+)
+async def predict_learner_placement_admin(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    prediction_cutoff: Optional[datetime] = Query(None, description="Historical cutoff timestamp T"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+) -> LearnerPlacementPredictionDTO:
+    """Generates placement prediction and explainability for a learner."""
+    learner = await db.get(Learner, learner_id)
+    if not learner:
+        raise NotFoundException(f"Candidate '{learner_id}' not found.")
+    return await placement_prediction_service.predict_for_learner(
+        db=db,
+        learner=learner,
+        cutoff=prediction_cutoff,
+    )
+
+
+@router.post(
+    "/{learner_id}/career-intelligence",
+    response_model=CareerIntelligenceResponseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Evaluate Learner Career Intelligence (Staff / Evaluator)",
+    description="Generates comprehensive career readiness evaluation, calibrated XGBoost placement probability, and prioritized actions for any learner.",
+)
+async def evaluate_learner_career_intelligence_admin(
+    learner_id: str = Path(..., description="Candidate beneficiary identifier"),
+    prediction_cutoff: Optional[datetime] = Query(None, description="Historical cutoff timestamp T"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(*ALL_INSTITUTIONAL_ROLES)),
+) -> CareerIntelligenceResponseDTO:
+    """Evaluates career readiness, XGBoost estimate, and next-best actions for a learner."""
+    learner = await db.get(Learner, learner_id)
+    if not learner:
+        raise NotFoundException(f"Candidate '{learner_id}' not found.")
+    return await career_intelligence_service.evaluate_career_intelligence(
+        db=db,
+        learner=learner,
+        cutoff=prediction_cutoff,
+    )
+

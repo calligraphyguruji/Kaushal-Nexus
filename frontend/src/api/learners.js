@@ -313,4 +313,78 @@ export const learnersApi = {
       throw err;
     }
   },
+
+  // ==========================================
+  // Bayesian Knowledge Tracing (BKT) APIs
+  // ==========================================
+
+  async getSkills(learnerId) {
+    try {
+      const response = await apiClient.get(`/learners/${learnerId}/skills`);
+      return response.data;
+    } catch (err) {
+      if (!err.response) {
+        return {
+          learner_id: learnerId,
+          skills: [
+            { skill_id: "s1", skill: "Python Basics", mastery_probability: 0.82, status: "mastered", questions_attempted: 12 },
+            { skill_id: "s2", skill: "Python OOP", mastery_probability: 0.54, status: "developing", questions_attempted: 8 },
+            { skill_id: "s3", skill: "SQL", mastery_probability: 0.43, status: "developing", questions_attempted: 9 },
+            { skill_id: "s4", skill: "Git", mastery_probability: 0.31, status: "weak", questions_attempted: 6 },
+            { skill_id: "s5", skill: "DSA", mastery_probability: 0.65, status: "proficient", questions_attempted: 14 },
+            { skill_id: "s6", skill: "REST API", mastery_probability: 0.25, status: "weak", questions_attempted: 7 },
+          ],
+        };
+      }
+      throw err;
+    }
+  },
+
+  async getSkillGaps(learnerId, roleId = "Python Developer Intern") {
+    try {
+      const response = await apiClient.get(`/learners/${learnerId}/skill-gaps`, {
+        params: { role_id: roleId },
+      });
+      return response.data;
+    } catch (err) {
+      if (!err.response) {
+        return {
+          learner_id: learnerId,
+          role: roleId,
+          overall_alignment: 0.63,
+          skill_gaps: [
+            { skill: "REST API", current_mastery: 0.25, required_mastery: 0.60, gap: 0.35, priority: "high" },
+            { skill: "Git", current_mastery: 0.31, required_mastery: 0.60, gap: 0.29, priority: "high" },
+            { skill: "SQL", current_mastery: 0.43, required_mastery: 0.65, gap: 0.22, priority: "medium" },
+            { skill: "Python OOP", current_mastery: 0.54, required_mastery: 0.70, gap: 0.16, priority: "medium" },
+          ],
+        };
+      }
+      throw err;
+    }
+  },
+
+  async getBktFeatures(learnerId) {
+    try {
+      const response = await apiClient.get(`/learners/${learnerId}/bkt-features`);
+      return response.data;
+    } catch (err) {
+      if (!err.response) {
+        return {
+          learner_id: learnerId,
+          features: {
+            python_basics_mastery: 0.82,
+            python_oop_mastery: 0.54,
+            sql_mastery: 0.43,
+            git_mastery: 0.31,
+            dsa_mastery: 0.65,
+            rest_api_mastery: 0.25,
+          },
+          total_skills_assessed: 6,
+          generated_at: new Date().toISOString(),
+        };
+      }
+      throw err;
+    }
+  },
 };

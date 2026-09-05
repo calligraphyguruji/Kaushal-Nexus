@@ -1,0 +1,207 @@
+{
+  "model_version": "xgb-placement-v1.0-20260905-070250",
+  "algorithm": "XGBoost + Isotonic CalibratedClassifierCV",
+  "trained_at": "2026-09-05T07:02:50.648516+00:00",
+  "dataset_records": 808,
+  "temporal_splits": {
+    "total_records": 808,
+    "train_count": 565,
+    "val_count": 121,
+    "test_count": 122,
+    "train_cutoff_range": "2024-06-01 to 2025-08-02",
+    "val_cutoff_range": "2025-08-02 to 2025-10-17",
+    "test_cutoff_range": "2025-10-17 to 2026-09-05",
+    "train_positives": 220,
+    "val_positives": 51,
+    "test_positives": 48
+  },
+  "metrics": {
+    "roc_auc": 0.8187,
+    "pr_auc": 0.7078,
+    "brier_score": 0.1671,
+    "log_loss": 0.8532,
+    "ece": 0.0669,
+    "accuracy": 0.7459,
+    "precision": 0.6232,
+    "recall": 0.8958,
+    "f1_score": 0.735,
+    "best_threshold": 0.2,
+    "confusion_matrix": {
+      "tp": 43,
+      "fp": 26,
+      "tn": 48,
+      "fn": 5
+    }
+  },
+  "hyperparameters": {
+    "max_depth": 4,
+    "learning_rate": 0.05,
+    "n_estimators": 150,
+    "subsample": 0.85,
+    "colsample_bytree": 0.85,
+    "min_child_weight": 3,
+    "reg_lambda": 2.0
+  },
+  "calibration": {
+    "pre_calibration_brier": 0.1693,
+    "post_calibration_brier": 0.1671,
+    "pre_calibration_ece": 0.1236,
+    "post_calibration_ece": 0.0669,
+    "calibration_method": "isotonic",
+    "bins": [
+      {
+        "bin_index": 0,
+        "mean_predicted_prob": 0.0548,
+        "fraction_of_positives": 0.0943,
+        "sample_count": 53
+      },
+      {
+        "bin_index": 1,
+        "mean_predicted_prob": 0.15,
+        "fraction_of_positives": 0.0,
+        "sample_count": 0
+      },
+      {
+        "bin_index": 2,
+        "mean_predicted_prob": 0.25,
+        "fraction_of_positives": 0.0,
+        "sample_count": 0
+      },
+      {
+        "bin_index": 3,
+        "mean_predicted_prob": 0.3746,
+        "fraction_of_positives": 0.5217,
+        "sample_count": 23
+      },
+      {
+        "bin_index": 4,
+        "mean_predicted_prob": 0.4,
+        "fraction_of_positives": 0.4706,
+        "sample_count": 17
+      },
+      {
+        "bin_index": 5,
+        "mean_predicted_prob": 0.55,
+        "fraction_of_positives": 0.0,
+        "sample_count": 0
+      },
+      {
+        "bin_index": 6,
+        "mean_predicted_prob": 0.65,
+        "fraction_of_positives": 0.0,
+        "sample_count": 0
+      },
+      {
+        "bin_index": 7,
+        "mean_predicted_prob": 0.7703,
+        "fraction_of_positives": 0.7727,
+        "sample_count": 22
+      },
+      {
+        "bin_index": 8,
+        "mean_predicted_prob": 0.833,
+        "fraction_of_positives": 1.0,
+        "sample_count": 3
+      },
+      {
+        "bin_index": 9,
+        "mean_predicted_prob": 0.982,
+        "fraction_of_positives": 0.75,
+        "sample_count": 4
+      }
+    ]
+  },
+  "feature_importances": [
+    {
+      "feature_name": "Drill Remediation Efficacy",
+      "importance_score": 0.0941,
+      "importance_type": "gain",
+      "rank": 1
+    },
+    {
+      "feature_name": "Diagnostic Assessment Accuracy",
+      "importance_score": 0.0716,
+      "importance_type": "gain",
+      "rank": 2
+    },
+    {
+      "feature_name": "Python Fundamentals Mastery",
+      "importance_score": 0.0518,
+      "importance_type": "gain",
+      "rank": 3
+    },
+    {
+      "feature_name": "Interviews Attended",
+      "importance_score": 0.0489,
+      "importance_type": "gain",
+      "rank": 4
+    },
+    {
+      "feature_name": "bkt_max_mastery",
+      "importance_score": 0.048,
+      "importance_type": "gain",
+      "rank": 5
+    },
+    {
+      "feature_name": "Aspiring Role Alignment Score",
+      "importance_score": 0.0317,
+      "importance_type": "gain",
+      "rank": 6
+    },
+    {
+      "feature_name": "bkt_min_mastery",
+      "importance_score": 0.0275,
+      "importance_type": "gain",
+      "rank": 7
+    },
+    {
+      "feature_name": "bkt_weak_skill_count",
+      "importance_score": 0.0272,
+      "importance_type": "gain",
+      "rank": 8
+    },
+    {
+      "feature_name": "SQL & Relational Databases Mastery",
+      "importance_score": 0.0252,
+      "importance_type": "gain",
+      "rank": 9
+    },
+    {
+      "feature_name": "Critical Role Skill Gaps",
+      "importance_score": 0.0249,
+      "importance_type": "gain",
+      "rank": 10
+    },
+    {
+      "feature_name": "roadmap_estimated_hours_remaining",
+      "importance_score": 0.0214,
+      "importance_type": "gain",
+      "rank": 11
+    },
+    {
+      "feature_name": "skill_mastery_rate",
+      "importance_score": 0.0201,
+      "importance_type": "gain",
+      "rank": 12
+    },
+    {
+      "feature_name": "bkt_developing_skill_count",
+      "importance_score": 0.0198,
+      "importance_type": "gain",
+      "rank": 13
+    },
+    {
+      "feature_name": "interview_rate",
+      "importance_score": 0.0195,
+      "importance_type": "gain",
+      "rank": 14
+    },
+    {
+      "feature_name": "Composite Readiness Index",
+      "importance_score": 0.0192,
+      "importance_type": "gain",
+      "rank": 15
+    }
+  ],
+  "is_active": false
+}

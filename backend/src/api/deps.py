@@ -90,3 +90,59 @@ def require_role(*allowed_roles: Union[UserRole, str]) -> Callable:
         return current_user
 
     return role_checker
+
+
+async def get_current_learner(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> "Learner":
+    """
+    Retrieves the authenticated learner associated with the current session.
+    Auto-provisions a learner record for newly registered users with role LEARNER.
+    Enforces strict ownership: candidates can only access their own dossier.
+    """
+    from datetime import datetime
+    from sqlalchemy.orm import selectinload
+    from src.models.learner import Learner
+
+    stmt = (
+        select(Learner)
+        .where((Learner.user_id == current_user.id) | (Learner.email == current_user.email))
+        .options(
+            selectinload(Learner.skills),
+            selectinload(Learner.aspiring_role),
+            selectinload(Learner.resumes),
+        )
+    )
+    result = await db.execute(stmt)
+    learner = result.scalars().first()
+
+    if not learner:
+        if current_user.role == UserRole.LEARNER.value or current_user.is_superuser:
+            now_year = datetime.now().year
+            unique_id = f"KN-{now_year}-{uuid.uuid4().hex[:5].upper()}"
+            learner = Learner(
+                id=unique_id,
+                user_id=current_user.id,
+                full_name=current_user.full_name,
+                email=current_user.email,
+                district_id="UP-LUCKNOW",
+                employment_readiness_score=0,
+                overall_progress=0,
+                status="In Training",
+            )
+            db.add(learner)
+            await db.commit()
+            await db.refresh(learner)
+        else:
+            raise ForbiddenException(
+                message="Account does not have a linked candidate learner dossier.",
+                details={"user_id": str(current_user.id), "role": current_user.role},
+            )
+
+    if learner.user_id != current_user.id:
+        learner.user_id = current_user.id
+        await db.commit()
+
+    return learner
+

@@ -88,6 +88,8 @@ async def analyze_skill_gap(
                     # Enrich existing gaps if available
                     if not req.existing_gaps and learner_dossier.detected_gaps:
                         req.existing_gaps = [g.name for g in learner_dossier.detected_gaps]
+            except AppException:
+                raise
             except Exception as enrich_err:
                 logger.warning(
                     f"Optional database enrichment for learner '{req.learner_id}' skipped ({enrich_err}). Proceeding with payload."

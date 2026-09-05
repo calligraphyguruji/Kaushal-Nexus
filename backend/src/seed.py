@@ -12,6 +12,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.database import AsyncSessionLocal, dispose_engine, engine
 from src.core.logging import logger, setup_logging
 from src.core.security import get_password_hash
+from src.models.assessment import (
+    Assessment,
+    AssessmentQuestion,
+    AssessmentSubmission,
+    LearnerSkillHistory,
+    LearnerSkillMastery,
+)
 from src.models.audit_log import AuditLog
 from src.models.competency import Competency, LearnerSkill
 from src.models.district import District
@@ -106,6 +113,12 @@ COMPETENCIES_DATA = [
     # code, name, sector, nqr_code
     # IT-ITeS
     ("COMP-PY-DEV", "Python Application Development", "IT-ITeS", "NQR-2026-IT-01"),
+    ("COMP-PY-BASE", "Python Basics", "IT-ITeS", "NQR-2026-IT-10"),
+    ("COMP-PY-OOP", "Python OOP", "IT-ITeS", "NQR-2026-IT-11"),
+    ("COMP-SQL-CORE", "SQL", "IT-ITeS", "NQR-2026-IT-12"),
+    ("COMP-GIT-VCS", "Git", "IT-ITeS", "NQR-2026-IT-13"),
+    ("COMP-DSA-CORE", "DSA", "IT-ITeS", "NQR-2026-IT-14"),
+    ("COMP-REST-API", "REST API", "IT-ITeS", "NQR-2026-IT-15"),
     ("COMP-CLOUD-OPS", "Cloud DevOps & Kubernetes", "IT-ITeS", "NQR-2026-IT-02"),
     ("COMP-SQL-DATA", "Relational Database Design & SQL", "IT-ITeS", "NQR-2026-IT-03"),
     ("COMP-CYBER-SEC", "Cyber Security Operations (SOC)", "IT-ITeS", "NQR-2026-IT-04"),
@@ -213,6 +226,11 @@ async def seed_database(clean: bool = True) -> Dict[str, int]:
             await session.execute(delete(AuditLog))
             await session.execute(delete(RetentionCheckpoint))
             await session.execute(delete(Placement))
+            await session.execute(delete(AssessmentSubmission))
+            await session.execute(delete(LearnerSkillHistory))
+            await session.execute(delete(LearnerSkillMastery))
+            await session.execute(delete(AssessmentQuestion))
+            await session.execute(delete(Assessment))
             await session.execute(delete(HiringMandate))
             await session.execute(delete(Employer))
             await session.execute(delete(LearnerSkill))
@@ -729,6 +747,11 @@ async def seed_database(clean: bool = True) -> Dict[str, int]:
             session.add(audit)
         await session.flush()
         stats["audit_logs"] = len(audit_events)
+
+        # 14. Seed BKT Diagnostic Assessments, Question Bank & Learner Skill Mastery States
+        from src.seed_bkt_data import seed_bkt_assessments_and_mastery
+        bkt_stats = await seed_bkt_assessments_and_mastery(session)
+        stats.update(bkt_stats)
 
         # Commit everything in a single atomic transaction
         await session.commit()

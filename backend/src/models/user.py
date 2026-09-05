@@ -1,9 +1,13 @@
+from typing import Optional, TYPE_CHECKING
 import uuid
 from sqlalchemy import Boolean, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
+
+if TYPE_CHECKING:
+    from src.models.learner import Learner
 
 
 class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -32,7 +36,7 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         default="EVALUATOR",
         nullable=False,
         index=True,
-        doc="Role: MSDE_OFFICER | STATE_ADMIN | TRAINING_PROVIDER | EMPLOYER | EVALUATOR | SYSTEM_ADMIN",
+        doc="Role: MSDE_OFFICER | STATE_ADMIN | TRAINING_PROVIDER | EMPLOYER | EVALUATOR | SYSTEM_ADMIN | LEARNER",
     )
     is_active: Mapped[bool] = mapped_column(
         Boolean,
@@ -45,6 +49,13 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         default=False,
         nullable=False,
         doc="Superuser administrative access flag",
+    )
+
+    # Relationships
+    learner: Mapped[Optional["Learner"]] = relationship(
+        "Learner",
+        back_populates="user",
+        uselist=False,
     )
 
     def __repr__(self) -> str:

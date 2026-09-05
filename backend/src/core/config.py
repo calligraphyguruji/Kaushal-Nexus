@@ -120,6 +120,17 @@ class Settings(BaseSettings):
     GEMINI_API_TIMEOUT_SECONDS: float = 30.0
     GEMINI_API_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta"
 
+    # Bayesian Knowledge Tracing (BKT) Learner Skill Assessment Parameters
+    BKT_DEFAULT_P_L0: float = 0.30     # Prior probability learner already mastered skill
+    BKT_DEFAULT_P_TRANS: float = 0.10  # Probability of transitioning from unmastered to mastered
+    BKT_DEFAULT_P_GUESS: float = 0.20  # Probability of guessing correctly when unmastered
+    BKT_DEFAULT_P_SLIP: float = 0.10   # Probability of making a mistake when skill is mastered
+
+    # BKT Mastery Status Classification Thresholds
+    BKT_THRESHOLD_DEVELOPING: float = 0.40  # < 0.40: weak, 0.40 - 0.60: developing
+    BKT_THRESHOLD_PROFICIENT: float = 0.60  # 0.60 - 0.80: proficient
+    BKT_THRESHOLD_MASTERED: float = 0.80    # >= 0.80: mastered
+
 
     # Logging
     LOG_LEVEL: str = "INFO"
