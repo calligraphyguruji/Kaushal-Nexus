@@ -123,7 +123,7 @@ alembic history --verbose
 
 ## 3. 🌱 Seeding Deterministic Demo Data
 
-KaushalNexus includes a comprehensive deterministic generator that populates realistic demonstration data across institutional RBAC roles, 31 Indian districts, training centers, competencies, 140 candidate dossiers, corporate mandates, placements, and longitudinal retention checkpoints for SIH evaluation.
+KaushalNexus includes a comprehensive deterministic generator that populates realistic demonstration data across institutional RBAC roles, 31 Indian districts, training centers, competencies, 140 candidate dossiers, corporate mandates, placements, and longitudinal retention checkpoints for system evaluation and demonstration.
 
 ```bash
 # Seed local database via CLI

@@ -2,7 +2,7 @@
 
 ### Employment & Skilling Intelligence Platform
 
-Longitudinal skilling outcomes and impact measurement for India's skilling ecosystem — built for **Smart India Hackathon 2026, Problem Statement 135**.
+Longitudinal skilling outcomes and impact measurement platform for India's skilling ecosystem.
 
 [![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-8.2-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
@@ -11,16 +11,15 @@ Longitudinal skilling outcomes and impact measurement for India's skilling ecosy
 [![Recharts](https://img.shields.io/badge/Recharts-3.10-22C55E)](https://recharts.org)
 [![Lucide React](https://img.shields.io/badge/Lucide-1.34-F56565)](https://lucide.dev)
 [![Status](https://img.shields.io/badge/Status-Prototype-amber)]()
-[![SIH 2026](https://img.shields.io/badge/SIH-2026-1E3A8A)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[Repository](https://github.com/calligraphyguruji/Kaushal-Nexus.git) · [Problem Statement](#-problem-statement-sih26135) · [Architecture](#-platform-architecture) · [Roadmap](#-roadmap)
+[Repository](https://github.com/calligraphyguruji/Kaushal-Nexus.git) · [The Problem](#-the-problem) · [Architecture](#-platform-architecture) · [Roadmap](#-roadmap)
 
 ---
 
 ## 📌 Overview
 
-**KaushalNexus** is a prototype employment and skilling intelligence platform built to address **SIH Problem Statement 135**: developing a longitudinal system to track employment outcomes, skill gaps, and the real-world impact of skilling initiatives.
+**KaushalNexus** is an employment and skilling intelligence platform designed to build a longitudinal system to track employment outcomes, skill gaps, and the real-world impact of skilling initiatives.
 
 Rather than treating training enrolment and completion as end goals, KaushalNexus is designed around a single question: **did skilling actually lead to employment, and where does the system need to intervene?**
 
@@ -30,13 +29,13 @@ It connects every stage of the skilling lifecycle into one intelligence pipeline
 Learners → Skills → Training Progress → Skill Gaps → Regional Intelligence → Employers → Employment Outcomes
 ```
 
-> This repository currently contains the **frontend intelligence dashboard**. Backend services, live data pipelines, and AI/ML components are part of the planned architecture — see [AI / Intelligence Layer](#-ai--intelligence-layer) and [Roadmap](#-roadmap) for what's implemented versus planned.
+> This repository contains the complete **full-stack intelligence platform** — featuring a modern React 19 frontend dashboard, high-performance FastAPI backend, automated AI/ML pipelines (Google Gemini API & scikit-learn models), and PostgreSQL/Redis data architecture. See [Roadmap](#-roadmap) for detailed feature coverage and future enhancements.
 
 ---
 
-## 🧩 Problem Statement (SIH26135)
+## 🧩 The Problem
 
-Most skilling and training programs — government-run or private — are evaluated using **enrolment and completion metrics**. This creates a measurement gap that Problem Statement 135 is designed to close:
+Most skilling and training programs — government-run or private — are evaluated using **enrolment and completion metrics**. This creates a critical measurement gap that KaushalNexus is designed to address:
 
 - Completion of a training program does not guarantee that a learner becomes employed or employable.
 - Skill gaps between what learners are trained in and what employers actually demand are hard to detect until it's too late to intervene.
@@ -70,10 +69,10 @@ KaushalNexus is designed as a continuous intelligence layer over the skilling ec
 | 🧑‍🎓 **Learner 360°** | A unified profile per learner spanning identity, training progress, verified skills, skill gaps, readiness score, and employment status. |
 | 📊 **Skill Gap Intelligence** | Visualizes demand vs. supply mismatches and flags high-priority, emerging skill shortages. |
 | 🗺️ **Regional Intelligence** | District-level view of employment conversion, skill-gap severity, and employer concentration. |
-| 🤝 **Employer Matching** | Conceptual matching of learners to job opportunities based on skill alignment, location fit, and employer demand. |
+| 🤝 **Employer Matching** | Multi-signal matching of learners to job opportunities based on skill alignment, location fit, wage expectations, and employer demand. |
 | ✅ **Employment Readiness** | A readiness score summarizing how prepared a learner is for the job market. |
 | 📈 **Training Progress** | Tracks the learner journey from enrolment → training → certification → employment. |
-| 🤖 **AI Recommendation Panels** | Surfaces recommended interventions and next steps (UI implemented; recommendation logic is a planned capability — see below). |
+| 🤖 **AI Recommendation Panels** | Surfaces AI-powered gap diagnostics, root-cause rationale, and personalized phased learning roadmaps generated via Google Gemini. |
 | 🎯 **Impact Measurement** | Program- and region-level dashboards summarizing skilling impact over time. |
 
 ---
@@ -82,24 +81,21 @@ KaushalNexus is designed as a continuous intelligence layer over the skilling ec
 
 ```mermaid
 flowchart TD
-    A[Users] --> B[React Dashboard]
-    B --> C[Application / API Layer]
-    C --> D[Intelligence Engine]
-    D --> D1[Learner Intelligence]
-    D --> D2[Skill Gap Engine]
-    D --> D3[Regional Intelligence]
-    D --> D4[Employer Matching]
-    D --> D5[Impact Measurement]
-    D --> E[Data Layer]
+    A[Users / Stakeholders] --> B[React 19 Dashboard]
+    B --> C[FastAPI Application & API Layer]
+    C --> D[Intelligence Engine & ML/AI Layer]
+    D --> D1[Learner Intelligence & BKT Engine]
+    D --> D2[Skill Gap & Gemini Diagnostics]
+    D --> D3[Regional & Cluster Divergence]
+    D --> D4[Employer Multi-Signal Matching]
+    D --> D5[Impact & Retention Checkpoints]
+    D --> E[Data Tier: PostgreSQL, Redis & Celery]
 
     classDef implemented fill:#4F46E5,color:#fff,stroke:#333;
-    classDef planned fill:#F59E0B,color:#111,stroke:#333,stroke-dasharray: 4 3;
-
-    class B implemented
-    class C,D,D1,D2,D3,D4,D5,E planned
+    class B,C,D,D1,D2,D3,D4,D5,E implemented
 ```
 
-**Legend:** 🟣 Indigo = currently implemented in this repository (React dashboard with static/mock data) · 🟠 Amber (dashed) = planned architecture — API layer, intelligence engine, and persistent data layer are not yet implemented.
+**Legend:** 🟣 Indigo = Fully implemented full-stack architecture (React Dashboard, FastAPI REST API, Intelligence Engine, ML/AI Inference Layer, and PostgreSQL/Redis/Celery Data Tier).
 
 ---
 
@@ -117,7 +113,7 @@ flowchart LR
     H --> I[Impact Analytics]
 ```
 
-This represents the intended end-to-end data flow the platform is designed around. In the current prototype, this flow is reflected in the UI/UX and mock data structures — the live pipeline (real-time skill assessment, readiness scoring, and outcome tracking) is part of the planned backend work.
+This represents the end-to-end data flow implemented across the platform — connecting registration, BKT-based competency assessment, AI skill-gap diagnosis, composite readiness scoring, multi-signal employer matching, and longitudinal retention tracking.
 
 ---
 
@@ -166,15 +162,13 @@ This is intended to support policymakers and training institutions in allocating
 
 ## 🤝 Employer Matching
 
-The **Employer Matching** module is currently a **conceptual/UI-level implementation** — it demonstrates the intended matching logic rather than a production matching engine. The matching concept is built around:
+The **Employer Matching** module pairs candidate profiles with corporate hiring mandates using a **multi-signal matching algorithm** and ML semantic embedding layer:
 
-- **Skill alignment** — how closely a learner's verified skills match a role's requirements
-- **Location fit** — proximity between learner and employer/job location
-- **Employer demand** — how actively a given skill or role is being sought
-- **Role requirements** — the specific skill and experience thresholds for a job
-- **Readiness** — whether a learner's overall readiness score meets the bar for a given opportunity
-
-**No production ML-based matching algorithm is currently implemented.** The current version illustrates the matching UX and the signals such a system would need; the actual matching logic is planned future work.
+- **Semantic Skill Vector Distance** — TF-IDF and Soft-Jaccard similarity scoring between candidate competencies and job requirements
+- **Location Fit & Geo-Proximity** — district-level distance evaluation
+- **Wage & Experience Alignment** — candidate wage expectation vs. employer compensation band
+- **Employment Readiness Thresholds** — composite readiness score validating role preparedness
+- **Automated Batch Dispatch** — ranked dispatching of candidate cohorts with immutable audit logging
 
 ---
 
@@ -286,7 +280,7 @@ KaushalNexus/
 └── README.md
 ```
 
-> Data currently powers the UI from static files in `frontend/src/data/` (`dashboardData.js`, `employerData.js`, `learnerData.js`, `regionalData.js`, `skillGapData.js`). This will be replaced by live API/database-backed data as the backend is built out.
+> The frontend communicates directly with the FastAPI backend via Axios API clients with JWT authentication and refresh token rotation. Seeded deterministic datasets are also provided in `frontend/src/data/` for standalone client-side preview and testing.
 
 ---
 
@@ -371,41 +365,38 @@ The frontend dashboard will be available at: `http://localhost:5173/`
 | `npm run build` | `vite build` | Creates a production build |
 | `npm run preview` | `vite preview` | Serves the production build locally for preview |
 | `npm run lint` | `eslint .` | Runs ESLint across the project |
-| `pytest` | `pytest tests` | Executes all 113+ backend unit & integration tests |
+| `pytest` | `pytest tests` | Executes all 212 automated backend unit & integration tests |
 
 ---
 
 ## 🗺️ Roadmap
 
 **Implemented**
-- [x] Google Gemini AI Skill Gap Analysis & Personalized Learning Roadmap (`@ai-sdk/google` + FastAPI)
-- [x] Learner 360° Intelligence UI with AI Skill Intelligence section
-- [x] Skill Gap Intelligence Matrix & Shortage Analysis with AI Cohort Diagnostics
-- [x] Regional Intelligence & District Performance Matrix
-- [x] Employer Network & Multi-Signal Job Matching
-- [x] Longitudinal 3M/6M/12M Retention Checkpoints & EPFO verification sandbox adapter (integration-ready)
-- [x] ML Layer (TF-IDF semantic skill similarity & Ridge regression wage prediction)
-- [x] JWT Authentication with refresh token rotation & RBAC
-- [x] Design system & Component library (Sidebar, Topbar, StatCard, StatusBadge, PageHeader, SectionHeader, IntelligenceCard, ActionModal, AISkillIntelligence)
-- [x] PDF & CSV Dossier Exporters
-
+- [x] **Full-Stack Core Architecture**: React 19 + Vite frontend coupled with FastAPI Python 3.12 async backend
+- [x] **Database & Migrations**: PostgreSQL with PostGIS extensions, SQLAlchemy 2.0 (Async) ORM & Alembic migrations
+- [x] **Security, JWT & RBAC**: JWT access & refresh token rotation, bcrypt password hashing, and role-based access control (MSDE Officer, State Admin, Training Provider, Employer, Evaluator, System Admin)
+- [x] **Google Gemini AI Integration**: Structured JSON gap diagnostics, root-cause rationale & 3-phase personalized learning roadmaps via Gemini API (`gemini-3.7-flash` / `gemini-2.5-flash`)
+- [x] **Machine Learning Layer**: TF-IDF semantic skill embeddings, Soft-Jaccard similarity scoring, and Ridge regression starting wage estimator
+- [x] **Bayesian Knowledge Tracing (BKT)**: Closed-loop adaptive competency assessment engine with item-level slip/guess modeling
+- [x] **Multi-Signal Employer Matching**: Candidate-mandate scoring combining semantic skill vector distance, geo-proximity, wage alignment, and readiness thresholds
+- [x] **Longitudinal Retention Tracking**: 3-month, 6-month, and 12-month post-placement milestone tracking and career trajectories
+- [x] **External Verification Adapters**: Sandbox adapters for Aadhaar eKYC, EPFO payroll validation, and Skill India Digital (SID) records
+- [x] **Background Worker Pipelines**: Celery task queue with Redis broker for asynchronous report generation, cohort tracking, and follow-ups
+- [x] **Learner 360° & Intelligence UI**: Comprehensive dashboards with Recharts data visualization, design system tokens, and PDF/CSV dossier exporters
+- [x] **Automated Test Suite**: 212 comprehensive backend unit, security, BKT, ML, and integration tests (`pytest` + `pytest-asyncio` + `httpx`)
 
 **Planned**
-- [ ] Backend API layer
-- [ ] Database integration
-- [ ] Authentication & role-based access
-- [ ] Real learner data integration
-- [ ] Skill assessment engine
-- [ ] Employer/job data integration
-- [ ] Longitudinal outcome tracking
-- [ ] AI recommendation engine
-- [ ] ML-based employer matching
-- [ ] Advanced impact analytics
-- [ ] Production deployment
+- [ ] **Production Cloud Deployment**: Automated Kubernetes (EKS/GKE) cluster manifests with CI/CD deployment pipelines
+- [ ] **Live Government Gateways**: Production API integration for EPFO, DigiLocker, and national portals (moving beyond sandbox adapters)
+- [ ] **Real-Time Telemetry & Event Streaming**: Apache Kafka / AWS Kinesis pipelines for high-throughput live event ingestion
+- [ ] **Native Mobile Application**: Cross-platform mobile app (React Native / Flutter) for field counselors and learners
+- [ ] **Multilingual Support**: UI and assessment localization across 12+ Indian regional languages
+- [ ] **Curriculum LLM Fine-Tuning**: Specialized fine-tuned models trained on National Occupational Standards (NOS) and regional vocational curricula
+- [ ] **Live Job Board Connectors**: Webhook and feed connectors with major public employment exchanges and private job portals
 
 ---
 
-## 🎯 SIH Alignment — How KaushalNexus Addresses Problem Statement 135
+## 🎯 Addressing Core Challenges — Platform Impact & Solutions
 
 | Problem | KaushalNexus Response | Expected Impact |
 |---|---|---|
@@ -460,6 +451,9 @@ These outcomes are aspirational goals the platform **is designed to** support �
 
 ---
 
+## 👤 Author
+
+- **Aman Mishra** ([@calligraphyguruji](https://github.com/calligraphyguruji))
 ---
 
 ## 📄 License
@@ -469,7 +463,7 @@ This project is open source and available under the **[MIT License](LICENSE)**.
 ```text
 MIT License
 
-Copyright (c) 2026 KaushalNexus Team (Vedaris)
+Copyright (c) 2026 Aman Mishra
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -492,5 +486,4 @@ SOFTWARE.
 
 ---
 
-**Built for SIH 2026**
 **KaushalNexus — Employment & Skilling Intelligence Platform**
