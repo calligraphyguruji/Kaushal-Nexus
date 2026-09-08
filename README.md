@@ -460,21 +460,6 @@ These outcomes are aspirational goals the platform **is designed to** support �
 
 ---
 
-## 👥 Team
-
-<!-- Add team member details here -->
-
-| Name | Role |
-|---|---|
-| Aman Mishra | Team Lead |
-| Satyam Jaiswal | Software Developer |
-| Anand Maurya | Web Developer |
-| Ritesh Kumar Patel | Vibe Coder |
-| Aaliya Fatima | Ideation Lead |
-| Amlan Chakrabarty | Ideation Management |
-
-**Team:** Vedaris
-
 ---
 
 ## 📄 License
