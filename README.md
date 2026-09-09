@@ -13,10 +13,11 @@ Longitudinal skilling outcomes and impact measurement platform for India's skill
 [![Status](https://img.shields.io/badge/Status-Prototype-amber)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[Repository](https://github.com/calligraphyguruji/Kaushal-Nexus.git) · [Live Demo](https://kaushal-nexus.vercel.app/) · [The Problem](#-the-problem) · [Architecture](#-platform-architecture) · [Roadmap](#-roadmap)
+[Repository](https://github.com/calligraphyguruji/Kaushal-Nexus.git) · [Live Demo](https://kaushal-nexus.vercel.app/) · [The Problem](#the-problem) · [Architecture](#platform-architecture) · [Roadmap](#roadmap)
 
 ---
 
+<a id="live-demo"></a>
 ## 🌐 Live Demo
 
 Experience the platform live in your browser:
@@ -36,10 +37,11 @@ It connects every stage of the skilling lifecycle into one intelligence pipeline
 Learners → Skills → Training Progress → Skill Gaps → Regional Intelligence → Employers → Employment Outcomes
 ```
 
-> This repository contains the complete **full-stack intelligence platform** — featuring a modern React 19 frontend dashboard, high-performance FastAPI backend, automated AI/ML pipelines (Google Gemini API & scikit-learn models), and PostgreSQL/Redis data architecture. See [Roadmap](#-roadmap) for detailed feature coverage and future enhancements.
+> This repository contains the complete **full-stack intelligence platform** — featuring a modern React 19 frontend dashboard, high-performance FastAPI backend, automated AI/ML pipelines (Google Gemini API & scikit-learn models), and PostgreSQL/Redis data architecture. See [Roadmap](#roadmap) for detailed feature coverage and future enhancements.
 
 ---
 
+<a id="the-problem"></a>
 ## 🧩 The Problem
 
 Most skilling and training programs — government-run or private — are evaluated using **enrolment and completion metrics**. This creates a critical measurement gap that KaushalNexus is designed to address:
@@ -84,6 +86,8 @@ KaushalNexus is designed as a continuous intelligence layer over the skilling ec
 
 ---
 
+<a id="architecture"></a>
+<a id="platform-architecture"></a>
 ## 🏗️ Platform Architecture
 
 ```mermaid
@@ -376,6 +380,7 @@ The frontend dashboard will be available at: `http://localhost:5173/`
 
 ---
 
+<a id="roadmap"></a>
 ## 🗺️ Roadmap
 
 **Implemented**
