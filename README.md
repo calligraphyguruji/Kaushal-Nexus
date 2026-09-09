@@ -13,7 +13,14 @@ Longitudinal skilling outcomes and impact measurement platform for India's skill
 [![Status](https://img.shields.io/badge/Status-Prototype-amber)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[Repository](https://github.com/calligraphyguruji/Kaushal-Nexus.git) · [The Problem](#-the-problem) · [Architecture](#-platform-architecture) · [Roadmap](#-roadmap)
+[Repository](https://github.com/calligraphyguruji/Kaushal-Nexus.git) · [Live Demo](https://kaushal-nexus.vercel.app/) · [The Problem](#-the-problem) · [Architecture](#-platform-architecture) · [Roadmap](#-roadmap)
+
+---
+
+## 🌐 Live Demo
+
+Experience the platform live in your browser:
+👉 **[Launch KaushalNexus Live Demo](https://kaushal-nexus.vercel.app/)**
 
 ---
 
