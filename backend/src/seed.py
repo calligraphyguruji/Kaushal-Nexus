@@ -1,12 +1,13 @@
 import asyncio
 from datetime import date, datetime, timedelta, timezone
 import json
+import os
 import random
 import sys
 from typing import Dict, List, Tuple
 import uuid
 
-from sqlalchemy import delete, select, text
+from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import AsyncSessionLocal, dispose_engine, engine
@@ -208,7 +209,7 @@ EDUCATION_LEVELS = [
 # Seeding Orchestrator
 # ==============================================================================
 
-async def seed_database(clean: bool = True) -> Dict[str, int]:
+async def seed_database(clean: bool = False) -> Dict[str, int]:
     """
     Populates PostgreSQL database with a deterministic, rich, realistic dataset
     optimized for national hackathon demonstration.
@@ -220,9 +221,19 @@ async def seed_database(clean: bool = True) -> Dict[str, int]:
     logger.info(f"Starting deterministic database seed (Fixed Seed: {SEED_VAL})...")
 
     async with AsyncSessionLocal() as session:
-        # 1. Clean existing records if requested
+        # 1. Guard against overwriting live user data if clean is not requested
+        if not clean:
+            existing_user_count = await session.scalar(select(func.count(User.id)))
+            if existing_user_count and existing_user_count > 0:
+                logger.info(
+                    f"Database already contains {existing_user_count} registered users. "
+                    "Skipping seeding to prevent data loss. Use --clean or SEED_CLEAN=true to overwrite."
+                )
+                return {"status": "skipped", "reason": "database_already_populated", "users": existing_user_count}
+
+        # 2. Clean existing records if explicitly requested
         if clean:
-            logger.info("Cleaning existing database records across all domain tables...")
+            logger.warning("Cleaning existing database records across all domain tables (clean=True)...")
             await session.execute(delete(AuditLog))
             await session.execute(delete(RetentionCheckpoint))
             await session.execute(delete(Placement))
@@ -769,14 +780,15 @@ async def main():
     print("=" * 80)
     print("🚀 KAUSHALNEXUS NATIONAL SKILLING PLATFORM - DEMO DATA SEEDER")
     print("=" * 80)
+    clean_requested = os.getenv("SEED_CLEAN", "false").lower() in ("true", "1", "yes") or "--clean" in sys.argv
     try:
-        stats = await seed_database(clean=True)
+        stats = await seed_database(clean=clean_requested)
         print("\n📊 SEEDED ENTITY RECORD SUMMARY:")
         print("-" * 80)
         for table, count in stats.items():
             print(f"  • {table:<28} : {count:>5} records")
         print("-" * 80)
-        print("✅ Database seeding completed successfully with 100% relational integrity.")
+        print("✅ Database seeding operation completed successfully.")
         print("=" * 80)
     finally:
         await dispose_engine()
