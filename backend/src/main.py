@@ -103,8 +103,9 @@ app.add_exception_handler(Exception, unhandled_exception_handler)
 # Root & Health Endpoints
 # ==============================================================================
 
-@app.get(
+@app.api_route(
     "/health",
+    methods=["GET", "HEAD"],
     response_model=HealthCheckResponse,
     status_code=status.HTTP_200_OK,
     tags=["Health"],
@@ -129,8 +130,9 @@ async def global_health_check() -> HealthCheckResponse:
     )
 
 
-@app.get(
+@app.api_route(
     "/",
+    methods=["GET", "HEAD"],
     status_code=status.HTTP_200_OK,
     tags=["Root"],
     summary="Platform Root",

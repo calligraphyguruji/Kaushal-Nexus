@@ -37,6 +37,20 @@ async def test_api_v1_health_endpoint(client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_root_head_endpoint(client: AsyncClient):
+    """Test HEAD / returns 200 OK for uptime monitors."""
+    response = await client.head("/")
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_health_head_endpoint(client: AsyncClient):
+    """Test HEAD /health returns 200 OK for uptime monitors."""
+    response = await client.head("/health")
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
 async def test_404_error_handling(client: AsyncClient):
     """Test structured 404 response for non-existent endpoint."""
     response = await client.get("/api/v1/non-existent-route")

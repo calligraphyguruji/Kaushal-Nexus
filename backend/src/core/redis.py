@@ -11,6 +11,14 @@ redis_client: Optional[aioredis.Redis] = None
 _sync_redis_client: Optional[syncredis.Redis] = None
 
 
+def is_valid_redis_url(url: Optional[str]) -> bool:
+    """Checks if Redis URL is non-empty and has a valid Redis URI scheme."""
+    if not url or not isinstance(url, str):
+        return False
+    cleaned = url.strip()
+    return any(cleaned.startswith(scheme) for scheme in ("redis://", "rediss://", "unix://"))
+
+
 # ==============================================================================
 # Async Redis Client (FastAPI & Async Pipelines)
 # ==============================================================================
@@ -18,6 +26,10 @@ _sync_redis_client: Optional[syncredis.Redis] = None
 async def init_redis_pool() -> Optional[aioredis.Redis]:
     """Initialize asynchronous Redis connection pool."""
     global redis_client
+    if not is_valid_redis_url(settings.REDIS_URL):
+        logger.info("Redis cache is not configured or disabled. Running in stateless mode without Redis cache.")
+        return None
+
     try:
         redis_client = aioredis.from_url(
             settings.REDIS_URL,
@@ -38,7 +50,10 @@ async def close_redis_pool() -> None:
     """Close asynchronous Redis connection pool."""
     global redis_client
     if redis_client:
-        await redis_client.close()
+        if hasattr(redis_client, "aclose"):
+            await redis_client.aclose()
+        else:
+            await redis_client.close()
         logger.info("Async Redis connection closed.")
 
 
@@ -51,16 +66,21 @@ def get_redis() -> Optional[aioredis.Redis]:
 # Sync Redis Client (Celery Workers & Sync Execution)
 # ==============================================================================
 
-def get_sync_redis() -> syncredis.Redis:
+def get_sync_redis() -> Optional[syncredis.Redis]:
     """Provides a thread-safe synchronous Redis client for Celery tasks."""
     global _sync_redis_client
+    if not is_valid_redis_url(settings.REDIS_URL):
+        return None
     if _sync_redis_client is None:
-        _sync_redis_client = syncredis.from_url(
-            settings.REDIS_URL,
-            encoding="utf-8",
-            decode_responses=True,
-            socket_timeout=5.0,
-        )
+        try:
+            _sync_redis_client = syncredis.from_url(
+                settings.REDIS_URL,
+                encoding="utf-8",
+                decode_responses=True,
+                socket_timeout=5.0,
+            )
+        except Exception:
+            return None
     return _sync_redis_client
 
 
@@ -79,6 +99,8 @@ def update_sync_task_status(
     """Updates background Celery task execution progress and state in Redis."""
     try:
         client = get_sync_redis()
+        if client is None:
+            return
         key = f"kn:task:{task_id}"
         payload = {
             "task_id": task_id,
@@ -114,6 +136,14 @@ async def get_async_task_status(task_id: str) -> Optional[Dict[str, Any]]:
 
 async def check_redis_connection() -> Dict[str, Any]:
     """Pings Redis server and returns diagnostic metrics."""
+    if not is_valid_redis_url(settings.REDIS_URL):
+        return {
+            "status": "disabled",
+            "healthy": True,
+            "latency_ms": 0.0,
+            "message": "Redis is optional and not configured. Running in stateless mode.",
+        }
+
     start_time = time.perf_counter()
     try:
         if redis_client is None:
@@ -121,7 +151,10 @@ async def check_redis_connection() -> Dict[str, Any]:
             temp_client = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
             await temp_client.ping()
             info = await temp_client.info()
-            await temp_client.close()
+            if hasattr(temp_client, "aclose"):
+                await temp_client.aclose()
+            else:
+                await temp_client.close()
         else:
             await redis_client.ping()
             info = await redis_client.info()
