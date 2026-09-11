@@ -998,7 +998,7 @@ export default function LearnerIntelligence() {
           <MLModelStudio onModelUpdated={fetchLearnersList} />
         </div>
       ) : viewMode === "career" ? (
-        <CareerJourneyWorkspace onJourneyUpdated={fetchLearnersList} />
+        <CareerJourneyWorkspace learnerId={selectedLearnerId} onJourneyUpdated={fetchLearnersList} />
       ) : viewMode === "remediation" ? (
         <AdaptiveLearningWorkspace onProgressUpdated={fetchLearnersList} />
       ) : viewMode === "pipeline" ? (

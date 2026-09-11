@@ -33,7 +33,7 @@ import { getErrorMessage } from "../api/client";
 import AIPlacementPredictionCard from "./AIPlacementPredictionCard";
 import CareerIntelligenceCenter from "./CareerIntelligenceCenter";
 
-export default function CareerJourneyWorkspace({ onJourneyUpdated }) {
+export default function CareerJourneyWorkspace({ learnerId = null, onJourneyUpdated }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
@@ -418,7 +418,7 @@ export default function CareerJourneyWorkspace({ onJourneyUpdated }) {
       {/* =========================================================================
           1.5. PHASE 5 CALIBRATED XGBOOST PLACEMENT FORECAST
       ========================================================================== */}
-      <AIPlacementPredictionCard />
+      <AIPlacementPredictionCard learnerId={learnerId} />
 
       {/* =========================================================================
           2. WORKSPACE TAB NAVIGATION
