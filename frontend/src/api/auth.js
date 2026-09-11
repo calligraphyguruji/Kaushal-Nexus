@@ -237,21 +237,12 @@ export const authApi = {
   },
 
   /**
-   * Ensures an active authenticated session exists, auto-authenticating demo officer if needed
+   * Returns current access token if authenticated, or null
    */
   async ensureAuthenticated() {
     if (this.isAuthenticated()) {
       return localStorage.getItem('kn_access_token');
     }
-    try {
-      const data = await this.login({
-        email: 'aman.mishra@msde.gov.in',
-        password: 'KaushalNexus2026!',
-      });
-      return data.access_token;
-    } catch (err) {
-      console.warn('Auto-authentication fallback notice:', err);
-      return null;
-    }
+    return null;
   },
 };

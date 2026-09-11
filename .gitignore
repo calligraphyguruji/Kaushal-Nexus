@@ -47,3 +47,7 @@ generated_reports/
 # Uploaded Files
 backend/uploads/
 uploads/
+
+# MemPalace per-project files (issue #185)
+mempalace.yaml
+entities.json

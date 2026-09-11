@@ -84,8 +84,8 @@ export default function Login() {
   const { login, user, isAuthenticated, isLoading } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
 
-  const [email, setEmail] = useState("aman.mishra@msde.gov.in");
-  const [password, setPassword] = useState("KaushalNexus2026!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
