@@ -16,7 +16,6 @@ import {
   Smartphone,
   Phone,
   RotateCcw,
-  Sparkles,
 } from "lucide-react";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth } from "../config/firebase";
@@ -235,6 +234,9 @@ export default function Login({ defaultMode }) {
     if (code === "auth/api-key-not-valid" || rawMsg.includes("api-key")) {
       return "Authentication service is temporarily unavailable. Please try again shortly.";
     }
+    if (err?.response?.data?.error?.message) {
+      return err.response.data.error.message;
+    }
     if (err?.response?.data?.message || err?.response?.data?.detail) {
       return getErrorMessage(err);
     }
@@ -292,16 +294,31 @@ export default function Login({ defaultMode }) {
       }
 
       // 1. Confirm OTP with Firebase
-      const userCredential = await window.confirmationResult.confirm(otp.trim());
-      const firebaseUser = userCredential.user;
-      const idToken = await firebaseUser.getIdToken();
+      let userCredential;
+      try {
+        userCredential = await window.confirmationResult.confirm(otp.trim());
+      } catch (fbErr) {
+        console.error("Firebase OTP confirmation failed:", fbErr);
+        setError(
+          formatPhoneAuthError(
+            fbErr,
+            "Incorrect 6-digit verification code. Please check the code and try again."
+          )
+        );
+        setIsSubmitting(false);
+        return;
+      }
 
       // 2. Authenticate or Auto-provision user in KaushalNexus Backend
+      const firebaseUser = userCredential.user;
+      const idToken = await firebaseUser.getIdToken();
       const formatted = normalizePhoneNumber(phoneNumber);
       const authData = await phoneLogin({
+        phone: firebaseUser.phoneNumber || formatted,
         phone_number: firebaseUser.phoneNumber || formatted,
+        firebase_id_token: idToken,
         id_token: idToken,
-        display_name: firebaseUser.displayName || undefined,
+        full_name: firebaseUser.displayName || undefined,
       });
 
       localStorage.removeItem("kn_current_learner");
@@ -316,7 +333,7 @@ export default function Login({ defaultMode }) {
       setError(
         formatPhoneAuthError(
           err,
-          "Incorrect verification code. Please check your SMS and try again."
+          "Unable to complete session authentication. Please try again."
         )
       );
     } finally {
@@ -652,44 +669,6 @@ export default function Login({ defaultMode }) {
                     </>
                   )}
                 </button>
-
-                {/* Instant Test Mode Helper */}
-                <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-xs dark:border-blue-900/50 dark:bg-blue-950/30">
-                  <div className="flex items-center gap-1.5 font-semibold text-blue-900 dark:text-blue-300">
-                    <Sparkles size={13} className="text-blue-600 dark:text-blue-400" />
-                    <span>Instant Testing / SIM-less Mode</span>
-                  </div>
-                  <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-400">
-                    Unlimited free test authentication using pre-authorized phone numbers:
-                  </p>
-                  <div className="mt-2 flex flex-col gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPhoneNumber("9140408637");
-                        setError(null);
-                      }}
-                      className="inline-flex items-center justify-between rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:bg-slate-800 dark:text-blue-300 dark:hover:bg-slate-700"
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                        Autofill: +91 91404 08637
-                      </span>
-                      <span className="font-mono text-[11px] font-normal text-slate-500 dark:text-slate-400">OTP: 123456</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPhoneNumber("9999999999");
-                        setError(null);
-                      }}
-                      className="inline-flex items-center justify-between rounded-lg border border-slate-200 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800/70 dark:text-slate-300 dark:hover:bg-slate-700"
-                    >
-                      <span>Autofill: +91 99999 99999</span>
-                      <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">OTP: 123456</span>
-                    </button>
-                  </div>
-                </div>
 
                 <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
                   Are you an institutional officer?{" "}

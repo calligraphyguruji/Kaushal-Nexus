@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 import uuid
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 
 class UserRole(str, Enum):
@@ -60,7 +60,22 @@ class TokenPayload(BaseModel):
 
 
 class PhoneLoginRequest(BaseModel):
-    phone: str = Field(..., min_length=7, max_length=25, description="E.164 phone number e.g. +919876543210")
+    phone: Optional[str] = Field(None, min_length=7, max_length=25, description="E.164 phone number e.g. +919876543210")
+    phone_number: Optional[str] = Field(None, min_length=7, max_length=25)
     firebase_id_token: Optional[str] = Field(None, description="Verified Firebase Auth ID token")
+    id_token: Optional[str] = Field(None, description="Alternative key for Firebase Auth ID token")
     full_name: Optional[str] = Field(None, max_length=150, description="Full name if new user registration")
+    display_name: Optional[str] = Field(None, max_length=150)
     role: Optional[UserRole] = Field(UserRole.LEARNER, description="Role to assign (default: LEARNER)")
+
+    @model_validator(mode="after")
+    def populate_canonical_fields(self) -> "PhoneLoginRequest":
+        if not self.phone and self.phone_number:
+            self.phone = self.phone_number
+        if not self.phone:
+            raise ValueError("Phone number is required")
+        if not self.firebase_id_token and self.id_token:
+            self.firebase_id_token = self.id_token
+        if not self.full_name and self.display_name:
+            self.full_name = self.display_name
+        return self
