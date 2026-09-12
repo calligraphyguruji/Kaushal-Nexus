@@ -6,11 +6,52 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.deps import get_current_user
 from src.core.database import get_db
 from src.models.user import User
-from src.schemas.user import PhoneLoginRequest, RefreshTokenRequest, TokenResponse, UserCreate, UserLogin, UserResponse
+from src.schemas.user import (
+    CheckPhoneRequest,
+    CheckPhoneResponse,
+    PhoneLoginRequest,
+    RefreshTokenRequest,
+    TokenResponse,
+    UserCreate,
+    UserLogin,
+    UserResponse,
+)
 from src.services.audit_service import audit_service
 from src.services.auth_service import auth_service
 
 router = APIRouter()
+
+
+@router.post(
+    "/check-phone",
+    response_model=CheckPhoneResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Check Phone Number Registration",
+    description="Verify whether a mobile number is already registered on KaushalNexus before sending OTP.",
+)
+async def check_phone(
+    req: CheckPhoneRequest,
+    db: AsyncSession = Depends(get_db),
+) -> CheckPhoneResponse:
+    """Check if phone number is registered."""
+    result = await auth_service.check_phone_registration(db, req.phone)
+    return CheckPhoneResponse(**result)
+
+
+@router.get(
+    "/check-phone",
+    response_model=CheckPhoneResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Check Phone Number Registration (Query)",
+    description="Verify whether a mobile number is already registered on KaushalNexus via query parameter.",
+)
+async def check_phone_query(
+    phone: str,
+    db: AsyncSession = Depends(get_db),
+) -> CheckPhoneResponse:
+    """Check if phone number is registered (GET)."""
+    result = await auth_service.check_phone_registration(db, phone)
+    return CheckPhoneResponse(**result)
 
 
 @router.post(

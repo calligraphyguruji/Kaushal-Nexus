@@ -94,6 +94,7 @@ export default function Register() {
         password: password.trim(),
         full_name: fullName.trim(),
         role: targetRole,
+        phone: phone.trim() || undefined,
       };
 
       // 1. Register with backend RBAC API

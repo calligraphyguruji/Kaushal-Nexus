@@ -72,6 +72,8 @@ class AuthService:
             learner = l_res.scalar_one_or_none()
             if learner:
                 learner.user_id = db_user.id
+                if getattr(user_in, "phone", None):
+                    learner.phone = user_in.phone.strip()
             else:
                 now_year = datetime.now().year
                 unique_suffix = uuid.uuid4().hex[:5].upper()
@@ -80,6 +82,7 @@ class AuthService:
                     user_id=db_user.id,
                     full_name=db_user.full_name,
                     email=db_user.email,
+                    phone=user_in.phone.strip() if getattr(user_in, "phone", None) else None,
                     district_id="UP-LUCKNOW",
                     employment_readiness_score=0,
                     overall_progress=0,
@@ -324,6 +327,71 @@ class AuthService:
             )
 
         return user
+
+    @staticmethod
+    async def check_phone_registration(
+        db: AsyncSession,
+        phone: str,
+    ) -> dict:
+        """
+        Checks if a given phone number is registered on KaushalNexus
+        (either in Learner records or User accounts).
+        """
+        import re
+        from sqlalchemy import or_
+        from src.models.learner import Learner
+
+        cleaned = re.sub(r"[^\d+]", "", phone.strip())
+        digits = re.sub(r"\D", "", cleaned)
+
+        if len(digits) < 10:
+            return {
+                "registered": False,
+                "full_name": None,
+                "message": "Invalid mobile phone number. Must be at least 10 digits.",
+            }
+
+        last_10 = digits[-10:]
+
+        # 1. Check if a learner has this phone number
+        stmt = select(Learner).where(
+            or_(
+                Learner.phone.like(f"%{last_10}%"),
+                Learner.phone == cleaned,
+                Learner.phone == f"+91{last_10}",
+                Learner.phone == f"+91 {last_10[:5]} {last_10[5:]}",
+            )
+        )
+        res = await db.execute(stmt)
+        learner = res.scalars().first()
+        if learner:
+            return {
+                "registered": True,
+                "full_name": learner.full_name,
+                "message": "Phone number is registered.",
+            }
+
+        # 2. Check if a user has a synthetic or matching phone email
+        user_stmt = select(User).where(
+            or_(
+                User.email.like(f"%{last_10}@phone.kaushalnexus.gov.in"),
+                User.email.like(f"%{last_10}%"),
+            )
+        )
+        user_res = await db.execute(user_stmt)
+        user = user_res.scalars().first()
+        if user:
+            return {
+                "registered": True,
+                "full_name": user.full_name,
+                "message": "Phone number is registered.",
+            }
+
+        return {
+            "registered": False,
+            "full_name": None,
+            "message": "This phone number is not registered on KaushalNexus. Please register first to continue.",
+        }
 
 
 auth_service = AuthService()

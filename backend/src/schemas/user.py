@@ -22,6 +22,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8, max_length=128, description="Password must be at least 8 characters")
+    phone: Optional[str] = Field(None, max_length=25, description="Contact phone number")
 
 
 class UserLogin(BaseModel):
@@ -79,3 +80,22 @@ class PhoneLoginRequest(BaseModel):
         if not self.full_name and self.display_name:
             self.full_name = self.display_name
         return self
+
+
+class CheckPhoneRequest(BaseModel):
+    phone: Optional[str] = Field(None, min_length=7, max_length=25, description="Mobile phone number to verify")
+    phone_number: Optional[str] = Field(None, min_length=7, max_length=25, description="Alias for phone number")
+
+    @model_validator(mode="after")
+    def populate_phone(self) -> "CheckPhoneRequest":
+        if not self.phone and self.phone_number:
+            self.phone = self.phone_number
+        if not self.phone:
+            raise ValueError("Phone number is required")
+        return self
+
+
+class CheckPhoneResponse(BaseModel):
+    registered: bool = Field(..., description="Whether phone is registered on KaushalNexus")
+    full_name: Optional[str] = Field(None, description="Registered candidate name if found")
+    message: str = Field(..., description="Status explanation or prompt to register")

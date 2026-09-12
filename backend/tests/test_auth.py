@@ -230,3 +230,34 @@ async def test_phone_login_and_auto_registration(client: AsyncClient):
     data2 = resp2.json()
     assert "access_token" in data2
     assert data2["user"]["id"] == data1["user"]["id"]
+
+
+@pytest.mark.asyncio
+async def test_check_phone_registration(client: AsyncClient):
+    """Test checking phone registration status before OTP dispatch."""
+    # 1. Unregistered number should return registered=False
+    unregistered_phone = f"+9170{uuid.uuid4().int % 100000000:08d}"
+    resp_unreg = await client.post("/api/v1/auth/check-phone", json={"phone": unregistered_phone})
+    assert resp_unreg.status_code == 200
+    data_unreg = resp_unreg.json()
+    assert data_unreg["registered"] is False
+    assert "not registered" in data_unreg["message"].lower()
+
+    # 2. Register candidate via phone-login
+    rand_phone = f"+9188{uuid.uuid4().int % 100000000:08d}"
+    reg_resp = await client.post(
+        "/api/v1/auth/phone-login",
+        json={"phone": rand_phone, "full_name": "Registered Phone Candidate"}
+    )
+    assert reg_resp.status_code == 200
+
+    # 3. Check registered number via POST -> registered=True
+    resp_reg = await client.post("/api/v1/auth/check-phone", json={"phone": rand_phone})
+    assert resp_reg.status_code == 200
+    data_reg = resp_reg.json()
+    assert data_reg["registered"] is True
+
+    # 4. Check registered number via GET query parameter -> registered=True
+    resp_get = await client.get(f"/api/v1/auth/check-phone?phone={rand_phone}")
+    assert resp_get.status_code == 200
+    assert resp_get.json()["registered"] is True

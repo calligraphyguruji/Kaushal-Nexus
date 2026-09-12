@@ -209,6 +209,30 @@ export const authApi = {
   },
 
   /**
+   * Checks whether a phone number is registered on KaushalNexus
+   * @param {string} phone - Phone number to verify
+   * @returns {Promise<{ registered: boolean, full_name?: string, message: string }>}
+   */
+  async checkPhone(phone) {
+    try {
+      const response = await apiClient.post('/auth/check-phone', { phone });
+      return response.data;
+    } catch (err) {
+      if (!err.response) {
+        // Offline / fallback verification against local candidate cache
+        const digits = (phone || '').replace(/\D/g, '').slice(-10);
+        try {
+          const cached = JSON.parse(localStorage.getItem('kn_current_learner') || 'null');
+          if (cached?.phone && (cached.phone || '').replace(/\D/g, '').includes(digits)) {
+            return { registered: true, full_name: cached.full_name, message: 'Phone number is registered.' };
+          }
+        } catch (_) {}
+      }
+      throw err;
+    }
+  },
+
+  /**
    * Authenticates or auto-registers user via verified Phone Number & Firebase ID Token
    * @param {Object} payload - { phone, firebase_id_token, full_name, role }
    */

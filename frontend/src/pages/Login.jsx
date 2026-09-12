@@ -22,6 +22,7 @@ import { auth } from "../config/firebase";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { getErrorMessage } from "../api/client";
+import { authApi } from "../api/auth";
 
 // Pre-seeded Demo Credentials for Institutional Testing (6 Authoritative Backend Roles)
 const DEMO_PRESETS = [
@@ -114,6 +115,7 @@ export default function Login({ defaultMode }) {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [notRegistered, setNotRegistered] = useState(false);
 
   // If already authenticated, redirect to appropriate portal
   if (!isLoading && isAuthenticated) {
@@ -246,6 +248,7 @@ export default function Login({ defaultMode }) {
   const handleSendOtp = async (e) => {
     if (e) e.preventDefault();
     setError(null);
+    setNotRegistered(false);
 
     const formatted = normalizePhoneNumber(phoneNumber);
     if (formatted.replace(/\D/g, "").length < 10) {
@@ -255,6 +258,29 @@ export default function Login({ defaultMode }) {
 
     try {
       setIsSubmitting(true);
+
+      // Pre-check: Verify mobile number is registered on KaushalNexus before sending OTP
+      try {
+        const checkRes = await authApi.checkPhone(formatted);
+        if (!checkRes?.registered) {
+          setNotRegistered(true);
+          setError(
+            checkRes?.message ||
+            "This mobile number is not registered on KaushalNexus. Please register first to continue."
+          );
+          setIsSubmitting(false);
+          return;
+        }
+      } catch (checkErr) {
+        if (checkErr?.response?.data?.error?.message) {
+          setNotRegistered(true);
+          setError(checkErr.response.data.error.message);
+          setIsSubmitting(false);
+          return;
+        }
+        // If network issue, allow flow to proceed or fail gracefully
+      }
+
       const appVerifier = initRecaptcha();
       const confirmationResult = await signInWithPhoneNumber(auth, formatted, appVerifier);
       window.confirmationResult = confirmationResult;
@@ -345,6 +371,7 @@ export default function Login({ defaultMode }) {
     setOtpSent(false);
     setOtp("");
     setError(null);
+    setNotRegistered(false);
   };
 
   const handleSubmit = async (e) => {
@@ -523,10 +550,23 @@ export default function Login({ defaultMode }) {
 
             {/* Error Banner */}
             {error && (
-              <div className="mt-4 flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50/90 p-3.5 text-xs text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-200">
-                <div className="flex items-center gap-2.5">
-                  <AlertCircle size={16} className="shrink-0 text-rose-600 dark:text-rose-400" />
-                  <span>{error}</span>
+              <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50/90 p-3.5 text-xs text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-200">
+                <div className="flex items-start gap-2.5">
+                  <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-600 dark:text-rose-400" />
+                  <div className="flex-1">
+                    <p className="font-medium leading-relaxed">{error}</p>
+                    {notRegistered && (
+                      <div className="mt-2.5 flex items-center gap-2">
+                        <Link
+                          to="/register"
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-rose-700 active:scale-[0.98]"
+                        >
+                          <span>Register as Candidate</span>
+                          <ArrowRight size={13} />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -670,15 +710,26 @@ export default function Login({ defaultMode }) {
                   )}
                 </button>
 
-                <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
-                  Are you an institutional officer?{" "}
-                  <button
-                    type="button"
-                    onClick={() => setLoginMode("email")}
-                    className="font-semibold text-blue-600 underline hover:text-blue-700 dark:text-blue-400"
-                  >
-                    Use Email & Password
-                  </button>
+                <div className="pt-2 flex flex-col items-center gap-1 text-center text-xs text-slate-500 dark:text-slate-400">
+                  <div>
+                    New candidate?{" "}
+                    <Link
+                      to="/register"
+                      className="font-semibold text-emerald-600 underline hover:text-emerald-700 dark:text-emerald-400"
+                    >
+                      Register on KaushalNexus
+                    </Link>
+                  </div>
+                  <div>
+                    Are you an institutional officer?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setLoginMode("email")}
+                      className="font-semibold text-blue-600 underline hover:text-blue-700 dark:text-blue-400"
+                    >
+                      Use Email & Password
+                    </button>
+                  </div>
                 </div>
               </form>
             ) : (
