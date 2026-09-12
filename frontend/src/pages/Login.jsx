@@ -184,15 +184,23 @@ export default function Login({ defaultMode }) {
   };
 
   const initRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-        size: "invisible",
-        callback: () => {},
-        "expired-callback": () => {
-          setError("reCAPTCHA security check expired. Please send OTP again.");
-        },
-      });
+    if (window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier.clear();
+      } catch (_) {}
+      window.recaptchaVerifier = null;
     }
+    const container = document.getElementById("recaptcha-container");
+    if (container) {
+      container.innerHTML = "";
+    }
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+      size: "invisible",
+      callback: () => {},
+      "expired-callback": () => {
+        setError("reCAPTCHA security check expired. Please send OTP again.");
+      },
+    });
     return window.recaptchaVerifier;
   };
 
@@ -654,16 +662,33 @@ export default function Login({ defaultMode }) {
                   <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-400">
                     Unlimited free test authentication using pre-authorized phone numbers:
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPhoneNumber("9999999999");
-                      setError(null);
-                    }}
-                    className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-blue-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:bg-slate-800 dark:text-blue-300 dark:hover:bg-slate-700"
-                  >
-                    <span>Click to Autofill: +91 99999 99999 (OTP: 123456)</span>
-                  </button>
+                  <div className="mt-2 flex flex-col gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPhoneNumber("9140408637");
+                        setError(null);
+                      }}
+                      className="inline-flex items-center justify-between rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:bg-slate-800 dark:text-blue-300 dark:hover:bg-slate-700"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                        Autofill: +91 91404 08637
+                      </span>
+                      <span className="font-mono text-[11px] font-normal text-slate-500 dark:text-slate-400">OTP: 123456</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPhoneNumber("9999999999");
+                        setError(null);
+                      }}
+                      className="inline-flex items-center justify-between rounded-lg border border-slate-200 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800/70 dark:text-slate-300 dark:hover:bg-slate-700"
+                    >
+                      <span>Autofill: +91 99999 99999</span>
+                      <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">OTP: 123456</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
