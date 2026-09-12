@@ -13,7 +13,7 @@ export const skillGapsApi = {
       const response = await apiClient.get('/skill-gaps/priority', { params });
       return response.data;
     } catch (err) {
-      if (!err.response) {
+      if (!err.response || err.response.status === 401 || err.response.status === 404) {
         // Base national benchmark priority gaps
         const baseGaps = prioritySkills.map((s, idx) => ({
           id: `gap-${idx + 1}`,

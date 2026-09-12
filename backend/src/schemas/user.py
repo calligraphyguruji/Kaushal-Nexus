@@ -57,3 +57,10 @@ class TokenPayload(BaseModel):
     role: Optional[str] = None
     type: Optional[str] = "access"
     exp: Optional[int] = None
+
+
+class PhoneLoginRequest(BaseModel):
+    phone: str = Field(..., min_length=7, max_length=25, description="E.164 phone number e.g. +919876543210")
+    firebase_id_token: Optional[str] = Field(None, description="Verified Firebase Auth ID token")
+    full_name: Optional[str] = Field(None, max_length=150, description="Full name if new user registration")
+    role: Optional[UserRole] = Field(UserRole.LEARNER, description="Role to assign (default: LEARNER)")

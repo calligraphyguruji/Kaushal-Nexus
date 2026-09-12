@@ -6,11 +6,38 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.deps import get_current_user
 from src.core.database import get_db
 from src.models.user import User
-from src.schemas.user import RefreshTokenRequest, TokenResponse, UserCreate, UserLogin, UserResponse
+from src.schemas.user import PhoneLoginRequest, RefreshTokenRequest, TokenResponse, UserCreate, UserLogin, UserResponse
 from src.services.audit_service import audit_service
 from src.services.auth_service import auth_service
 
 router = APIRouter()
+
+
+@router.post(
+    "/phone-login",
+    response_model=TokenResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Authenticate or Register via Verified Phone & OTP",
+    description="Authenticate or auto-provision a candidate user via verified phone number and Firebase OTP.",
+)
+async def phone_login(
+    req: PhoneLoginRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> TokenResponse:
+    """Phone and OTP authentication endpoint."""
+    client_ip = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+    user = await auth_service.authenticate_or_register_phone_user(
+        db,
+        phone=req.phone,
+        firebase_id_token=req.firebase_id_token,
+        full_name=req.full_name,
+        role=req.role,
+        ip_address=client_ip,
+        user_agent=user_agent,
+    )
+    return auth_service.generate_token_response(user)
 
 
 @router.post(

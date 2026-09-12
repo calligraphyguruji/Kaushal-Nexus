@@ -221,5 +221,109 @@ class AuthService:
 
         return AuthService.generate_token_response(user)
 
+    @staticmethod
+    async def authenticate_or_register_phone_user(
+        db: AsyncSession,
+        phone: str,
+        firebase_id_token: Optional[str] = None,
+        full_name: Optional[str] = None,
+        role: Optional[str] = "LEARNER",
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None,
+    ) -> User:
+        """
+        Authenticates an existing user via verified phone number,
+        or auto-provisions a candidate account with associated Learner record.
+        """
+        import re
+        from src.models.learner import Learner
+        from datetime import datetime
+        import uuid
+
+        cleaned_phone = re.sub(r"[^\d+]", "", phone.strip())
+        phone_digits = re.sub(r"\D", "", cleaned_phone)
+        synthetic_email = f"{phone_digits}@phone.kaushalnexus.gov.in"
+
+        # Check if user already exists with this phone email
+        stmt = select(User).where(User.email == synthetic_email)
+        res = await db.execute(stmt)
+        user = res.scalar_one_or_none()
+
+        if not user:
+            # Check if a learner already exists with this phone number
+            l_stmt = select(Learner).where(Learner.phone == cleaned_phone)
+            l_res = await db.execute(l_stmt)
+            existing_learner = l_res.scalar_one_or_none()
+            if existing_learner and existing_learner.user_id:
+                u_stmt = select(User).where(User.id == existing_learner.user_id)
+                u_res = await db.execute(u_stmt)
+                user = u_res.scalar_one_or_none()
+
+        if not user:
+            # Register new user
+            display_name = full_name.strip() if full_name and full_name.strip() else f"Candidate (+{phone_digits[-10:] if len(phone_digits) >= 10 else phone_digits})"
+            user_role = role.value if hasattr(role, "value") else str(role or "LEARNER")
+            random_pwd = uuid.uuid4().hex + "KN2026!"
+            hashed_pwd = get_password_hash(random_pwd)
+
+            user = User(
+                email=synthetic_email,
+                hashed_password=hashed_pwd,
+                full_name=display_name,
+                role=user_role,
+                is_active=True,
+                is_superuser=False,
+            )
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+
+            # Auto-provision learner profile
+            if user.role == "LEARNER":
+                now_year = datetime.now().year
+                unique_suffix = uuid.uuid4().hex[:5].upper()
+                new_learner = Learner(
+                    id=f"KN-{now_year}-{unique_suffix}",
+                    user_id=user.id,
+                    full_name=user.full_name,
+                    email=user.email,
+                    phone=cleaned_phone,
+                    district_id="UP-LUCKNOW",
+                    employment_readiness_score=0,
+                    overall_progress=0,
+                    status="In Training",
+                )
+                db.add(new_learner)
+                await db.commit()
+
+            await audit_service.log_action(
+                db=db,
+                action="AUTH_PHONE_REGISTER_SUCCESS",
+                resource_type="USER",
+                resource_id=str(user.id),
+                actor=user,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                status="SUCCESS",
+                details={"role": user.role, "phone": cleaned_phone},
+            )
+        else:
+            if not user.is_active:
+                raise ForbiddenException("User account is deactivated. Contact platform administrator.")
+
+            await audit_service.log_action(
+                db=db,
+                action="AUTH_PHONE_LOGIN_SUCCESS",
+                resource_type="USER",
+                resource_id=str(user.id),
+                actor=user,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                status="SUCCESS",
+                details={"role": user.role, "phone": cleaned_phone},
+            )
+
+        return user
+
 
 auth_service = AuthService()

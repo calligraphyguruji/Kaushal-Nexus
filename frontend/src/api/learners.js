@@ -337,7 +337,7 @@ export const learnersApi = {
       const response = await apiClient.get(`/learners/${learnerId}/skills`);
       return response.data;
     } catch (err) {
-      if (!err.response) {
+      if (!err.response || err.response.status === 401 || err.response.status === 404) {
         const candidate = getCandidateById(learnerId);
 
         if (candidate && Array.isArray(candidate.skills) && candidate.skills.length > 0) {
@@ -380,7 +380,7 @@ export const learnersApi = {
       });
       return response.data;
     } catch (err) {
-      if (!err.response) {
+      if (!err.response || err.response.status === 401 || err.response.status === 404) {
         const candidate = getCandidateById(learnerId);
         let candidateGaps = candidate?.detected_gaps || [];
 

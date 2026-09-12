@@ -48,6 +48,14 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  // Phone OTP Login handler
+  const phoneLogin = async (payload) => {
+    const data = await authApi.phoneLogin(payload);
+    setToken(data.access_token);
+    setUser(data.user);
+    return data;
+  };
+
   // Logout handler
   const logout = () => {
     authApi.logout();
@@ -65,6 +73,7 @@ export function AuthProvider({ children }) {
         isAuthenticated,
         isLoading,
         login,
+        phoneLogin,
         logout,
         checkAuth,
       }}

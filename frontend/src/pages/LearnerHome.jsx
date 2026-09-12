@@ -29,6 +29,7 @@ import {
   Quote,
   Clock,
   Zap,
+  Smartphone,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import ThemeToggle from "../components/ThemeToggle";
@@ -229,8 +230,16 @@ export default function LearnerHome() {
             ) : (
               <div className="flex items-center gap-2">
                 <Link
+                  to="/otp-login"
+                  className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 px-3 py-2 rounded-lg border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all"
+                  title="Passwordless 1-Tap Mobile OTP Sign In"
+                >
+                  <Smartphone size={13} className="text-emerald-600 dark:text-emerald-400" />
+                  <span>OTP Login</span>
+                </Link>
+                <Link
                   to="/login"
-                  className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                  className="hidden md:inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
                 >
                   <Lock size={13} />
                   <span>Portal Login</span>
@@ -356,6 +365,14 @@ export default function LearnerHome() {
                   </Link>
                 ) : (
                   <>
+                    <Link
+                      to="/otp-login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex h-10 items-center justify-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-950/40 text-emerald-300 text-xs font-semibold uppercase tracking-wider hover:bg-emerald-900/50"
+                    >
+                      <Smartphone size={14} className="text-emerald-400" />
+                      <span>One-Tap Mobile OTP Login</span>
+                    </Link>
                     <Link
                       to="/login"
                       onClick={() => setMobileMenuOpen(false)}

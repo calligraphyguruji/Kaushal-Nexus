@@ -691,6 +691,10 @@ export default function Register() {
               <Link to="/login" className="font-semibold text-sky-600 hover:underline dark:text-sky-400">
                 Sign In
               </Link>
+              {" · "}
+              <Link to="/otp-login" className="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">
+                Sign in with Mobile OTP →
+              </Link>
             </div>
           </div>
         </div>

@@ -59,6 +59,8 @@ function App() {
 
             {/* Public Auth Routes */}
             <Route path="/login" element={<Login />} />
+            <Route path="/otp-login" element={<Login defaultMode="phone" />} />
+            <Route path="/phone-login" element={<Login defaultMode="phone" />} />
             <Route path="/register" element={<Register />} />
 
             {/* Protected Application Routes */}

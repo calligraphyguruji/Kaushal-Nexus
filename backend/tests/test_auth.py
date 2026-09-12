@@ -204,3 +204,29 @@ async def test_rbac_role_guard(client: AsyncClient):
     data_tp = resp_tp.json()
     assert data_tp["success"] is False
     assert data_tp["error"]["code"] == "FORBIDDEN"
+
+
+@pytest.mark.asyncio
+async def test_phone_login_and_auto_registration(client: AsyncClient):
+    """Test phone login endpoint auto-provisions user and returns valid token."""
+    rand_phone = f"+9198{uuid.uuid4().int % 100000000:08d}"
+    payload = {
+        "phone": rand_phone,
+        "full_name": "Test Candidate Phone",
+        "role": "LEARNER",
+        "firebase_id_token": "mock-firebase-token",
+    }
+    # 1. First call registers the user
+    resp1 = await client.post("/api/v1/auth/phone-login", json=payload)
+    assert resp1.status_code == 200
+    data1 = resp1.json()
+    assert "access_token" in data1
+    assert data1["user"]["full_name"] == "Test Candidate Phone"
+    assert data1["user"]["role"] == "LEARNER"
+
+    # 2. Second call logs in existing user
+    resp2 = await client.post("/api/v1/auth/phone-login", json=payload)
+    assert resp2.status_code == 200
+    data2 = resp2.json()
+    assert "access_token" in data2
+    assert data2["user"]["id"] == data1["user"]["id"]
