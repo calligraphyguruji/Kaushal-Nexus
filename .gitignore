@@ -56,4 +56,7 @@ models_registry/
 # Impeccable platform binaries and user hooks
 .agents/skills/impeccable/scripts/bin/
 .codex/
+.claude/
+agent/
+
 
