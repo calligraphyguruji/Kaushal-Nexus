@@ -52,3 +52,8 @@ uploads/
 mempalace.yaml
 entities.json
 models_registry/
+
+# Impeccable platform binaries and user hooks
+.agents/skills/impeccable/scripts/bin/
+.codex/
+
