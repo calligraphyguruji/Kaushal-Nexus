@@ -13,11 +13,13 @@ import {
   LogOut,
   Shield,
   ShieldCheck,
+  Layers,
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "../context/AuthContext";
 import { learnersApi } from "../api/learners";
 import { regionalApi } from "../api/regional";
+import { programPerformance, schemeBreakdown } from "../data/dashboardData";
 import { ROLE_LABELS } from "../utils/permissions";
 
 export default function Topbar({ onMenuClick }) {
@@ -31,7 +33,7 @@ export default function Topbar({ onMenuClick }) {
     user?.role ? ROLE_LABELS[user.role] || user.role : "National Policy View (MSDE)"
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const [suggestions, setSuggestions] = useState({ learners: [], districts: [] });
+  const [suggestions, setSuggestions] = useState({ learners: [], districts: [], sectors: [] });
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -127,7 +129,7 @@ export default function Topbar({ onMenuClick }) {
   // Live query search suggestions as user types
   useEffect(() => {
     if (!searchQuery || searchQuery.trim().length < 2) {
-      setSuggestions({ learners: [], districts: [] });
+      setSuggestions({ learners: [], districts: [], sectors: [] });
       setIsSearching(false);
       return;
     }
@@ -135,6 +137,34 @@ export default function Topbar({ onMenuClick }) {
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
+        const query = searchQuery.trim().toLowerCase();
+
+        // 1. Instant local matching for Sectors & Schemes
+        const matchedPrograms = programPerformance
+          .filter(
+            (p) =>
+              p.name.toLowerCase().includes(query) ||
+              p.sector.toLowerCase().includes(query)
+          )
+          .map((p) => ({
+            id: `prog-${p.name}`,
+            title: p.name,
+            subtitle: `${p.sector} · ${p.employment}% Placed`,
+            searchTarget: p.sector,
+          }));
+
+        const matchedSchemes = schemeBreakdown
+          .filter((s) => s.scheme.toLowerCase().includes(query))
+          .map((s) => ({
+            id: `scheme-${s.scheme}`,
+            title: s.scheme,
+            subtitle: `${s.enrolled.toLocaleString()} enrolled · ${s.placedRate}% Placed`,
+            searchTarget: s.scheme,
+          }));
+
+        const sectorMatches = [...matchedPrograms, ...matchedSchemes].slice(0, 3);
+
+        // 2. Query Candidates & Districts
         const [learnersRes, districtsRes] = await Promise.all([
           learnersApi.list({ search: searchQuery.trim(), page_size: 4 }).catch(() => ({ items: [] })),
           regionalApi.getDistricts({ district: searchQuery.trim() }).catch(() => []),
@@ -143,6 +173,7 @@ export default function Topbar({ onMenuClick }) {
         setSuggestions({
           learners: (learnersRes?.items || []).slice(0, 3),
           districts: (districtsRes || []).slice(0, 3),
+          sectors: sectorMatches,
         });
         setShowDropdown(true);
       } catch (err) {
@@ -157,9 +188,57 @@ export default function Topbar({ onMenuClick }) {
 
   const handleSearchSubmit = (e) => {
     if (e) e.preventDefault();
-    if (!searchQuery.trim()) return;
+    const query = searchQuery.trim();
+    if (!query) return;
     setShowDropdown(false);
-    navigate(`/learner?search=${encodeURIComponent(searchQuery.trim())}&tab=dossier`);
+
+    // If on Dashboard / Overview & Impact, filter in-place via URL param
+    if (location.pathname === "/dashboard" || location.pathname === "/") {
+      navigate(`/dashboard?search=${encodeURIComponent(query)}`);
+      return;
+    }
+
+    // If on Regional Intelligence, filter regional districts
+    if (location.pathname.startsWith("/regional")) {
+      navigate(`/regional?search=${encodeURIComponent(query)}`);
+      return;
+    }
+
+    // If on Skill Gap Matrix, filter skills
+    if (location.pathname.startsWith("/skill-gap")) {
+      navigate(`/skill-gap?search=${encodeURIComponent(query)}`);
+      return;
+    }
+
+    // If on Employer Network, filter mandates
+    if (location.pathname.startsWith("/matching")) {
+      navigate(`/matching?search=${encodeURIComponent(query)}`);
+      return;
+    }
+
+    // Check if query matches known sector or scheme keywords
+    const lowerQuery = query.toLowerCase();
+    const matchesSectorOrScheme =
+      programPerformance.some(
+        (p) =>
+          p.name.toLowerCase().includes(lowerQuery) ||
+          p.sector.toLowerCase().includes(lowerQuery)
+      ) ||
+      schemeBreakdown.some((s) => s.scheme.toLowerCase().includes(lowerQuery));
+
+    if (matchesSectorOrScheme) {
+      navigate(`/dashboard?search=${encodeURIComponent(query)}`);
+      return;
+    }
+
+    // Default to candidate dossier
+    navigate(`/learner?search=${encodeURIComponent(query)}&tab=dossier`);
+  };
+
+  const handleSelectSector = (sector) => {
+    setShowDropdown(false);
+    setSearchQuery("");
+    navigate(`/dashboard?search=${encodeURIComponent(sector.searchTarget || sector.title)}`);
   };
 
   const handleSelectLearner = (learner) => {
@@ -183,7 +262,9 @@ export default function Topbar({ onMenuClick }) {
   };
 
   const hasSuggestions =
-    suggestions.learners.length > 0 || suggestions.districts.length > 0;
+    suggestions.learners.length > 0 ||
+    suggestions.districts.length > 0 ||
+    suggestions.sectors.length > 0;
 
   const initials = user?.full_name
     ? user.full_name
@@ -268,7 +349,7 @@ export default function Topbar({ onMenuClick }) {
                 onFocus={() => {
                   if (searchQuery.trim().length >= 2) setShowDropdown(true);
                 }}
-                placeholder="Search candidate, district..."
+                placeholder="Search sector, district, candidate..."
                 className="h-8 w-52 lg:w-64 rounded-lg border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] pl-8 pr-7 font-sans text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:border-sky-500 dark:focus:border-sky-400 focus:bg-white dark:focus:bg-[#070d18] focus:outline-none"
               />
               {isSearching ? (
@@ -296,12 +377,50 @@ export default function Topbar({ onMenuClick }) {
 
             {/* Instant Search Suggestions Dropdown */}
             {showDropdown && searchQuery.trim().length >= 2 && (
-              <div className="absolute left-0 right-0 top-full mt-2 w-80 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-2.5 shadow-xl dark:shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute left-0 right-0 top-full mt-2 w-84 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-2.5 shadow-xl dark:shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
                 {hasSuggestions ? (
                   <div className="space-y-2">
+                    {/* Sectors & Schemes Group */}
+                    {suggestions.sectors.length > 0 && (
+                      <div>
+                        <span className="block px-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          Sectors &amp; Schemes ({suggestions.sectors.length})
+                        </span>
+                        <div className="mt-1 space-y-0.5">
+                          {suggestions.sectors.map((sec) => (
+                            <button
+                              key={sec.id}
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleSelectSector(sec);
+                              }}
+                              onClick={() => handleSelectSector(sec)}
+                              className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs transition hover:bg-slate-100 dark:hover:bg-[#0f1c33] cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Layers size={13} className="shrink-0 text-indigo-400" />
+                                <div className="min-w-0">
+                                  <p className="truncate font-semibold text-slate-800 dark:text-slate-100">
+                                    {sec.title}
+                                  </p>
+                                  <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                                    {sec.subtitle}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="shrink-0 rounded border border-indigo-400/20 bg-indigo-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-indigo-600 dark:text-indigo-300">
+                                Overview
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Candidates Group */}
                     {suggestions.learners.length > 0 && (
-                      <div>
+                      <div className={suggestions.sectors.length > 0 ? "border-t border-slate-200 dark:border-[#1e293b] pt-1.5" : ""}>
                         <span className="block px-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
                           Candidates ({suggestions.learners.length})
                         </span>
@@ -375,7 +494,7 @@ export default function Topbar({ onMenuClick }) {
                       </div>
                     )}
 
-                    {/* Search All button */}
+                    {/* Contextual Search Button */}
                     <div className="border-t border-slate-200 dark:border-[#1e293b] pt-1.5">
                       <button
                         type="button"
@@ -386,14 +505,24 @@ export default function Topbar({ onMenuClick }) {
                         onClick={handleSearchSubmit}
                         className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-sky-500/10 border border-sky-400/20 py-1.5 font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 transition hover:bg-sky-500/20 cursor-pointer"
                       >
-                        <span>Search for "{searchQuery}" in Registry</span>
+                        <span>
+                          {location.pathname === "/dashboard" || location.pathname === "/"
+                            ? `Filter Overview for "${searchQuery}"`
+                            : location.pathname.startsWith("/regional")
+                            ? `Filter Regional for "${searchQuery}"`
+                            : location.pathname.startsWith("/skill-gap")
+                            ? `Filter Skill Gap for "${searchQuery}"`
+                            : location.pathname.startsWith("/matching")
+                            ? `Filter Employer Network for "${searchQuery}"`
+                            : `Search for "${searchQuery}" in Registry`}
+                        </span>
                         <ArrowRight size={12} />
                       </button>
                     </div>
                   </div>
                 ) : (
                   <div className="py-3 text-center text-xs text-slate-400">
-                    <p>No exact candidate or district match.</p>
+                    <p>No instant matches found.</p>
                     <button
                       type="button"
                       onMouseDown={(e) => {
@@ -403,7 +532,9 @@ export default function Topbar({ onMenuClick }) {
                       onClick={handleSearchSubmit}
                       className="mt-1.5 font-mono text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
                     >
-                      Press Enter to search entire registry →
+                      {location.pathname === "/dashboard" || location.pathname === "/"
+                        ? `Filter Overview & Impact for "${searchQuery}" →`
+                        : `Press Enter to search entire registry →`}
                     </button>
                   </div>
                 )}

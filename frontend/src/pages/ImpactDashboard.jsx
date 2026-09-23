@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   ArrowUpRight,
   Download,
@@ -13,6 +14,9 @@ import {
   Activity,
   TrendingUp,
   Layers,
+  Search,
+  X,
+  SlidersHorizontal,
 } from "lucide-react";
 
 import {
@@ -56,6 +60,42 @@ export default function ImpactDashboard() {
   const [isExporting, setIsExporting] = useState(false);
   const [actionSuccessMsg, setActionSuccessMsg] = useState(null);
   const [isInterventionModalOpen, setIsInterventionModalOpen] = useState(false);
+
+  // Search & Filter State (synced with URL)
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get("search") || "");
+  const [selectedDemandTier, setSelectedDemandTier] = useState("All Tiers");
+
+  // Keep state in sync when URL search parameter changes
+  useEffect(() => {
+    const urlQuery = searchParams.get("search");
+    if (urlQuery !== null && urlQuery !== searchQuery) {
+      setSearchQuery(urlQuery);
+    } else if (urlQuery === null && searchQuery !== "") {
+      setSearchQuery("");
+    }
+  }, [searchParams]);
+
+  const handleSearchChange = (val) => {
+    setSearchQuery(val);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (val && val.trim()) {
+          next.set("search", val.trim());
+        } else {
+          next.delete("search");
+        }
+        return next;
+      },
+      { replace: true }
+    );
+  };
+
+  const handleClearSearch = () => {
+    handleSearchChange("");
+    setSelectedDemandTier("All Tiers");
+  };
 
   // Live Backend Data States
   const [loading, setLoading] = useState(true);
@@ -166,6 +206,47 @@ export default function ImpactDashboard() {
     "bg-emerald-400",
   ];
 
+  // Filtered sector matrix items matching searchQuery and demand tier
+  const filteredSectors = useMemo(() => {
+    return (sectorMatrixData || []).filter((prog) => {
+      const sectorTitle = (prog.sector || prog.name || "").toLowerCase();
+      const progName = (prog.name || "").toLowerCase();
+      const statusText = (prog.status || "").toLowerCase();
+      const q = searchQuery.trim().toLowerCase();
+
+      const matchesQuery =
+        !q ||
+        sectorTitle.includes(q) ||
+        progName.includes(q) ||
+        statusText.includes(q);
+
+      const placementRate = Number(prog.placement_rate ?? prog.employment ?? 0);
+      const tier =
+        placementRate >= 50
+          ? "High Placement"
+          : placementRate >= 30
+          ? "Expanding Demand"
+          : "Intervention Targeted";
+
+      const matchesTier =
+        selectedDemandTier === "All Tiers" || selectedDemandTier === tier;
+
+      return matchesQuery && matchesTier;
+    });
+  }, [sectorMatrixData, searchQuery, selectedDemandTier]);
+
+  // Filtered scheme breakdown items matching searchQuery
+  const filteredSchemes = useMemo(() => {
+    return (schemeBreakdown || []).filter((item) => {
+      const q = searchQuery.trim().toLowerCase();
+      if (!q) return true;
+      return (
+        item.scheme.toLowerCase().includes(q) ||
+        (item.budgetUtil && item.budgetUtil.toLowerCase().includes(q))
+      );
+    });
+  }, [searchQuery]);
+
   return (
     <div className="space-y-8 font-sans text-[#f1f5f9]">
       {/* =====================================================
@@ -236,6 +317,31 @@ export default function ImpactDashboard() {
             className="font-mono text-xs font-bold uppercase text-emerald-400 hover:text-emerald-300"
           >
             Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Active Search / Filter Banner */}
+      {searchQuery && (
+        <div className="flex items-center justify-between rounded-xl border border-sky-500/30 bg-sky-950/30 px-4 py-2.5 text-xs text-sky-200">
+          <div className="flex items-center gap-2">
+            <Search size={14} className="shrink-0 text-sky-400" />
+            <span>
+              Active Filter:{" "}
+              <strong className="font-mono text-white">"{searchQuery}"</strong>{" "}
+              <span className="text-slate-400">
+                ({filteredSectors.length} of {sectorMatrixData.length} sectors,{" "}
+                {filteredSchemes.length} of {schemeBreakdown.length} schemes matching)
+              </span>
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleClearSearch}
+            className="flex items-center gap-1 font-mono text-[11px] font-semibold text-sky-400 hover:text-sky-300 transition cursor-pointer"
+          >
+            <X size={12} />
+            <span>Clear Filter</span>
           </button>
         </div>
       )}
@@ -574,9 +680,46 @@ export default function ImpactDashboard() {
             title="Sector & Program Performance Matrix"
             subtitle="Live SQL breakdown of certified candidates, placement conversion, and starting wages"
             actions={
-              <StatusBadge variant="indigo" size="sm">
-                {sectorMatrixData.length} Monitored Sectors
-              </StatusBadge>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative">
+                  <Search
+                    size={13}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Filter sectors, schemes..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    className="h-8 w-44 sm:w-52 rounded-lg border border-[#1e293b] bg-[#070d18] pl-8 pr-7 font-sans text-xs text-slate-200 placeholder:text-slate-500 transition-all focus:border-sky-400 focus:outline-none"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={handleClearSearch}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                      title="Clear filter"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+
+                <select
+                  value={selectedDemandTier}
+                  onChange={(e) => setSelectedDemandTier(e.target.value)}
+                  className="h-8 rounded-lg border border-[#1e293b] bg-[#070d18] px-2 font-mono text-xs font-semibold text-slate-300 focus:border-sky-400 focus:outline-none cursor-pointer"
+                >
+                  <option value="All Tiers">All Demand Tiers</option>
+                  <option value="High Placement">High Placement (≥50%)</option>
+                  <option value="Expanding Demand">Expanding Demand (30-49%)</option>
+                  <option value="Intervention Targeted">Intervention Targeted (&lt;30%)</option>
+                </select>
+
+                <StatusBadge variant="indigo" size="sm">
+                  {filteredSectors.length} of {sectorMatrixData.length} Sectors
+                </StatusBadge>
+              </div>
             }
           />
 
@@ -601,55 +744,79 @@ export default function ImpactDashboard() {
                       </td>
                     </tr>
                   ))
-                ) : sectorMatrixData.length > 0 ? (
-                  sectorMatrixData.map((prog) => (
-                    <tr
-                      key={prog.sector}
-                      className="transition-colors hover:bg-[#0f1c33]"
-                    >
-                      <td className="py-3 font-semibold text-white">
-                        <div>{prog.sector}</div>
-                        <span className="font-mono text-[10px] font-normal text-slate-400">
-                          {prog.enrolled} enrolled candidates
-                        </span>
-                      </td>
-                      <td className="py-3 text-right font-mono font-medium text-slate-300">
-                        {Number(prog.certified || 0).toLocaleString()}
-                      </td>
-                      <td className="py-3 text-right">
-                        <span className="font-mono font-bold text-white">
-                          {prog.placement_rate}%
-                        </span>
-                      </td>
-                      <td className="py-3 text-right font-mono font-semibold text-emerald-400">
-                        {prog.avg_readiness_score}%
-                      </td>
-                      <td className="py-3 text-right font-mono font-semibold text-slate-200">
-                        ₹{(3.2 + (prog.avg_readiness_score * 0.03)).toFixed(1)} LPA
-                      </td>
-                      <td className="py-3 text-right">
-                        <span
-                          className={`inline-block rounded px-2 py-0.5 font-mono text-[10px] font-semibold border ${
-                            prog.placement_rate >= 50
-                              ? "bg-emerald-950/50 text-emerald-300 border-emerald-500/30"
-                              : prog.placement_rate >= 30
-                              ? "bg-sky-950/50 text-sky-300 border-sky-500/30"
-                              : "bg-amber-950/50 text-amber-300 border-amber-500/30"
-                          }`}
-                        >
-                          {prog.placement_rate >= 50
-                            ? "High Placement"
-                            : prog.placement_rate >= 30
-                            ? "Expanding Demand"
-                            : "Intervention Targeted"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                ) : filteredSectors.length > 0 ? (
+                  filteredSectors.map((prog, idx) => {
+                    const sectorTitle = prog.sector || prog.name || "General Track";
+                    const enrolledCount = Number(prog.enrolled ?? prog.learners ?? 0);
+                    const certifiedCount = Number(prog.certified ?? Math.round(enrolledCount * 0.88));
+                    const placementRate = Number(prog.placement_rate ?? prog.employment ?? 0);
+                    const readinessScore = Number(prog.avg_readiness_score ?? Math.round(placementRate * 1.05));
+                    const wageDisplay = prog.avgWage || `₹${(3.2 + (readinessScore * 0.03)).toFixed(1)} LPA`;
+                    const isHighPlacement = placementRate >= 50;
+                    const isExpandingDemand = placementRate >= 30;
+
+                    return (
+                      <tr
+                        key={prog.sector || prog.name || idx}
+                        className="transition-colors hover:bg-[#0f1c33]"
+                      >
+                        <td className="py-3 font-semibold text-white">
+                          <div>{sectorTitle}</div>
+                          <span className="font-mono text-[10px] font-normal text-slate-400">
+                            {enrolledCount.toLocaleString()} enrolled candidates
+                          </span>
+                        </td>
+                        <td className="py-3 text-right font-mono font-medium text-slate-300">
+                          {certifiedCount.toLocaleString()}
+                        </td>
+                        <td className="py-3 text-right">
+                          <span className="font-mono font-bold text-white">
+                            {placementRate}%
+                          </span>
+                        </td>
+                        <td className="py-3 text-right font-mono font-semibold text-emerald-400">
+                          {readinessScore}%
+                        </td>
+                        <td className="py-3 text-right font-mono font-semibold text-slate-200">
+                          {wageDisplay}
+                        </td>
+                        <td className="py-3 text-right">
+                          <span
+                            className={`inline-block rounded px-2 py-0.5 font-mono text-[10px] font-semibold border ${
+                              isHighPlacement
+                                ? "bg-emerald-950/50 text-emerald-300 border-emerald-500/30"
+                                : isExpandingDemand
+                                ? "bg-sky-950/50 text-sky-300 border-sky-500/30"
+                                : "bg-amber-950/50 text-amber-300 border-amber-500/30"
+                            }`}
+                          >
+                            {isHighPlacement
+                              ? "High Placement"
+                              : isExpandingDemand
+                              ? "Expanding Demand"
+                              : "Intervention Targeted"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
-                    <td colSpan={6} className="py-6 text-center font-mono text-slate-400">
-                      No sector matrix metrics recorded.
+                    <td colSpan={6} className="py-8 text-center">
+                      <div className="mx-auto flex flex-col items-center justify-center gap-2">
+                        <p className="font-mono text-xs text-slate-400">
+                          No sector or program matches "{searchQuery}"
+                          {selectedDemandTier !== "All Tiers" ? ` with ${selectedDemandTier}` : ""}.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handleClearSearch}
+                          className="inline-flex items-center gap-1 rounded-md border border-[#1e293b] bg-[#070d18] px-3 py-1 font-mono text-xs font-semibold text-sky-400 hover:border-sky-400/50 hover:text-white transition cursor-pointer"
+                        >
+                          <X size={12} />
+                          <span>Clear Search Filters</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )}
@@ -661,27 +828,44 @@ export default function ImpactDashboard() {
         {/* Scheme Impact Summary (4 Cols) */}
         <div className="flex flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 xl:col-span-4">
           <div>
-            <SectionHeader
-              title="Scheme-Wise Outcome Efficiency"
-              subtitle="Performance across national &amp; state skilling missions"
-            />
+            <div className="flex items-center justify-between">
+              <SectionHeader
+                title="Scheme-Wise Outcome Efficiency"
+                subtitle="Performance across national &amp; state skilling missions"
+              />
+            </div>
 
             <div className="mt-4 divide-y divide-[#1e293b]">
-              {schemeBreakdown.map((item) => (
-                <div key={item.scheme} className="py-3 first:pt-0 last:pb-0">
-                  <div className="flex items-center justify-between text-xs font-semibold text-white">
-                    <span>{item.scheme}</span>
-                    <span className="font-mono font-bold text-sky-400">
-                      {item.placedRate}% Placed
-                    </span>
-                  </div>
+              {filteredSchemes.length > 0 ? (
+                filteredSchemes.map((item) => (
+                  <div key={item.scheme} className="py-3 first:pt-0 last:pb-0">
+                    <div className="flex items-center justify-between text-xs font-semibold text-white">
+                      <span>{item.scheme}</span>
+                      <span className="font-mono font-bold text-sky-400">
+                        {item.placedRate}% Placed
+                      </span>
+                    </div>
 
-                  <div className="mt-1.5 flex justify-between font-mono text-[11px] text-slate-400">
-                    <span>{item.enrolled.toLocaleString()} Enrolled</span>
-                    <span>Budget: {item.budgetUtil}</span>
+                    <div className="mt-1.5 flex justify-between font-mono text-[11px] text-slate-400">
+                      <span>{item.enrolled.toLocaleString()} Enrolled</span>
+                      <span>Budget: {item.budgetUtil}</span>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="py-8 text-center">
+                  <p className="font-mono text-xs text-slate-400">
+                    No schemes matching "{searchQuery}"
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="mt-2 inline-flex items-center gap-1 rounded-md border border-[#1e293b] bg-[#070d18] px-2.5 py-1 font-mono text-[11px] font-semibold text-sky-400 hover:text-white"
+                  >
+                    Clear Filter
+                  </button>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 

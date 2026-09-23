@@ -1,5 +1,5 @@
-import { apiClient } from './client';
-import { districtPerformance, priorityDistricts, skillDemand } from '../data/regionalData';
+import { apiClient } from './client.js';
+import { districtPerformance, priorityDistricts, skillDemand } from '../data/regionalData.js';
 
 export const regionalApi = {
   /**
@@ -12,7 +12,7 @@ export const regionalApi = {
       return response.data;
     } catch (err) {
       if (!err.response) {
-        return districtPerformance.map((d, i) => ({
+        let list = districtPerformance.map((d, i) => ({
           district_id: `dist-${i + 1}`,
           id: `dist-${i + 1}`,
           name: d.district,
@@ -38,6 +38,21 @@ export const regionalApi = {
           active_training_centers_count: 4,
           vulnerability_index: d.priority === 'High' ? 52.0 : 34.0,
         }));
+
+        const query = (params.district || params.search || '').trim().toLowerCase();
+        if (query) {
+          list = list.filter((d) =>
+            d.name.toLowerCase().includes(query) ||
+            d.region.toLowerCase().includes(query)
+          );
+        }
+
+        if (params.tier && params.tier !== 'All' && params.tier !== 'All Tiers') {
+          const tierQuery = params.tier.trim().toLowerCase();
+          list = list.filter((d) => d.tier && d.tier.toLowerCase().includes(tierQuery));
+        }
+
+        return list;
       }
       throw err;
     }
