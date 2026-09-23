@@ -6,6 +6,7 @@ from src.api.v1.dashboard import router as dashboard_router
 from src.api.v1.endpoints.auth import router as auth_router
 from src.api.v1.endpoints.health import router as health_router
 from src.api.v1.impact import router as impact_router
+from src.api.v1.internships import router as internships_router
 from src.api.v1.learners import router as learners_router
 from src.api.v1.matching import router as matching_router
 from src.api.v1.ml import router as ml_router
@@ -23,6 +24,7 @@ api_v1_router.include_router(health_router, prefix="/health", tags=["Health"])
 api_v1_router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 api_v1_router.include_router(dashboard_router, prefix="/dashboard", tags=["Dashboard"])
 api_v1_router.include_router(learners_router, prefix="/learners", tags=["Learners"])
+api_v1_router.include_router(internships_router, prefix="/internships", tags=["Internships Directory"])
 api_v1_router.include_router(roles_router, prefix="/roles", tags=["Roles & Standards"])
 api_v1_router.include_router(assessments_router, prefix="/assessments", tags=["Assessments & BKT"])
 api_v1_router.include_router(skill_gaps_router, prefix="/skill-gaps", tags=["Skill Gaps"])

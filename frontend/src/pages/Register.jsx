@@ -221,7 +221,7 @@ export default function Register() {
 
         {/* Post-Registration Welcome Ribbon */}
         <div className="border-b border-emerald-200 bg-emerald-50/80 px-6 py-2.5 text-center text-xs font-medium text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-200">
-          <span className="font-bold">Profile successfully registered!</span> Complete this 10-question MCQ diagnostic to compute your baseline Skill Readiness Score &amp; BKT Knowledge Vector.
+          <span className="font-bold">Profile successfully registered!</span> Complete this 10-question MCQ diagnostic to evaluate your competencies and unlock 10+ dynamically matched internships.
         </div>
 
         {/* Main Assessment Container */}

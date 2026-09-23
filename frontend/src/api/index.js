@@ -13,6 +13,7 @@ export { aiApi } from './ai';
 export { learnerPipelineApi } from './learnerPipeline';
 export { mlPlacementApi } from './mlPlacement';
 export { careerIntelligenceApi } from './careerIntelligence';
+export { internshipsApi } from './internships';
 export * as impactApi from './impact';
 
 

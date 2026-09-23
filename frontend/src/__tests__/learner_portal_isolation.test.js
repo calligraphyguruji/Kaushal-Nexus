@@ -1,4 +1,4 @@
-﻿import { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
 import {
@@ -150,17 +150,20 @@ describe("Learner Portal RBAC & Screen Isolation Test Suite", () => {
   });
 
   describe("4. Navigation Items Isolation", () => {
-    it("should expose only Assessment & Skill Gaps and Recommended Learning Path in learner nav", () => {
+    it("should expose only candidate portal routes (Assessment, Remediation, Internships) in learner nav", () => {
       const learnerNav = [
         { name: "Assessment & Skill Gaps", path: "/learner?tab=pipeline" },
         { name: "Recommended Learning Path", path: "/learner?tab=remediation" },
+        { name: "Available Internships", path: "/internships" },
       ];
 
-      assert.equal(learnerNav.length, 2);
+      assert.equal(learnerNav.length, 3);
       assert.equal(learnerNav[0].name, "Assessment & Skill Gaps");
       assert.equal(learnerNav[0].path, "/learner?tab=pipeline");
       assert.equal(learnerNav[1].name, "Recommended Learning Path");
       assert.equal(learnerNav[1].path, "/learner?tab=remediation");
+      assert.equal(learnerNav[2].name, "Available Internships");
+      assert.equal(learnerNav[2].path, "/internships");
 
       const forbiddenPaths = ["/dashboard", "/skill-gap", "/regional", "/matching"];
       learnerNav.forEach((item) => {

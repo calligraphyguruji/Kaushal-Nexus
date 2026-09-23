@@ -41,6 +41,14 @@ export default function Sidebar({ open, onClose }) {
       isActive: (loc) =>
         loc.pathname === "/learner" && loc.search.includes("tab=remediation"),
     },
+    {
+      name: "Available Internships",
+      path: "/internships",
+      icon: BriefcaseBusiness,
+      badge: "10+ Matches",
+      badgeTone: "success",
+      isActive: (loc) => loc.pathname === "/internships",
+    },
   ];
 
   const intelligenceNav = [

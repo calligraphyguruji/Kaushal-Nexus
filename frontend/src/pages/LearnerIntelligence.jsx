@@ -780,6 +780,18 @@ export default function LearnerIntelligence() {
                 Adaptive Learning
               </span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/internships")}
+              className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#0b1528] transition cursor-pointer"
+            >
+              <Briefcase size={15} className="text-sky-500" />
+              <span>Available Internships</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                10+ Matches
+              </span>
+            </button>
           </div>
 
           <div className="hidden lg:flex items-center gap-2 pr-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">

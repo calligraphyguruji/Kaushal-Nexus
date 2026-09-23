@@ -15,6 +15,7 @@ import {
   X,
   Compass,
   Loader2,
+  Briefcase,
 } from "lucide-react";
 import { assessmentsApi } from "../api/assessments";
 import { getDomainQuestions, simulateBKTUpdate, ASSESSMENT_DOMAINS } from "../data/assessmentQuestionBank";
@@ -303,6 +304,37 @@ export default function DiagnosticMCQAssessment({
           </div>
         </div>
 
+        {/* Dynamic Skill-Matched Internships Callout Card */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-sky-200 bg-gradient-to-r from-sky-50 via-indigo-50/50 to-white p-5 shadow-xs dark:border-sky-900/60 dark:from-sky-950/40 dark:via-slate-900 dark:to-slate-900">
+          <div className="flex items-start gap-3.5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-600 text-white shadow-xs dark:bg-sky-500">
+              <Briefcase size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                  10+ Skill-Matched Internships Ready for You!
+                </h4>
+                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                  Dynamic Match
+                </span>
+              </div>
+              <p className="mt-0.5 text-[11px] text-slate-600 dark:text-slate-300">
+                Your assessment scores have updated your competency profile. We've matched your verified skills to live openings in <strong className="text-slate-900 dark:text-white">{domainObj.title}</strong> and related tracks.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => navigate(`/internships?interest=${selectedDomain}`)}
+            className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-sky-500 transition cursor-pointer"
+          >
+            <span>View Available Internships</span>
+            <ArrowRight size={13} />
+          </button>
+        </div>
+
         {/* BKT Knowledge State Breakdown Grid */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
@@ -502,10 +534,20 @@ export default function DiagnosticMCQAssessment({
 
             <button
               type="button"
-              onClick={() => navigate("/learner")}
-              className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-sky-500"
+              onClick={() => navigate(`/internships?interest=${selectedDomain}`)}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:from-sky-500 hover:to-indigo-500 cursor-pointer transition"
             >
-              <span>Go to Learner 360° Dossier</span>
+              <Briefcase size={14} />
+              <span>Available Internships (10+ Matched)</span>
+              <ArrowRight size={14} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/learner")}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              <span>Learner Dossier</span>
               <ArrowRight size={14} />
             </button>
           </div>

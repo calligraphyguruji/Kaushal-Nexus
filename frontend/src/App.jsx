@@ -25,6 +25,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Experience = lazy(() => import("./pages/Experience"));
 const SaasTemplatePage = lazy(() => import("./pages/SaasTemplatePage"));
 const LearnerAssessmentPage = lazy(() => import("./pages/LearnerAssessmentPage"));
+const AvailableInternships = lazy(() => import("./pages/AvailableInternships"));
 
 // Lightweight cyber-navy fallback indicator
 function RouteFallback() {
@@ -146,6 +147,17 @@ function App() {
               element={
                 <ProtectedRoute>
                   <LearnerAssessmentPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/internships"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <AvailableInternships />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
