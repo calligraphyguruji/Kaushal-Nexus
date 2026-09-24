@@ -96,46 +96,46 @@
 }
 
 .dark, :root.dark {
-  /* Semantic Theme Tokens (Stitch Cyber-Navy Dark Mode) */
-  --background: #070d18;
-  --foreground: #f8fafc;
+  /* Semantic Theme Tokens (Warm Obsidian / Arrakis Minimal Dark Mode) */
+  --background: #0b0a08;
+  --foreground: #ffffff;
   
-  --card: #0b1528;
-  --card-foreground: #f8fafc;
+  --card: #141210;
+  --card-foreground: #ffffff;
   
-  --popover: #0b1528;
-  --popover-foreground: #f8fafc;
+  --popover: #141210;
+  --popover-foreground: #ffffff;
   
-  --primary: #38bdf8;
-  --primary-foreground: #070d18;
+  --primary: #ffffff;
+  --primary-foreground: #0b0a08;
   
-  --secondary: #0f1c33;
-  --secondary-foreground: #f8fafc;
+  --secondary: #191613;
+  --secondary-foreground: #ffffff;
   
-  --muted: #0f1c33;
-  --muted-foreground: #94a3b8;
+  --muted: #191613;
+  --muted-foreground: #a8a29e;
   
-  --accent: rgba(56, 189, 248, 0.15);
-  --accent-foreground: #38bdf8;
+  --accent: #191613;
+  --accent-foreground: #ffffff;
   
-  --destructive: #f43f5e;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   
-  --border: #1e293b;
-  --input: #1e293b;
-  --ring: #38bdf8;
+  --border: #262320;
+  --input: #262320;
+  --ring: #d6d3d1;
 
   /* Surface mapping tokens */
-  --canvas-bg: #070d18;
-  --surface-panel: #0b1528;
-  --surface-card: #0b1528;
-  --surface-elevated: #0f1c33;
-  --surface-footer: #050a12;
-  --border-color: #1e293b;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-body: #cbd5e1;
-  --text-muted: #94a3b8;
+  --canvas-bg: #0b0a08;
+  --surface-panel: #141210;
+  --surface-card: #141210;
+  --surface-elevated: #191613;
+  --surface-footer: #080706;
+  --border-color: #262320;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-body: #d6d3d1;
+  --text-muted: #a8a29e;
 }
 
 * {
@@ -181,8 +181,8 @@ textarea {
 .dark select:-webkit-autofill,
 .dark select:-webkit-autofill:hover,
 .dark select:-webkit-autofill:focus {
-  -webkit-text-fill-color: #f8fafc;
-  -webkit-box-shadow: 0 0 0px 1000px #1e293b inset;
+  -webkit-text-fill-color: #ffffff;
+  -webkit-box-shadow: 0 0 0px 1000px #141210 inset;
   transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -193,19 +193,19 @@ select option {
 }
 
 .dark select option {
-  background-color: #1e293b;
-  color: #f8fafc;
+  background-color: #141210;
+  color: #ffffff;
 }
 
-/* Stitch Visual Utilities */
+/* Visual Utilities */
 .glass-card {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
 
 .dark .glass-card {
-  background: rgba(15, 28, 51, 0.7);
-  border-color: #1e293b;
+  background: #141210 !important;
+  border-color: #262320 !important;
 }
 
 html:not(.dark) .glass-card {
@@ -220,8 +220,8 @@ html:not(.dark) .glass-card {
 
 .dark .grid-pattern {
   background-image: 
-    linear-gradient(to right, rgba(30, 41, 59, 0.35) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(30, 41, 59, 0.35) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }
 
 html:not(.dark) .grid-pattern {
@@ -235,7 +235,7 @@ html:not(.dark) .grid-pattern {
 }
 
 .dark .radar-grid {
-  background-image: radial-gradient(circle, rgba(56, 189, 248, 0.15) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
 }
 
 html:not(.dark) .radar-grid {
@@ -250,6 +250,11 @@ html:not(.dark) .radar-grid {
   box-shadow: 0 0 24px -4px rgba(56, 189, 248, 0.25);
 }
 
+.dark .glow-cyan,
+.dark .glow-indigo {
+  box-shadow: none !important;
+}
+
 html:not(.dark) .glow-cyan {
   box-shadow: 0 4px 14px -2px rgba(2, 132, 199, 0.12);
 }
@@ -260,6 +265,139 @@ html:not(.dark) .glow-cyan {
 
 html:not(.dark) .glow-indigo {
   box-shadow: 0 4px 14px -2px rgba(99, 102, 241, 0.12);
+}
+
+/* ==============================================================================
+   DARK MODE OBSIDIAN SURFACE & MINIMAL WHITE TYPOGRAPHY ENGINE (.dark)
+   Matches Arrakis warm-black minimalist aesthetic: #0b0a08 canvas, simple white text
+   ============================================================================== */
+
+html.dark,
+:root.dark,
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: #0b0a08 !important;
+  color: #ffffff !important;
+}
+
+/* 1. Surfaces & Backgrounds in Dark Mode (#0b0a08 canvas, #141210 cards, #191613 elevated) */
+.dark .bg-\[\#070d18\],
+.dark [class*="bg-[#070d18]"],
+.dark .bg-\[\#090d16\],
+.dark [class*="bg-[#090d16]"],
+.dark .bg-slate-950,
+.dark [class*="bg-slate-950"],
+.dark .bg-gray-950,
+.dark [class*="bg-gray-950"],
+.dark .dark\:bg-slate-950,
+.dark .dark\:bg-\[\#070d18\] {
+  background-color: #0b0a08 !important;
+}
+
+.dark .bg-\[\#0b1528\],
+.dark [class*="bg-[#0b1528]"],
+.dark .bg-\[\#060c18\],
+.dark [class*="bg-[#060c18]"],
+.dark .bg-\[\#080e1a\],
+.dark [class*="bg-[#080e1a]"],
+.dark .bg-slate-900,
+.dark [class*="bg-slate-900"],
+.dark .bg-gray-900,
+.dark [class*="bg-gray-900"],
+.dark .dark\:bg-slate-900 {
+  background-color: #141210 !important;
+}
+
+.dark .bg-\[\#0f1c33\],
+.dark [class*="bg-[#0f1c33]"],
+.dark .bg-slate-800,
+.dark [class*="bg-slate-800"],
+.dark .bg-gray-800,
+.dark [class*="bg-gray-800"],
+.dark .dark\:bg-slate-800 {
+  background-color: #191613 !important;
+}
+
+/* Subtle Warm Borders in Dark Mode */
+.dark .border-slate-800,
+.dark [class*="border-slate-800"],
+.dark .border-slate-700,
+.dark [class*="border-slate-700"],
+.dark .border-\[\#1e293b\],
+.dark [class*="border-[#1e293b]"],
+.dark .dark\:border-slate-800,
+.dark .dark\:border-slate-700 {
+  border-color: #262320 !important;
+}
+
+/* 2. Simple White Typography in Dark Mode (No Extra Contrast/Harsh Colors) */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+  color: #ffffff !important;
+}
+
+.dark .text-white,
+.dark .text-slate-100,
+.dark .text-slate-200,
+.dark .text-slate-300,
+.dark .text-gray-100,
+.dark .text-gray-200,
+.dark .text-gray-300,
+.dark .dark\:text-white,
+.dark .dark\:text-slate-100,
+.dark .dark\:text-slate-200 {
+  color: #ffffff !important;
+}
+
+/* Secondary / Body text: Clean subtle light neutral */
+.dark .text-slate-400,
+.dark .text-slate-500,
+.dark .text-gray-400,
+.dark .text-gray-500,
+.dark .dark\:text-slate-300,
+.dark .dark\:text-slate-400 {
+  color: #d6d3d1 !important;
+}
+
+/* Neutralize loud colorful text tints in dark mode into simple white */
+.dark .text-sky-400,
+.dark .text-sky-300,
+.dark .text-cyan-400,
+.dark .text-cyan-300,
+.dark .text-indigo-400,
+.dark .text-indigo-300,
+.dark .text-blue-400,
+.dark .text-blue-300,
+.dark .dark\:text-sky-400,
+.dark .dark\:text-sky-300,
+.dark .dark\:text-cyan-400 {
+  color: #ffffff !important;
+}
+
+/* Subtle muted badges in dark mode */
+.dark .bg-sky-500\/10,
+.dark .bg-sky-500\/20,
+.dark .bg-indigo-500\/10,
+.dark .bg-indigo-500\/20,
+.dark .dark\:bg-sky-950\/50,
+.dark .dark\:bg-sky-950\/60,
+.dark .dark\:bg-indigo-950\/60 {
+  background-color: #191613 !important;
+  border-color: #262320 !important;
+}
+
+/* Eliminate loud colorful ambient background blur blobs in dark mode */
+.dark [class*="blur-[120px]"],
+.dark [class*="blur-[100px]"],
+.dark [class*="blur-[80px]"] {
+  display: none !important;
 }
 
 /* ==============================================================================
