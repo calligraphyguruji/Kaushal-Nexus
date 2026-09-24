@@ -22,6 +22,7 @@ import {
   MapPin,
   BrainCircuit,
   BookOpen,
+  Send,
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
@@ -74,6 +75,8 @@ export default function Register() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState(null);
 
   // Handle Registration Submit
   const handleRegister = async (e) => {
@@ -97,17 +100,10 @@ export default function Register() {
         phone: phone.trim() || undefined,
       };
 
-      // 1. Register with backend RBAC API
+      // 1. Register with backend RBAC API (which generates token & sends verification link)
       await authApi.register(registerData);
 
-      // 2. Automatically log in user to create active session
-      try {
-        await login({ email: registerData.email, password: registerData.password });
-      } catch (loginErr) {
-        console.warn("Auto-login note:", loginErr);
-      }
-
-      // If registered as LEARNER: Prepare dossier and immediately enter MCQ Assessment
+      // If registered as LEARNER: Prepare draft dossier locally
       if (accountType === "learner") {
         const randNum = Math.floor(1000 + Math.random() * 9000);
         const learnerId = `KN-${new Date().getFullYear()}-${randNum}`;
@@ -127,39 +123,15 @@ export default function Register() {
           created_at: new Date().toISOString(),
         };
 
-        // Persist learner profile in national candidate registry and client cache
+        // Persist candidate profile in national candidate registry
         const registered = upsertCandidateInRegistry(learnerProfile);
         localStorage.setItem("kn_current_learner", JSON.stringify(registered || learnerProfile));
-
-        // Optionally send profile update to backend if live
-        try {
-          await learnerPipelineApi.updateMyProfile({
-            full_name: fullName.trim(),
-            phone: phone.trim(),
-            education_level: educationLevel,
-            institution: institution.trim(),
-          });
-        } catch {
-          // Backend profile sync is best-effort when running offline
-        }
-
         setRegisteredLearner(registered || learnerProfile);
-        setSuccess(true);
-
-        // Smooth transition to Diagnostic MCQ Assessment
-        setTimeout(() => {
-          setRegistrationStep("assessment");
-        }, 800);
-      } else {
-        // Institutional user redirection to login
-        setSuccess(true);
-        setTimeout(() => {
-          navigate("/login", {
-            state: { registeredEmail: email.trim().toLowerCase() },
-            replace: true,
-          });
-        }, 1200);
       }
+
+      setSuccess(true);
+      // Explicitly stop here and require email verification before assessment
+      setRegistrationStep("email_sent");
     } catch (err) {
       console.error("Registration error:", err);
       setError(getErrorMessage(err));
@@ -167,6 +139,162 @@ export default function Register() {
       setIsSubmitting(false);
     }
   };
+
+  // If in email_sent step, render the Verification Email Sent screen
+  if (registrationStep === "email_sent") {
+    return (
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-slate-900 px-4 py-12 selection:bg-sky-500 selection:text-white font-sans">
+        {/* Ambient background glows */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 left-1/2 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-sky-600/10 blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 h-[350px] w-[500px] rounded-full bg-indigo-600/10 blur-[100px]" />
+        </div>
+
+        {/* Top Header */}
+        <header className="absolute top-0 z-20 flex w-full max-w-6xl items-center justify-between px-6 py-4">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 shadow-md shadow-sky-500/20">
+              <ShieldCheck className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-heading text-sm font-bold tracking-tight text-white">
+                Kaushal<span className="text-sky-400">Nexus</span>
+              </span>
+              <span className="text-[10px] font-medium tracking-wide text-slate-400 uppercase">
+                National Skilling Registry
+              </span>
+            </div>
+          </Link>
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-700/80 bg-slate-800/80 text-slate-300 transition-colors hover:border-slate-600 hover:text-white"
+          >
+            {resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+        </header>
+
+        {/* Verification Card */}
+        <main className="relative z-10 w-full max-w-lg">
+          <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/85 p-8 shadow-2xl shadow-black/60 backdrop-blur-xl">
+            <div className="flex flex-col items-center text-center">
+              <div className="relative mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-sky-500/30 bg-sky-500/10 text-sky-400 shadow-lg shadow-sky-500/20">
+                <Mail className="h-8 w-8 text-sky-400" />
+                <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75" />
+                  <span className="relative inline-flex h-4 w-4 rounded-full bg-sky-500" />
+                </span>
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-[11px] font-medium text-sky-300">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span>Verification Link Dispatched</span>
+              </div>
+
+              <h1 className="mt-4 font-heading text-2xl font-bold tracking-tight text-white">
+                ✉️ Verification Email Sent!
+              </h1>
+
+              <div className="mt-3 rounded-lg border border-slate-800 bg-slate-900/90 px-3.5 py-2 text-xs font-mono text-sky-300 break-all">
+                {email}
+              </div>
+
+              <p className="mt-3 text-xs leading-relaxed text-slate-300">
+                We have sent a secure 24-hour verification link to your email address. 
+                <strong className="text-white block mt-1.5">
+                  Please verify your email before taking the diagnostic assessment.
+                </strong>
+              </p>
+
+              {/* 3 Step Instruction Guide */}
+              <div className="mt-6 w-full rounded-xl border border-slate-800/80 bg-slate-900/70 p-4 text-left">
+                <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">
+                  Next Steps to Access Your Assessment:
+                </h4>
+                <div className="space-y-3 text-xs text-slate-300">
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-500/20 text-[10px] font-bold text-sky-400">1</span>
+                    <span>Open your email inbox (also check Spam or Junk folder).</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-500/20 text-[10px] font-bold text-sky-400">2</span>
+                    <span>Click the blue <strong className="text-white">"Verify Email Address"</strong> button.</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-500/20 text-[10px] font-bold text-sky-400">3</span>
+                    <span>Sign in to unlock your <strong className="text-white">10-Question NSQF MCQ Assessment</strong> and view 10+ dynamic internships!</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Resend Status Alert */}
+              {resendMessage && (
+                <div
+                  className={`mt-4 w-full rounded-lg p-2.5 text-[11px] leading-relaxed text-left ${
+                    resendMessage.type === "success"
+                      ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                      : "border border-rose-500/30 bg-rose-500/10 text-rose-300"
+                  }`}
+                >
+                  {resendMessage.text}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="mt-6 flex w-full flex-col gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => navigate("/login", { state: { registeredEmail: email } })}
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-4 text-xs font-semibold text-white shadow-lg shadow-sky-500/25 transition-all hover:from-sky-400 hover:to-indigo-500 hover:shadow-sky-500/35 focus:outline-none"
+                >
+                  <span>Already Verified? Proceed to Sign In</span>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isResending}
+                  onClick={async () => {
+                    setIsResending(true);
+                    setResendMessage(null);
+                    try {
+                      const resp = await authApi.resendVerification(email.trim().toLowerCase());
+                      setResendMessage({
+                        type: "success",
+                        text: resp.message || "A fresh verification link has been sent to your inbox.",
+                      });
+                    } catch (rErr) {
+                      setResendMessage({
+                        type: "error",
+                        text: getErrorMessage(rErr, "Failed to send verification email. Please try again."),
+                      });
+                    } finally {
+                      setIsResending(false);
+                    }
+                  }}
+                  className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-4 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-600 hover:text-white disabled:opacity-50"
+                >
+                  {isResending ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span>Sending new link...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-3.5 w-3.5" />
+                      <span>Resend Verification Email</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   // If in assessment step, render full MCQ Diagnostic Assessment
   if (registrationStep === "assessment") {
