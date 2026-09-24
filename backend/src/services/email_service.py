@@ -182,6 +182,81 @@ class SMTPEmailProvider:
             )
 
 
+class BrevoHttpEmailProvider:
+    """
+    Direct HTTP REST API email provider for Brevo.
+    Bypasses cloud firewall blocks on outbound SMTP ports (like Render free tier).
+    Uses HTTPS port 443 via httpx.
+    """
+
+    def __init__(self, api_key: str, timeout: float = 10.0) -> None:
+        self.api_key = api_key
+        self.timeout = timeout
+
+    async def send_email(
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        text_body: str,
+        from_email: Optional[str] = None,
+        from_name: Optional[str] = None,
+    ) -> EmailSendResult:
+        import httpx
+
+        sender_email = from_email or settings.SMTP_FROM_EMAIL
+        sender_name = from_name or settings.SMTP_FROM_NAME
+
+        payload = {
+            "sender": {"name": sender_name, "email": sender_email},
+            "to": [{"email": to_email}],
+            "subject": subject,
+            "htmlContent": html_body,
+            "textContent": text_body,
+        }
+        headers = {
+            "api-key": self.api_key.strip(),
+            "content-type": "application/json",
+            "accept": "application/json",
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                resp = await client.post(
+                    "https://api.brevo.com/v3/smtp/email",
+                    json=payload,
+                    headers=headers,
+                )
+                if resp.status_code in (200, 201, 202):
+                    logger.info(f"[BrevoHttpEmailProvider] Email sent successfully via REST API to {to_email}")
+                    return EmailSendResult(
+                        success=True,
+                        recipient=to_email,
+                        subject=subject,
+                        provider="brevo_http",
+                    )
+                else:
+                    err_msg = f"Brevo HTTP API error ({resp.status_code}): {resp.text}"
+                    logger.error(f"[BrevoHttpEmailProvider] {err_msg}")
+                    return EmailSendResult(
+                        success=False,
+                        recipient=to_email,
+                        subject=subject,
+                        error=err_msg,
+                        provider="brevo_http",
+                    )
+        except Exception as exc:
+            err_msg = f"Brevo HTTP dispatch failed: {exc}"
+            logger.error(f"[BrevoHttpEmailProvider] {err_msg}")
+            return EmailSendResult(
+                success=False,
+                recipient=to_email,
+                subject=subject,
+                error=err_msg,
+                provider="brevo_http",
+            )
+
+
 class EmailService:
     """
     High-level email service orchestration layer with dynamic provider selection,
@@ -196,7 +271,18 @@ class EmailService:
         if self._provider is not None:
             return self._provider
 
-        # Auto-configure provider based on environment & SMTP configuration
+        # Check for Brevo API Key (explicit or passed in SMTP_PASSWORD starting with xkeysib-)
+        brevo_key = (
+            settings.BREVO_API_KEY
+            or (settings.SMTP_PASSWORD if settings.SMTP_PASSWORD and settings.SMTP_PASSWORD.startswith("xkeysib-") else None)
+        )
+        if brevo_key and brevo_key.strip():
+            return BrevoHttpEmailProvider(
+                api_key=brevo_key.strip(),
+                timeout=settings.SMTP_TIMEOUT_SECONDS,
+            )
+
+        # Fallback to standard SMTP provider (for paid instances or VPS without firewall blocks)
         if settings.SMTP_HOST and settings.SMTP_HOST.strip():
             return SMTPEmailProvider(
                 host=settings.SMTP_HOST.strip(),

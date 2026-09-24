@@ -65,26 +65,52 @@ async def redis_health_check() -> RedisHealthResponse:
 @router.get(
     "/email",
     status_code=status.HTTP_200_OK,
-    summary="SMTP Delivery Diagnostic",
-    description="Inspect SMTP configuration state and verify live connectivity without leaking credentials.",
+    summary="Email Delivery Diagnostic",
+    description="Inspect SMTP and Brevo HTTP configuration state and verify live connectivity without leaking credentials.",
 )
 async def email_health_check() -> dict:
     import asyncio
     import smtplib
+    import httpx
 
-    is_configured = bool(settings.SMTP_HOST and settings.SMTP_HOST.strip())
+    brevo_key = (
+        settings.BREVO_API_KEY
+        or (settings.SMTP_PASSWORD if settings.SMTP_PASSWORD and settings.SMTP_PASSWORD.startswith("xkeysib-") else None)
+    )
+    is_smtp_configured = bool(settings.SMTP_HOST and settings.SMTP_HOST.strip())
+    is_brevo_configured = bool(brevo_key and brevo_key.strip())
+
     diagnostic = {
-        "smtp_configured": is_configured,
+        "provider": "brevo_http" if is_brevo_configured else ("smtp" if is_smtp_configured else "none"),
+        "brevo_configured": is_brevo_configured,
+        "smtp_configured": is_smtp_configured,
         "smtp_host": settings.SMTP_HOST or None,
         "smtp_port": settings.SMTP_PORT,
         "smtp_username": settings.SMTP_USERNAME or None,
         "smtp_from_email": settings.SMTP_FROM_EMAIL or None,
-        "smtp_use_tls": settings.SMTP_USE_TLS,
-        "status": "unconfigured" if not is_configured else "testing",
+        "status": "unconfigured" if not (is_brevo_configured or is_smtp_configured) else "testing",
         "error": None,
     }
 
-    if not is_configured:
+    if is_brevo_configured:
+        try:
+            async with httpx.AsyncClient(timeout=8.0) as client:
+                res = await client.get(
+                    "https://api.brevo.com/v3/account",
+                    headers={"api-key": brevo_key.strip(), "accept": "application/json"},
+                )
+                if res.status_code == 200:
+                    diagnostic["status"] = "connected"
+                    diagnostic["account_email"] = res.json().get("email")
+                else:
+                    diagnostic["status"] = "connection_failed"
+                    diagnostic["error"] = f"Brevo HTTP API returned status {res.status_code}: {res.text}"
+        except Exception as e:
+            diagnostic["status"] = "connection_failed"
+            diagnostic["error"] = str(e)
+        return diagnostic
+
+    if not is_smtp_configured:
         return diagnostic
 
     def _test_connect():

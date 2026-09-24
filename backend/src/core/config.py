@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     SMTP_FROM_NAME: str = "KaushalNexus National Skill Intelligence"
     SMTP_USE_TLS: bool = True
     SMTP_TIMEOUT_SECONDS: float = 10.0
+    BREVO_API_KEY: Optional[str] = None
     
     # Rate Limiting
     RATE_LIMIT_ENABLED: bool = True
