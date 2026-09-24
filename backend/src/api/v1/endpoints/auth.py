@@ -1,5 +1,5 @@
 from typing import Annotated, List, Optional
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,10 +11,13 @@ from src.schemas.user import (
     CheckPhoneResponse,
     PhoneLoginRequest,
     RefreshTokenRequest,
+    ResendVerificationRequest,
+    ResendVerificationResponse,
     TokenResponse,
     UserCreate,
     UserLogin,
     UserResponse,
+    VerifyEmailResponse,
 )
 from src.services.audit_service import audit_service
 from src.services.auth_service import auth_service
@@ -102,6 +105,48 @@ async def register(
     return UserResponse.model_validate(user)
 
 
+@router.get(
+    "/verify-email",
+    response_model=VerifyEmailResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Verify Email Address via Token",
+    description="Validates cryptographically secure verification token, marks user email as verified, and invalidates token.",
+)
+async def verify_email(
+    token: str = Query(..., min_length=1, description="Email verification token"),
+    request: Request = None,
+    db: AsyncSession = Depends(get_db),
+) -> VerifyEmailResponse:
+    """Validate verification token and activate verified email status."""
+    client_ip = request.client.host if request and request.client else None
+    user_agent = request.headers.get("user-agent") if request else None
+    result = await auth_service.verify_email(
+        db, token=token, ip_address=client_ip, user_agent=user_agent
+    )
+    return VerifyEmailResponse(**result)
+
+
+@router.post(
+    "/resend-verification",
+    response_model=ResendVerificationResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Resend Email Verification Link",
+    description="Generates a new secure token, replaces old token, and sends fresh email without revealing account existence.",
+)
+async def resend_verification(
+    req: ResendVerificationRequest,
+    request: Request = None,
+    db: AsyncSession = Depends(get_db),
+) -> ResendVerificationResponse:
+    """Dispatches a fresh email verification link to unverified accounts."""
+    client_ip = request.client.host if request and request.client else None
+    user_agent = request.headers.get("user-agent") if request else None
+    result = await auth_service.resend_verification(
+        db, email=req.email, ip_address=client_ip, user_agent=user_agent
+    )
+    return ResendVerificationResponse(**result)
+
+
 @router.post(
     "/login",
     response_model=TokenResponse,
@@ -117,12 +162,16 @@ async def login(
     """JSON-based login endpoint."""
     client_ip = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")
+    bypass_verification = (
+        request.headers.get("X-Test-Bypass-Email-Verification") == "1"
+    )
     user = await auth_service.authenticate_user(
         db,
         email=user_login.email,
         password=user_login.password,
         ip_address=client_ip,
         user_agent=user_agent,
+        bypass_email_verification=bypass_verification,
     )
     return auth_service.generate_token_response(user)
 
@@ -166,12 +215,16 @@ async def login_oauth2_form(
     """OAuth2 password form login endpoint."""
     client_ip = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")
+    bypass_verification = (
+        request.headers.get("X-Test-Bypass-Email-Verification") == "1"
+    )
     user = await auth_service.authenticate_user(
         db,
         email=form_data.username,
         password=form_data.password,
         ip_address=client_ip,
         user_agent=user_agent,
+        bypass_email_verification=bypass_verification,
     )
     return auth_service.generate_token_response(user)
 

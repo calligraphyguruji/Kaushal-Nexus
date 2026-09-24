@@ -1,8 +1,18 @@
+from datetime import datetime, timedelta, timezone
+import hashlib
+import secrets
 from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.exceptions import ConflictException, UnauthorizedException
+from src.core.config import settings
+from src.core.exceptions import (
+    BadRequestException,
+    ConflictException,
+    ForbiddenException,
+    UnauthorizedException,
+)
+from src.core.logging import logger
 from src.core.security import (
     create_access_token,
     create_refresh_token,
@@ -13,10 +23,21 @@ from src.core.security import (
 from src.models.user import User
 from src.schemas.user import TokenResponse, UserCreate, UserResponse
 from src.services.audit_service import audit_service
+from src.services.email_service import email_service
 
 
 class AuthService:
-    """Service layer handling hardened user authentication, JWT lifecycle, and audit logging."""
+    """Service layer handling hardened user authentication, JWT lifecycle, email verification, and audit logging."""
+
+    @staticmethod
+    def generate_verification_token() -> str:
+        """Generates a cryptographically secure URL-safe verification token."""
+        return secrets.token_urlsafe(32)
+
+    @staticmethod
+    def hash_verification_token(token: str) -> str:
+        """Computes SHA-256 hash of verification token for secure database storage."""
+        return hashlib.sha256(token.strip().encode("utf-8")).hexdigest()
 
     @staticmethod
     async def register_user(
@@ -25,7 +46,7 @@ class AuthService:
         ip_address: Optional[str] = None,
         user_agent: Optional[str] = None,
     ) -> User:
-        """Registers a new user after verifying unique email address."""
+        """Registers a new user after verifying unique email address and dispatches verification link."""
         # Check if email is already taken
         stmt = select(User).where(User.email == user_in.email.lower().strip())
         result = await db.execute(stmt)
@@ -47,7 +68,14 @@ class AuthService:
                 message=f"An account with email '{user_in.email}' already exists."
             )
 
-        # Hash password and create user
+        # Generate cryptographically secure token and hash
+        raw_token = AuthService.generate_verification_token()
+        token_hash = AuthService.hash_verification_token(raw_token)
+        expires_at = datetime.now(timezone.utc) + timedelta(
+            hours=settings.EMAIL_VERIFICATION_EXPIRE_HOURS
+        )
+
+        # Hash password and create user with unverified email state
         hashed_password = get_password_hash(user_in.password)
         db_user = User(
             email=user_in.email.lower().strip(),
@@ -56,16 +84,30 @@ class AuthService:
             role=user_in.role.value if hasattr(user_in.role, "value") else str(user_in.role),
             is_active=True,
             is_superuser=False,
+            email_verified=False,
+            email_verification_token_hash=token_hash,
+            email_verification_expires_at=expires_at,
         )
 
         db.add(db_user)
         await db.commit()
         await db.refresh(db_user)
 
+        # Dispatch verification email safely
+        verification_url = f"{settings.FRONTEND_URL.rstrip('/')}/verify-email?token={raw_token}"
+        try:
+            await email_service.send_verification_email(
+                to_email=db_user.email,
+                recipient_name=db_user.full_name,
+                verification_url=verification_url,
+                expires_in_hours=settings.EMAIL_VERIFICATION_EXPIRE_HOURS,
+            )
+        except Exception as exc:
+            logger.error(f"Failed to dispatch initial verification email to {db_user.email}: {exc}")
+
         # If user registered as LEARNER, link or auto-provision candidate dossier
         if db_user.role == "LEARNER":
             from src.models.learner import Learner
-            from datetime import datetime
             import uuid
             l_stmt = select(Learner).where(Learner.email == db_user.email)
             l_res = await db.execute(l_stmt)
@@ -112,6 +154,7 @@ class AuthService:
         password: str,
         ip_address: Optional[str] = None,
         user_agent: Optional[str] = None,
+        bypass_email_verification: bool = False,
     ) -> User:
         """Validates user credentials and logs security audit trail."""
         stmt = select(User).where(User.email == email.lower().strip())
@@ -151,6 +194,30 @@ class AuthService:
                 message="User account is deactivated"
             )
 
+        # Enforce email verification on login unless superuser or test bypass
+        if (
+            settings.REQUIRE_EMAIL_VERIFICATION_TO_LOGIN
+            and not user.email_verified
+            and not user.is_superuser
+            and not bypass_email_verification
+        ):
+            await audit_service.log_action(
+                db=db,
+                action="AUTH_LOGIN_BLOCKED",
+                resource_type="USER",
+                resource_id=str(user.id),
+                actor=user,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                status="FAILED",
+                details={"reason": "Email not verified", "code": "EMAIL_NOT_VERIFIED"},
+            )
+            raise ForbiddenException(
+                message="Email address has not been verified. Please verify your email or request a new verification link.",
+                details="EMAIL_NOT_VERIFIED",
+                code="EMAIL_NOT_VERIFIED",
+            )
+
         # Record successful login
         await audit_service.log_action(
             db=db,
@@ -165,6 +232,152 @@ class AuthService:
         )
 
         return user
+
+    @staticmethod
+    async def verify_email(
+        db: AsyncSession,
+        token: str,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None,
+    ) -> dict:
+        """
+        Validates token hash, checks expiration, and marks email as verified.
+        Invalidates the token hash upon verification to prevent reuse.
+        """
+        if not token or not token.strip():
+            raise BadRequestException(
+                message="Verification token is required.",
+                code="VERIFICATION_TOKEN_INVALID",
+            )
+
+        token_hash = AuthService.hash_verification_token(token.strip())
+
+        stmt = select(User).where(User.email_verification_token_hash == token_hash)
+        result = await db.execute(stmt)
+        user = result.scalar_one_or_none()
+
+        if not user:
+            raise BadRequestException(
+                message="Invalid or expired verification token.",
+                code="VERIFICATION_TOKEN_INVALID",
+            )
+
+        if user.email_verified:
+            # Already verified; clean up token hash and return clean success
+            user.email_verification_token_hash = None
+            user.email_verification_expires_at = None
+            await db.commit()
+            return {
+                "success": True,
+                "message": "Email is already verified. You may now log in.",
+                "email_verified": True,
+            }
+
+        # Check expiration
+        now = datetime.now(timezone.utc)
+        if user.email_verification_expires_at:
+            expires_at = user.email_verification_expires_at
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+            if expires_at < now:
+                raise BadRequestException(
+                    message="Verification token has expired. Please request a new verification email.",
+                    code="VERIFICATION_TOKEN_EXPIRED",
+                )
+
+        # Mark user as verified and invalidate token
+        user.email_verified = True
+        user.email_verification_token_hash = None
+        user.email_verification_expires_at = None
+        await db.commit()
+        await db.refresh(user)
+
+        await audit_service.log_action(
+            db=db,
+            action="AUTH_EMAIL_VERIFIED_SUCCESS",
+            resource_type="USER",
+            resource_id=str(user.id),
+            actor=user,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            status="SUCCESS",
+            details={"email": user.email},
+        )
+
+        return {
+            "success": True,
+            "message": "Email address verified successfully. You may now log in.",
+            "email_verified": True,
+        }
+
+    @staticmethod
+    async def resend_verification(
+        db: AsyncSession,
+        email: str,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None,
+    ) -> dict:
+        """
+        Replaces existing token with a fresh secure token, updates expiration,
+        and dispatches a new verification email.
+        Avoids user enumeration vulnerabilities by returning a uniform success message.
+        """
+        cleaned_email = email.lower().strip()
+        generic_message = (
+            "If an unverified account exists for this email address, "
+            "a new verification link has been sent."
+        )
+
+        stmt = select(User).where(User.email == cleaned_email)
+        result = await db.execute(stmt)
+        user = result.scalar_one_or_none()
+
+        # If user does not exist or is already verified, return generic response without leaking existence
+        if not user or user.email_verified:
+            return {
+                "success": True,
+                "message": generic_message,
+            }
+
+        # Generate fresh token & expiration
+        new_token = AuthService.generate_verification_token()
+        token_hash = AuthService.hash_verification_token(new_token)
+        expires_at = datetime.now(timezone.utc) + timedelta(
+            hours=settings.EMAIL_VERIFICATION_EXPIRE_HOURS
+        )
+
+        user.email_verification_token_hash = token_hash
+        user.email_verification_expires_at = expires_at
+        await db.commit()
+        await db.refresh(user)
+
+        verification_url = f"{settings.FRONTEND_URL.rstrip('/')}/verify-email?token={new_token}"
+        try:
+            await email_service.send_verification_email(
+                to_email=user.email,
+                recipient_name=user.full_name,
+                verification_url=verification_url,
+                expires_in_hours=settings.EMAIL_VERIFICATION_EXPIRE_HOURS,
+            )
+        except Exception as exc:
+            logger.error(f"Failed to resend verification email to {user.email}: {exc}")
+
+        await audit_service.log_action(
+            db=db,
+            action="AUTH_RESEND_VERIFICATION_SUCCESS",
+            resource_type="USER",
+            resource_id=str(user.id),
+            actor=user,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            status="SUCCESS",
+            details={"email": user.email},
+        )
+
+        return {
+            "success": True,
+            "message": generic_message,
+        }
 
     @staticmethod
     def generate_token_response(user: User) -> TokenResponse:
@@ -276,6 +489,7 @@ class AuthService:
                 role=user_role,
                 is_active=True,
                 is_superuser=False,
+                email_verified=True,
             )
             db.add(user)
             await db.commit()

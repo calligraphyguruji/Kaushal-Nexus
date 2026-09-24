@@ -30,7 +30,10 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
     to prevent test rate limiting.
     """
     transport = ASGITransport(app=app)
-    headers = {"X-Test-Bypass-RateLimit": "1"}
+    headers = {
+        "X-Test-Bypass-RateLimit": "1",
+        "X-Test-Bypass-Email-Verification": "1",
+    }
     async with AsyncClient(
         transport=transport, base_url="http://testserver", headers=headers
     ) as async_client:
@@ -81,6 +84,7 @@ async def _create_authenticated_user_header(
     return {
         "Authorization": f"Bearer {token}",
         "X-Test-Bypass-RateLimit": "1",
+        "X-Test-Bypass-Email-Verification": "1",
     }
 
 

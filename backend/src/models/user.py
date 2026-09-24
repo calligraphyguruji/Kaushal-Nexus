@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import Optional, TYPE_CHECKING
 import uuid
-from sqlalchemy import Boolean, String
+from sqlalchemy import Boolean, DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -49,6 +50,23 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         default=False,
         nullable=False,
         doc="Superuser administrative access flag",
+    )
+    email_verified: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        doc="Whether user email address has been verified",
+    )
+    email_verification_token_hash: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True,
+        index=True,
+        doc="SHA-256 hash of email verification token",
+    )
+    email_verification_expires_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        doc="Email verification token expiration timestamp",
     )
 
     # Relationships

@@ -267,6 +267,7 @@ async def seed_database(clean: bool = False) -> Dict[str, int]:
                 role=role,
                 is_active=True,
                 is_superuser=is_super,
+                email_verified=True,
             )
             session.add(user)
             user_entities.append(user)

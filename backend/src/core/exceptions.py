@@ -25,52 +25,77 @@ class AppException(Exception):
 
 
 class NotFoundException(AppException):
-    def __init__(self, message: str = "Resource not found", details: Optional[Any] = None):
+    def __init__(
+        self,
+        message: str = "Resource not found",
+        details: Optional[Any] = None,
+        code: Optional[str] = None,
+    ):
         super().__init__(
             message=message,
             status_code=status.HTTP_404_NOT_FOUND,
             details=details,
-            code="RESOURCE_NOT_FOUND",
+            code=code or "RESOURCE_NOT_FOUND",
         )
 
 
 class BadRequestException(AppException):
-    def __init__(self, message: str = "Bad request", details: Optional[Any] = None):
+    def __init__(
+        self,
+        message: str = "Bad request",
+        details: Optional[Any] = None,
+        code: Optional[str] = None,
+    ):
         super().__init__(
             message=message,
             status_code=status.HTTP_400_BAD_REQUEST,
             details=details,
-            code="BAD_REQUEST",
+            code=code or "BAD_REQUEST",
         )
 
 
 class UnauthorizedException(AppException):
-    def __init__(self, message: str = "Unauthorized access", details: Optional[Any] = None):
+    def __init__(
+        self,
+        message: str = "Unauthorized access",
+        details: Optional[Any] = None,
+        code: Optional[str] = None,
+    ):
         super().__init__(
             message=message,
             status_code=status.HTTP_401_UNAUTHORIZED,
             details=details,
-            code="UNAUTHORIZED",
+            code=code or "UNAUTHORIZED",
         )
 
 
 class ForbiddenException(AppException):
-    def __init__(self, message: str = "Access forbidden", details: Optional[Any] = None):
+    def __init__(
+        self,
+        message: str = "Access forbidden",
+        details: Optional[Any] = None,
+        code: Optional[str] = None,
+    ):
         super().__init__(
             message=message,
             status_code=status.HTTP_403_FORBIDDEN,
             details=details,
-            code="FORBIDDEN",
+            code=code or "FORBIDDEN",
         )
 
 
 class ConflictException(AppException):
-    def __init__(self, message: str = "Resource conflict", details: Optional[Any] = None):
+    def __init__(
+        self,
+        message: str = "Resource conflict",
+        details: Optional[Any] = None,
+        code: Optional[str] = None,
+    ):
         super().__init__(
             message=message,
             status_code=status.HTTP_409_CONFLICT,
             details=details,
-            code="CONFLICT",
+            code=code or "CONFLICT",
         )
 
 

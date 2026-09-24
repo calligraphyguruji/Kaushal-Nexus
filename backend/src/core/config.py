@@ -16,6 +16,23 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30  # 30 minutes short-lived access tokens
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7  # 7 days refresh tokens
+
+    # Frontend URL (for verification & redirect links)
+    FRONTEND_URL: str = "http://localhost:5173"
+
+    # Email Verification Policy
+    EMAIL_VERIFICATION_EXPIRE_HOURS: int = 24
+    REQUIRE_EMAIL_VERIFICATION_TO_LOGIN: bool = True
+
+    # SMTP / Email Provider Configuration
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    SMTP_FROM_EMAIL: str = "noreply@kaushalnexus.gov.in"
+    SMTP_FROM_NAME: str = "KaushalNexus National Skill Intelligence"
+    SMTP_USE_TLS: bool = True
+    SMTP_TIMEOUT_SECONDS: float = 10.0
     
     # Rate Limiting
     RATE_LIMIT_ENABLED: bool = True

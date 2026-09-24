@@ -37,8 +37,24 @@ class UserResponse(BaseModel):
     role: UserRole
     is_active: bool
     is_superuser: bool
+    email_verified: bool = False
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class VerifyEmailResponse(BaseModel):
+    success: bool = True
+    message: str = Field(..., description="Status explanation")
+    email_verified: bool = True
+
+
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr = Field(..., description="Registered email address to resend verification link to")
+
+
+class ResendVerificationResponse(BaseModel):
+    success: bool = True
+    message: str = Field(..., description="Status explanation")
 
 
 class TokenResponse(BaseModel):
