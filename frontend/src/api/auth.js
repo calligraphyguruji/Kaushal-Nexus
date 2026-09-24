@@ -276,6 +276,30 @@ export const authApi = {
   },
 
   /**
+   * Verifies user email address using the cryptographically secure token from email
+   * @param {string} token - Raw verification token
+   * @returns {Promise<{ success: boolean, message: string, email_verified: boolean }>}
+   */
+  async verifyEmail(token) {
+    const response = await apiClient.get('/auth/verify-email', {
+      params: { token },
+    });
+    return response.data;
+  },
+
+  /**
+   * Dispatches a fresh verification email link
+   * @param {string} email - Email address
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async resendVerification(email) {
+    const response = await apiClient.post('/auth/resend-verification', {
+      email,
+    });
+    return response.data;
+  },
+
+  /**
    * Logs out user by clearing stored tokens and session state
    */
   logout() {

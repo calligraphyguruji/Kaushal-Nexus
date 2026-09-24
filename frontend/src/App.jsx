@@ -14,6 +14,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import LearnerHome from "./pages/LearnerHome";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
 
 // Route-level code-split internal dashboard pages
 const ImpactDashboard = lazy(() => import("./pages/ImpactDashboard"));
@@ -63,6 +64,7 @@ function App() {
             <Route path="/otp-login" element={<Login defaultMode="phone" />} />
             <Route path="/phone-login" element={<Login defaultMode="phone" />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
 
             {/* Protected Application Routes */}
             <Route

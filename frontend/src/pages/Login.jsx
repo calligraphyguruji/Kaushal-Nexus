@@ -16,6 +16,7 @@ import {
   Smartphone,
   Phone,
   RotateCcw,
+  Send,
 } from "lucide-react";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth } from "../config/firebase";
@@ -109,6 +110,9 @@ export default function Login({ defaultMode }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
+  const [isResendingEmail, setIsResendingEmail] = useState(false);
+  const [resendEmailStatus, setResendEmailStatus] = useState(null);
 
   // Phone OTP States
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -384,6 +388,8 @@ export default function Login({ defaultMode }) {
     try {
       setIsSubmitting(true);
       setError(null);
+      setEmailNotVerified(false);
+      setResendEmailStatus(null);
       localStorage.removeItem("kn_current_learner");
       const authData = await login({ email: email.trim(), password });
       window.dispatchEvent(new Event("kn-profile-updated"));
@@ -393,7 +399,17 @@ export default function Login({ defaultMode }) {
       navigate(destination, { replace: true });
     } catch (err) {
       console.error("Login attempt failed:", err);
-      setError(getErrorMessage(err));
+      const serverCode = err?.response?.data?.error?.code;
+      const errMsg = getErrorMessage(err);
+      setError(errMsg);
+
+      if (
+        serverCode === "EMAIL_NOT_VERIFIED" ||
+        errMsg.toLowerCase().includes("not been verified") ||
+        errMsg.toLowerCase().includes("verify your email")
+      ) {
+        setEmailNotVerified(true);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -564,6 +580,52 @@ export default function Login({ defaultMode }) {
                           <span>Register as Candidate</span>
                           <ArrowRight size={13} />
                         </Link>
+                      </div>
+                    )}
+                    {emailNotVerified && (
+                      <div className="mt-2.5 flex flex-col gap-2">
+                        <button
+                          type="button"
+                          disabled={isResendingEmail}
+                          onClick={async () => {
+                            if (!email.trim()) return;
+                            setIsResendingEmail(true);
+                            setResendEmailStatus(null);
+                            try {
+                              const resp = await authApi.resendVerification(email.trim());
+                              setResendEmailStatus({
+                                type: "success",
+                                text: resp.message || "A fresh verification link has been sent to your inbox.",
+                              });
+                            } catch (rErr) {
+                              setResendEmailStatus({
+                                type: "error",
+                                text: getErrorMessage(rErr, "Failed to send link. Please try again later."),
+                              });
+                            } finally {
+                              setIsResendingEmail(false);
+                            }
+                          }}
+                          className="inline-flex w-fit items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
+                        >
+                          {isResendingEmail ? (
+                            <Loader2 size={13} className="animate-spin" />
+                          ) : (
+                            <Send size={13} />
+                          )}
+                          <span>Resend Verification Email</span>
+                        </button>
+                        {resendEmailStatus && (
+                          <p
+                            className={`text-[11px] font-medium ${
+                              resendEmailStatus.type === "success"
+                                ? "text-emerald-700 dark:text-emerald-400"
+                                : "text-rose-700 dark:text-rose-400"
+                            }`}
+                          >
+                            {resendEmailStatus.text}
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
