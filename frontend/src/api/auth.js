@@ -148,34 +148,9 @@ export const authApi = {
       return response.data;
     } catch (err) {
       if (!err.response) {
-        const fallbackUser = {
-          id: `usr-${Date.now()}`,
-          email: userData.email,
-          full_name: userData.full_name,
-          role: userData.role || 'LEARNER',
-          is_active: true,
-          is_superuser: false,
-        };
-        const nowYear = new Date().getFullYear();
-        const randId = Math.floor(1000 + Math.random() * 9000);
-        const learnerId = `KN-${nowYear}-${randId}`;
-        const fallbackLearner = {
-          id: learnerId,
-          full_name: userData.full_name,
-          email: userData.email,
-          phone: userData.phone || '',
-          education_level: userData.education_level || 'B.Tech (Computer Science)',
-          institution: userData.institution || 'National Skill Development Center',
-          district_id: userData.district_id || 'UP-LUCKNOW',
-          aspiring_role_id: userData.aspiring_role_id || 'role-fullstack',
-          target_domain: userData.target_domain || 'fullstack',
-          employment_readiness_score: 55,
-          overall_progress: 10,
-          status: 'In Training',
-          created_at: new Date().toISOString(),
-        };
-        localStorage.setItem('kn_current_learner', JSON.stringify(fallbackLearner));
-        return fallbackUser;
+        throw new Error(
+          'Unable to reach KaushalNexus API server. Please check your connection or wait for backend deployment to complete.'
+        );
       }
       throw err;
     }

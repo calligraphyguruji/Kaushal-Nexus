@@ -56,11 +56,22 @@ class Settings(BaseSettings):
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        origins = []
         if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",") if i.strip()]
+            origins = [i.strip() for i in v.split(",") if i.strip()]
         elif isinstance(v, list):
-            return v
-        return []
+            origins = list(v)
+
+        essential = [
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173",
+            "https://kaushal-nexus.vercel.app",
+        ]
+        for origin in essential:
+            if origin not in origins:
+                origins.append(origin)
+        return origins
 
     # Database Configuration (PostgreSQL 16+ with asyncpg)
     POSTGRES_SERVER: str = "localhost"
