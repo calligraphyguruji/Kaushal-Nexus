@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7  # 7 days refresh tokens
 
     # Frontend URL (for verification & redirect links)
-    FRONTEND_URL: str = "http://localhost:5173"
+    FRONTEND_URL: str = "https://kaushal-nexus.vercel.app"
 
     # Email Verification Policy
     EMAIL_VERIFICATION_EXPIRE_HOURS: int = 24
@@ -50,6 +50,7 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://localhost:3000",
         "http://127.0.0.1:5173",
+        "https://kaushal-nexus.vercel.app",
     ]
 
     @field_validator("CORS_ORIGINS", mode="before")
