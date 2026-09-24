@@ -205,4 +205,52 @@ describe('Candidate Global Search & Dossier Redirection Test Suite', () => {
     assert.strictEqual(emptySearch.total, 0);
     assert.strictEqual(emptySearch.items.length, 0);
   });
+
+  it('9. Multi-word search tokenization matches across name, location, and trade fields', async () => {
+    (await import('../utils/candidateRegistry.js')).seedDefaultCandidatesIfEmpty();
+
+    // "amlan noida"
+    const amlanNoida = await learnersApi.list({ search: 'amlan noida' });
+    assert.ok(amlanNoida.items.length >= 1, 'Should find Amlan with multi-word "amlan noida"');
+    assert.equal(amlanNoida.items[0].full_name, 'Amlan Chakrabarty');
+
+    // "aarav varanasi"
+    const aaravVaranasi = await learnersApi.list({ search: 'aarav varanasi' });
+    assert.ok(aaravVaranasi.items.length >= 1, 'Should find Aarav with multi-word "aarav varanasi"');
+    assert.equal(aaravVaranasi.items[0].full_name, 'Aarav Sharma');
+
+    // "aman data"
+    const amanData = await learnersApi.list({ search: 'aman data' });
+    assert.ok(amanData.items.length >= 1, 'Should find Aman with multi-word "aman data"');
+    assert.equal(amanData.items[0].full_name, 'Aman Kumar Mishra');
+
+    // "ritesh cloud"
+    const riteshCloud = await learnersApi.list({ search: 'ritesh cloud' });
+    assert.ok(riteshCloud.items.length >= 1, 'Should find Ritesh with multi-word "ritesh cloud"');
+    assert.equal(riteshCloud.items[0].full_name, 'Ritesh Kumar Patel');
+  });
+
+  it('10. Every national candidate is instantly searchable by first name', async () => {
+    (await import('../utils/candidateRegistry.js')).seedDefaultCandidatesIfEmpty();
+
+    const nationalNames = [
+      'Amlan',
+      'Aarav',
+      'Aman',
+      'Satyam',
+      'Anand',
+      'Ritesh',
+      'Pooja',
+      'Ananya',
+      'Vikas',
+    ];
+
+    for (const name of nationalNames) {
+      const searchRes = listCandidatesFromRegistry({ search: name.toLowerCase() });
+      assert.ok(searchRes.items.length >= 1, `Candidate "${name}" must be found in instant search`);
+      const matched = searchRes.items.some((c) => c.full_name.includes(name));
+      assert.ok(matched, `Result items for "${name}" must include candidate with that name`);
+    }
+  });
 });
+

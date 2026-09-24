@@ -21,6 +21,7 @@ import { learnersApi } from "../api/learners";
 import { regionalApi } from "../api/regional";
 import { programPerformance, schemeBreakdown } from "../data/dashboardData";
 import { ROLE_LABELS } from "../utils/permissions";
+import { listCandidatesFromRegistry } from "../utils/candidateRegistry";
 
 export default function Topbar({ onMenuClick }) {
   const navigate = useNavigate();
@@ -134,44 +135,62 @@ export default function Topbar({ onMenuClick }) {
       return;
     }
 
+    const trimmedQuery = searchQuery.trim();
+    const query = trimmedQuery.toLowerCase();
+    setIsSearching(true);
+
+    // 1. Instant local matching for Candidates, Sectors & Schemes (0ms response)
+    const instantLearners = listCandidatesFromRegistry({
+      search: trimmedQuery,
+      page_size: 4,
+    }).items || [];
+
+    const matchedPrograms = programPerformance
+      .filter(
+        (p) =>
+          p.name.toLowerCase().includes(query) ||
+          p.sector.toLowerCase().includes(query)
+      )
+      .map((p) => ({
+        id: `prog-${p.name}`,
+        title: p.name,
+        subtitle: `${p.sector} · ${p.employment}% Placed`,
+        searchTarget: p.sector,
+      }));
+
+    const matchedSchemes = schemeBreakdown
+      .filter((s) => s.scheme.toLowerCase().includes(query))
+      .map((s) => ({
+        id: `scheme-${s.scheme}`,
+        title: s.scheme,
+        subtitle: `${s.enrolled.toLocaleString()} enrolled · ${s.placedRate}% Placed`,
+        searchTarget: s.scheme,
+      }));
+
+    const sectorMatches = [...matchedPrograms, ...matchedSchemes].slice(0, 3);
+
+    // Populate instant local suggestions right away so the dropdown appears immediately
+    if (instantLearners.length > 0 || sectorMatches.length > 0) {
+      setSuggestions((prev) => ({
+        ...prev,
+        learners: instantLearners.slice(0, 3),
+        sectors: sectorMatches,
+      }));
+      setShowDropdown(true);
+    }
+
+    // 2. Query Remote Candidates & Districts with 150ms debounce
     const timer = setTimeout(async () => {
-      setIsSearching(true);
       try {
-        const query = searchQuery.trim().toLowerCase();
-
-        // 1. Instant local matching for Sectors & Schemes
-        const matchedPrograms = programPerformance
-          .filter(
-            (p) =>
-              p.name.toLowerCase().includes(query) ||
-              p.sector.toLowerCase().includes(query)
-          )
-          .map((p) => ({
-            id: `prog-${p.name}`,
-            title: p.name,
-            subtitle: `${p.sector} · ${p.employment}% Placed`,
-            searchTarget: p.sector,
-          }));
-
-        const matchedSchemes = schemeBreakdown
-          .filter((s) => s.scheme.toLowerCase().includes(query))
-          .map((s) => ({
-            id: `scheme-${s.scheme}`,
-            title: s.scheme,
-            subtitle: `${s.enrolled.toLocaleString()} enrolled · ${s.placedRate}% Placed`,
-            searchTarget: s.scheme,
-          }));
-
-        const sectorMatches = [...matchedPrograms, ...matchedSchemes].slice(0, 3);
-
-        // 2. Query Candidates & Districts
         const [learnersRes, districtsRes] = await Promise.all([
-          learnersApi.list({ search: searchQuery.trim(), page_size: 4 }).catch(() => ({ items: [] })),
-          regionalApi.getDistricts({ district: searchQuery.trim() }).catch(() => []),
+          learnersApi.list({ search: trimmedQuery, page_size: 4 }).catch(() => ({ items: instantLearners })),
+          regionalApi.getDistricts({ district: trimmedQuery }).catch(() => []),
         ]);
 
+        const combinedLearners = learnersRes?.items?.length ? learnersRes.items : instantLearners;
+
         setSuggestions({
-          learners: (learnersRes?.items || []).slice(0, 3),
+          learners: combinedLearners.slice(0, 3),
           districts: (districtsRes || []).slice(0, 3),
           sectors: sectorMatches,
         });
@@ -181,7 +200,7 @@ export default function Topbar({ onMenuClick }) {
       } finally {
         setIsSearching(false);
       }
-    }, 250);
+    }, 150);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -194,6 +213,11 @@ export default function Topbar({ onMenuClick }) {
 
     const lowerQuery = query.toLowerCase();
 
+    // Check instant candidates if suggestions.learners is not yet populated
+    const candidateMatches = suggestions.learners.length > 0
+      ? suggestions.learners
+      : (listCandidatesFromRegistry({ search: query, page_size: 4 }).items || []);
+
     // Check if query matches known sector or scheme keywords
     const matchesSectorOrScheme =
       programPerformance.some(
@@ -203,9 +227,9 @@ export default function Topbar({ onMenuClick }) {
       ) ||
       schemeBreakdown.some((s) => s.scheme.toLowerCase().includes(lowerQuery));
 
-    // If suggestions found matching candidates, prioritize direct candidate dossier
-    if (suggestions.learners.length > 0) {
-      const topLearner = suggestions.learners[0];
+    // If candidate match found, prioritize direct candidate dossier!
+    if (candidateMatches.length > 0) {
+      const topLearner = candidateMatches[0];
       navigate(`/learner/${encodeURIComponent(topLearner.id)}?tab=dossier`);
       return;
     }
@@ -449,15 +473,15 @@ export default function Topbar({ onMenuClick }) {
                                 <User size={13} className="shrink-0 text-sky-400" />
                                 <div className="min-w-0">
                                   <p className="truncate font-semibold text-slate-800 dark:text-slate-100">
-                                    {learner.full_name}
+                                    {learner.full_name || learner.name}
                                   </p>
                                   <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400">
-                                    {learner.id} · {learner.district_name || learner.district_id}
+                                    {learner.id} · {learner.district_name || learner.district_id || learner.location || "Uttar Pradesh"}
                                   </p>
                                 </div>
                               </div>
                               <span className="shrink-0 rounded border border-sky-400/20 bg-sky-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-sky-600 dark:text-sky-300">
-                                {learner.employment_readiness_score}%
+                                {learner.employment_readiness_score || learner.readiness_score || learner.readiness || 85}%
                               </span>
                             </button>
                           ))}

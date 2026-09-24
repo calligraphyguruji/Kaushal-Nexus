@@ -476,6 +476,89 @@ export const NATIONAL_SEED_CANDIDATES = [
       { name: "Docker Containerization", score_percentage: 80, mastery_probability: 0.80, is_verified: true, status: "Mastered" },
     ],
   },
+  {
+    id: "KN-2026-00482",
+    full_name: "Aman Kumar Mishra",
+    name: "Aman Kumar Mishra",
+    email: "aman.mishra@kaushalnexus.in",
+    phone: "+91 98765 44000",
+    role: "Junior Data Analyst",
+    target_role: "Associate Data Engineer",
+    trade: "Data Analytics & Business Intelligence",
+    program: "Data Analytics & Business Intelligence",
+    institution: "National Skill Development Center, Noida",
+    provider: "National Skill Development Center, Noida",
+    district_name: "Noida",
+    district_id: "UP-NOIDA",
+    location: "Gautam Buddha Nagar (Noida), Uttar Pradesh",
+    state: "Uttar Pradesh",
+    education_level: "B.Sc (Computer Science) · 2025",
+    nsqf_level: "NSQF Level 5",
+    status: "Seeking Employment",
+    readiness_score: 84,
+    ncvet_credential_id: "NCVET-DA-2026-89421",
+    verified: true,
+    aadhaar_verified: true,
+    overall_progress: 92,
+    skills: [
+      { name: "SQL & Relational DBs", score_percentage: 92, mastery_probability: 0.92, is_verified: true, status: "Mastered" },
+      { name: "Python Data Stack", score_percentage: 88, mastery_probability: 0.88, is_verified: true, status: "Mastered" },
+      { name: "Advanced Microsoft Excel", score_percentage: 90, mastery_probability: 0.90, is_verified: true, status: "Mastered" },
+      { name: "Statistical Methods", score_percentage: 78, mastery_probability: 0.78, is_verified: true, status: "Mastered" },
+      { name: "Data Warehousing", score_percentage: 72, mastery_probability: 0.72, is_verified: true, status: "Developing" },
+    ],
+    detected_gaps: [
+      {
+        competency_name: "Power BI & Dashboarding",
+        deficit_pct: 64,
+        level: "High",
+        severity: "High",
+        impact: "Required in 82% of regional Data Analyst openings",
+        suggested_action: "Complete 15-hour Power BI visualization bridge module.",
+      },
+    ],
+  },
+  {
+    id: "KN-2026-00561",
+    full_name: "Ritesh Kumar Patel",
+    name: "Ritesh Kumar Patel",
+    email: "ritesh.patel@kaushalnexus.in",
+    phone: "+91 98765 88000",
+    role: "Cloud Infrastructure Associate",
+    target_role: "DevOps & Cloud Associate",
+    trade: "Cloud Computing & SysOps",
+    program: "Cloud Computing & SysOps",
+    institution: "PMKK Kanpur Skill Hub",
+    provider: "PMKK Kanpur Skill Hub",
+    district_name: "Kanpur",
+    district_id: "UP-KANPUR",
+    location: "Kanpur, Uttar Pradesh",
+    state: "Uttar Pradesh",
+    education_level: "Diploma in Computer Engineering · 2024",
+    nsqf_level: "NSQF Level 5",
+    status: "Interview Ready",
+    readiness_score: 81,
+    ncvet_credential_id: "NCVET-CC-2026-56199",
+    verified: true,
+    aadhaar_verified: true,
+    overall_progress: 90,
+    skills: [
+      { name: "Linux System Administration", score_percentage: 89, mastery_probability: 0.89, is_verified: true, status: "Mastered" },
+      { name: "AWS Core Infrastructure", score_percentage: 82, mastery_probability: 0.82, is_verified: true, status: "Mastered" },
+      { name: "Networking & VPC Config", score_percentage: 79, mastery_probability: 0.79, is_verified: true, status: "Mastered" },
+      { name: "Shell Scripting & Automation", score_percentage: 75, mastery_probability: 0.75, is_verified: true, status: "Mastered" },
+    ],
+    detected_gaps: [
+      {
+        competency_name: "Kubernetes Orchestration",
+        deficit_pct: 72,
+        level: "High",
+        severity: "High",
+        impact: "Required for senior DevOps roles",
+        suggested_action: "Enroll in fast-track Containerization Bridge to unlock immediate hiring.",
+      },
+    ],
+  },
 ];
 
 /**
@@ -484,7 +567,7 @@ export const NATIONAL_SEED_CANDIDATES = [
  * @returns {Array<Object>} Seeded or existing candidates
  */
 export function seedDefaultCandidatesIfEmpty() {
-  if (typeof localStorage === 'undefined') return [];
+  if (typeof localStorage === 'undefined') return NATIONAL_SEED_CANDIDATES.map(formatCandidateRecord);
   try {
     const raw = localStorage.getItem(CANDIDATE_REGISTRY_STORAGE_KEY);
     let existing = [];
@@ -494,23 +577,18 @@ export function seedDefaultCandidatesIfEmpty() {
       } catch {}
     }
 
-    const needsSeed =
-      !Array.isArray(existing) ||
-      existing.length === 0 ||
-      (existing.length === 1 && (existing[0]?.full_name || '').startsWith('Candidate ('));
+    const formattedSeed = NATIONAL_SEED_CANDIDATES.map(formatCandidateRecord);
+    const existingIds = new Set((existing || []).map((c) => String(c.id || '').trim().toLowerCase()));
+    const missingSeeds = formattedSeed.filter((s) => !existingIds.has(String(s.id).toLowerCase()));
 
-    if (needsSeed) {
-      const formattedSeed = NATIONAL_SEED_CANDIDATES.map(formatCandidateRecord);
-      const combined = Array.isArray(existing) && existing.length > 0
-        ? [...existing.filter((e) => !formattedSeed.some((s) => s.id === e.id)), ...formattedSeed]
-        : formattedSeed;
-      localStorage.setItem(CANDIDATE_REGISTRY_STORAGE_KEY, JSON.stringify(combined));
-      return combined;
-    }
-    return existing;
+    const combined = Array.isArray(existing) && existing.length > 0
+      ? [...existing, ...missingSeeds]
+      : formattedSeed;
+    localStorage.setItem(CANDIDATE_REGISTRY_STORAGE_KEY, JSON.stringify(combined));
+    return combined;
   } catch (err) {
     console.warn('Failed to seed default candidates:', err);
-    return [];
+    return NATIONAL_SEED_CANDIDATES.map(formatCandidateRecord);
   }
 }
 
@@ -534,12 +612,35 @@ export function getAllRegisteredCandidates() {
     console.warn('Failed to read candidates registry:', err);
   }
 
-  // In browser runtime, if registry is empty or only has un-named phone dummy, seed national cohort
-  if (
-    typeof window !== 'undefined' &&
-    (registry.length === 0 || (registry.length === 1 && (registry[0]?.full_name || '').startsWith('Candidate (')))
-  ) {
-    registry = seedDefaultCandidatesIfEmpty();
+  // In browser runtime (typeof window !== 'undefined'):
+  // Ensure that national seed candidates are ALWAYS present in the registry so search can find them immediately
+  if (typeof window !== 'undefined') {
+    const formattedSeeds = NATIONAL_SEED_CANDIDATES.map(formatCandidateRecord);
+    const existingIds = new Set(registry.map((c) => String(c.id || '').trim().toLowerCase()));
+    const existingNames = new Set(registry.map((c) => String(c.full_name || c.name || '').trim().toLowerCase()));
+
+    const missingSeeds = formattedSeeds.filter(
+      (s) => !existingIds.has(String(s.id).toLowerCase()) && !existingNames.has(String(s.full_name).toLowerCase())
+    );
+
+    if (
+      registry.length === 0 ||
+      (registry.length === 1 && (registry[0]?.full_name || '').startsWith('Candidate ('))
+    ) {
+      registry = formattedSeeds;
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(CANDIDATE_REGISTRY_STORAGE_KEY, JSON.stringify(registry));
+        }
+      } catch (e) {}
+    } else if (missingSeeds.length > 0) {
+      registry = [...registry, ...missingSeeds];
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(CANDIDATE_REGISTRY_STORAGE_KEY, JSON.stringify(registry));
+        }
+      } catch (e) {}
+    }
   }
 
   // Also check kn_current_learner
@@ -679,32 +780,29 @@ export function getCandidateById(learnerId) {
 export function listCandidatesFromRegistry(params = {}) {
   let candidates = getAllRegisteredCandidates();
 
-  // Search filter
+  // Search filter with multi-word tokenization
   if (params.search && typeof params.search === 'string') {
-    const q = params.search.trim().toLowerCase();
-    candidates = candidates.filter((c) => {
-      const fullName = (c.full_name || c.name || '').toLowerCase();
-      const id = (c.id || '').toLowerCase();
-      const district = (c.district_name || c.district_id || '').toLowerCase();
-      const location = (c.location || '').toLowerCase();
-      const state = (c.state || '').toLowerCase();
-      const trade = (c.trade || c.program || c.role || c.target_role || '').toLowerCase();
-      const email = (c.email || '').toLowerCase();
-      const credential = (c.ncvet_credential_id || '').toLowerCase();
-      const skillsMatch = Array.isArray(c.skills) && c.skills.some((s) => (s.name || s.skill || '').toLowerCase().includes(q));
+    const rawSearch = params.search.trim().toLowerCase();
+    const queryTokens = rawSearch.split(/\s+/).filter(Boolean);
 
-      return (
-        fullName.includes(q) ||
-        id.includes(q) ||
-        district.includes(q) ||
-        location.includes(q) ||
-        state.includes(q) ||
-        trade.includes(q) ||
-        email.includes(q) ||
-        credential.includes(q) ||
-        skillsMatch
-      );
-    });
+    if (queryTokens.length > 0) {
+      candidates = candidates.filter((c) => {
+        const fullName = (c.full_name || c.name || '').toLowerCase();
+        const id = (c.id || '').toLowerCase();
+        const district = (c.district_name || c.district_id || '').toLowerCase();
+        const location = (c.location || '').toLowerCase();
+        const state = (c.state || '').toLowerCase();
+        const trade = (c.trade || c.program || c.role || c.target_role || '').toLowerCase();
+        const email = (c.email || '').toLowerCase();
+        const credential = (c.ncvet_credential_id || '').toLowerCase();
+        const skillsStr = Array.isArray(c.skills)
+          ? c.skills.map((s) => `${s.name || s.skill || ''}`).join(' ').toLowerCase()
+          : '';
+        const searchSpace = `${fullName} ${id} ${district} ${location} ${state} ${trade} ${email} ${credential} ${skillsStr}`;
+
+        return queryTokens.every((token) => searchSpace.includes(token));
+      });
+    }
   }
 
   // Status filter
@@ -721,7 +819,7 @@ export function listCandidatesFromRegistry(params = {}) {
   }
 
   // NSQF filter
-  if (params.nsqf_level) {
+  if (params.nsqf_level && params.nsqf_level !== 'ALL') {
     candidates = candidates.filter((c) => (c.nsqf_level || '').includes(params.nsqf_level));
   }
 
@@ -735,23 +833,32 @@ export function listCandidatesFromRegistry(params = {}) {
   return {
     items: paginatedItems.map((c) => ({
       id: c.id,
-      full_name: c.full_name,
-      name: c.full_name,
-      trade: c.trade,
-      program: c.trade,
-      district_name: c.district_name,
-      state: c.state,
-      location: c.location,
-      status: c.status,
-      readiness_score: c.readiness_score,
-      readiness: c.readiness_score,
-      employment_readiness_score: c.employment_readiness_score,
-      nsqf_level: c.nsqf_level,
-      nsqfLevel: c.nsqf_level,
-      aadhaar_verified: c.aadhaar_verified,
-      verified: c.aadhaar_verified,
+      full_name: c.full_name || c.name,
+      name: c.full_name || c.name,
+      role: c.role || c.trade || 'Candidate Learner',
+      target_role: c.target_role || c.role || 'Junior Associate',
+      trade: c.trade || c.program || 'Vocational Skills',
+      program: c.program || c.trade || 'Vocational Skills',
+      institution: c.institution || 'PMKK Center of Excellence',
+      district_name: c.district_name || 'Lucknow',
+      district_id: c.district_id || 'UP-LUCKNOW',
+      location: c.location || `${c.district_name || 'Lucknow'}, Uttar Pradesh`,
+      state: c.state || 'Uttar Pradesh',
+      education_level: c.education_level || 'Vocational Diploma',
+      nsqf_level: c.nsqf_level || 'NSQF Level 5',
+      nsqfLevel: c.nsqf_level || 'NSQF Level 5',
+      status: c.status || 'Seeking Employment',
+      readiness_score: c.readiness_score || c.employment_readiness_score || c.readiness || 85,
+      readiness: c.readiness || c.readiness_score || c.employment_readiness_score || 85,
+      employment_readiness_score: c.employment_readiness_score || c.readiness_score || c.readiness || 85,
+      aadhaar_verified: c.aadhaar_verified ?? true,
+      verified: c.verified ?? true,
       ncvet_credential_id: c.ncvet_credential_id,
-      last_assessment: c.last_assessment,
+      skills: c.skills || [],
+      detected_gaps: c.detected_gaps || [],
+      last_assessment: c.last_assessment || null,
+      timeline: c.timeline || [],
+      recommendation: c.recommendation || null,
     })),
     total: total,
     page: page,

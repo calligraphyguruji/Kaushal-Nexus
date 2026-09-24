@@ -39,7 +39,7 @@ import { getErrorMessage } from "../api/client";
 import { exportLearnerDossierPDF } from "../utils/pdfExport";
 import { exportLearnersCSV } from "../utils/csvExport";
 import { usePermissions } from "../hooks/usePermissions";
-import { getCandidateById } from "../utils/candidateRegistry";
+import { getCandidateById, listCandidatesFromRegistry } from "../utils/candidateRegistry";
 
 import PageHeader from "../components/PageHeader";
 import SectionHeader from "../components/SectionHeader";
@@ -235,11 +235,33 @@ export default function LearnerIntelligence() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch paginated candidate list from backend
+  // Fetch paginated candidate list from backend with instant 0ms local registry fallback
   const fetchLearnersList = useCallback(async () => {
     try {
       setListLoading(true);
       setError(null);
+
+      // Instant local candidate registry lookup (0ms)
+      let localRes = { items: [], total: 0 };
+      if (!permissions.isLearner) {
+        localRes = listCandidatesFromRegistry({
+          search: debouncedSearch || undefined,
+          page: currentPage,
+          page_size: pageSize,
+        });
+        if (localRes.items.length > 0) {
+          setLearnersList(localRes.items);
+          setTotalLearners(localRes.total);
+          setListLoading(false);
+          setSelectedLearnerId((prev) => {
+            const routeParamId = learnerId || routeId || searchParams.get("id");
+            if (routeParamId) return routeParamId;
+            if (prev && localRes.items.some((it) => it.id === prev)) return prev;
+            return localRes.items[0].id;
+          });
+        }
+      }
+
       await authApi.ensureAuthenticated();
 
       if (permissions.isLearner) {
@@ -263,24 +285,29 @@ export default function LearnerIntelligence() {
       });
 
       const items = res.items || [];
-      setLearnersList(items);
-      setTotalLearners(res.total || 0);
+      if (items.length > 0) {
+        setLearnersList(items);
+        setTotalLearners(res.total || items.length);
 
-      setSelectedLearnerId((prev) => {
-        const routeParamId = learnerId || routeId || searchParams.get("id");
-        if (routeParamId) return routeParamId;
-        if (prev && items.some((it) => it.id === prev)) return prev;
-        if (debouncedSearch && !items.length) return null;
-        if (prev && !items.length) return prev;
-        return items.length > 0 ? items[0].id : null;
-      });
+        setSelectedLearnerId((prev) => {
+          const routeParamId = learnerId || routeId || searchParams.get("id");
+          if (routeParamId) return routeParamId;
+          if (prev && items.some((it) => it.id === prev)) return prev;
+          if (debouncedSearch && !items.length) return null;
+          if (prev && !items.length) return prev;
+          return items.length > 0 ? items[0].id : null;
+        });
+      } else if (localRes.items.length === 0) {
+        setLearnersList([]);
+        setTotalLearners(0);
+      }
     } catch (err) {
       console.error("Failed to fetch learners list:", err);
       setError(getErrorMessage(err));
     } finally {
       setListLoading(false);
     }
-  }, [debouncedSearch, currentPage, pageSize, permissions.isLearner]);
+  }, [debouncedSearch, currentPage, pageSize, permissions.isLearner, learnerId, routeId, searchParams]);
 
   useEffect(() => {
     fetchLearnersList();

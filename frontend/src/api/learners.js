@@ -12,7 +12,10 @@ export const learnersApi = {
    */
   async list(params = {}) {
     try {
-      const response = await apiClient.get('/learners', { params });
+      const response = await apiClient.get('/learners', {
+        params,
+        timeout: 2500,
+      });
       const remoteData = response.data || {};
       const remoteItems = remoteData.items || (Array.isArray(remoteData) ? remoteData : []);
       const localResult = listCandidatesFromRegistry(params);
@@ -31,9 +34,6 @@ export const learnersApi = {
         total: Math.max(remoteData.total || 0, combined.length),
       };
     } catch (err) {
-      if (!err.response) {
-        return listCandidatesFromRegistry(params);
-      }
       return listCandidatesFromRegistry(params);
     }
   },
