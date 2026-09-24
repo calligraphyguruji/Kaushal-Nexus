@@ -161,4 +161,48 @@ describe('Candidate Global Search & Dossier Redirection Test Suite', () => {
     });
     assert.equal(directRouteMode, 'dossier', 'Must automatically switch to dossier for specific candidate');
   });
+
+  it('6. seedDefaultCandidatesIfEmpty allows searching for Amlan and Aarav directly', async () => {
+    // Seed the national candidate cohort
+    const seeded = (await import('../utils/candidateRegistry.js')).seedDefaultCandidatesIfEmpty();
+    assert.ok(Array.isArray(seeded));
+    assert.ok(seeded.length >= 7, 'National cohort must contain at least 7 seeded candidates');
+
+    // Search for "amlan"
+    const amlanSearch = await learnersApi.list({ search: 'amlan' });
+    assert.ok(amlanSearch.items.length >= 1, 'Should find Amlan Chakrabarty');
+    const amlan = amlanSearch.items[0];
+    assert.equal(amlan.id, 'KN-2026-01001');
+    assert.equal(amlan.full_name, 'Amlan Chakrabarty');
+    assert.equal(amlan.readiness_score, 95);
+    assert.ok(amlan.district_name.includes('Noida'));
+
+    // Search for "aarav"
+    const aaravSearch = await learnersApi.list({ search: 'aarav' });
+    assert.ok(aaravSearch.items.length >= 1, 'Should find Aarav Sharma');
+    const aarav = aaravSearch.items[0];
+    assert.equal(aarav.id, 'KN-2026-01000');
+    assert.equal(aarav.full_name, 'Aarav Sharma');
+  });
+
+  it('7. Skill search finds candidates by verified skill keywords (kubernetes, python)', async () => {
+    (await import('../utils/candidateRegistry.js')).seedDefaultCandidatesIfEmpty();
+
+    const k8sSearch = await learnersApi.list({ search: 'kubernetes' });
+    assert.ok(k8sSearch.items.length >= 1, 'Should match Amlan by Kubernetes skill');
+    assert.equal(k8sSearch.items[0].full_name, 'Amlan Chakrabarty');
+
+    const pySearch = await learnersApi.list({ search: 'python' });
+    assert.ok(pySearch.items.length >= 1, 'Should match candidates with Python skills');
+    const pyNames = pySearch.items.map((c) => c.full_name);
+    assert.ok(pyNames.includes('Aarav Sharma') || pyNames.includes('Pooja Agarwal') || pyNames.includes('Amlan Chakrabarty'));
+  });
+
+  it('8. Searching for non-existent candidate returns 0 items and preserves isolation', async () => {
+    (await import('../utils/candidateRegistry.js')).seedDefaultCandidatesIfEmpty();
+
+    const emptySearch = await learnersApi.list({ search: 'completely_unknown_learner_query_999' });
+    assert.strictEqual(emptySearch.total, 0);
+    assert.strictEqual(emptySearch.items.length, 0);
+  });
 });

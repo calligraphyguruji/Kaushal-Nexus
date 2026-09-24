@@ -192,8 +192,32 @@ export default function Topbar({ onMenuClick }) {
     if (!query) return;
     setShowDropdown(false);
 
-    // If on Dashboard / Overview & Impact, filter in-place via URL param
-    if (location.pathname === "/dashboard" || location.pathname === "/") {
+    const lowerQuery = query.toLowerCase();
+
+    // Check if query matches known sector or scheme keywords
+    const matchesSectorOrScheme =
+      programPerformance.some(
+        (p) =>
+          p.name.toLowerCase().includes(lowerQuery) ||
+          p.sector.toLowerCase().includes(lowerQuery)
+      ) ||
+      schemeBreakdown.some((s) => s.scheme.toLowerCase().includes(lowerQuery));
+
+    // If suggestions found matching candidates, prioritize direct candidate dossier
+    if (suggestions.learners.length > 0) {
+      const topLearner = suggestions.learners[0];
+      navigate(`/learner/${encodeURIComponent(topLearner.id)}?tab=dossier`);
+      return;
+    }
+
+    // If suggestions found matching districts and query doesn't match sector/scheme
+    if (suggestions.districts.length > 0 && !matchesSectorOrScheme) {
+      navigate(`/regional?search=${encodeURIComponent(suggestions.districts[0].name)}`);
+      return;
+    }
+
+    // If query matches sector/scheme or user is filtering on dashboard
+    if (matchesSectorOrScheme) {
       navigate(`/dashboard?search=${encodeURIComponent(query)}`);
       return;
     }
@@ -216,22 +240,7 @@ export default function Topbar({ onMenuClick }) {
       return;
     }
 
-    // Check if query matches known sector or scheme keywords
-    const lowerQuery = query.toLowerCase();
-    const matchesSectorOrScheme =
-      programPerformance.some(
-        (p) =>
-          p.name.toLowerCase().includes(lowerQuery) ||
-          p.sector.toLowerCase().includes(lowerQuery)
-      ) ||
-      schemeBreakdown.some((s) => s.scheme.toLowerCase().includes(lowerQuery));
-
-    if (matchesSectorOrScheme) {
-      navigate(`/dashboard?search=${encodeURIComponent(query)}`);
-      return;
-    }
-
-    // Default to candidate dossier
+    // Default to candidate dossier registry
     navigate(`/learner?search=${encodeURIComponent(query)}&tab=dossier`);
   };
 
@@ -507,7 +516,7 @@ export default function Topbar({ onMenuClick }) {
                       >
                         <span>
                           {location.pathname === "/dashboard" || location.pathname === "/"
-                            ? `Filter Overview for "${searchQuery}"`
+                            ? (suggestions.sectors.length > 0 ? `Filter Overview for "${searchQuery}"` : `Search "${searchQuery}" in Registry`)
                             : location.pathname.startsWith("/regional")
                             ? `Filter Regional for "${searchQuery}"`
                             : location.pathname.startsWith("/skill-gap")
@@ -532,9 +541,7 @@ export default function Topbar({ onMenuClick }) {
                       onClick={handleSearchSubmit}
                       className="mt-1.5 font-mono text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
                     >
-                      {location.pathname === "/dashboard" || location.pathname === "/"
-                        ? `Filter Overview & Impact for "${searchQuery}" →`
-                        : `Press Enter to search entire registry →`}
+                      Press Enter to search entire registry for "{searchQuery}" →
                     </button>
                   </div>
                 )}

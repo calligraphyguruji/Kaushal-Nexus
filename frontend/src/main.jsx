@@ -7,6 +7,10 @@ import "./styles/design-system.css";
 
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import App from "./App.jsx";
+import { seedDefaultCandidatesIfEmpty } from "./utils/candidateRegistry.js";
+
+// Ensure national candidate registry has baseline cohort in browser storage
+seedDefaultCandidatesIfEmpty();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

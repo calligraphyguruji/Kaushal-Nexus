@@ -270,6 +270,7 @@ export default function LearnerIntelligence() {
         const routeParamId = learnerId || routeId || searchParams.get("id");
         if (routeParamId) return routeParamId;
         if (prev && items.some((it) => it.id === prev)) return prev;
+        if (debouncedSearch && !items.length) return null;
         if (prev && !items.length) return prev;
         return items.length > 0 ? items[0].id : null;
       });
@@ -1078,8 +1079,18 @@ export default function LearnerIntelligence() {
                 placeholder="Search candidate name, ID, district..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 w-full rounded-lg border border-[#1e293b] bg-[#070d18] pl-8 pr-3 font-sans text-xs text-slate-200 placeholder:text-slate-500 transition-all focus:border-sky-400 focus:outline-none"
+                className="h-8 w-full rounded-lg border border-[#1e293b] bg-[#070d18] pl-8 pr-7 font-sans text-xs text-slate-200 placeholder:text-slate-500 transition-all focus:border-sky-400 focus:outline-none"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  title="Clear candidate search"
+                >
+                  <X size={12} />
+                </button>
+              )}
             </div>
 
             <button
@@ -1106,9 +1117,30 @@ export default function LearnerIntelligence() {
         {/* Learner Switcher Grid */}
         <div className="mt-3 flex flex-wrap gap-2">
           {(() => {
-            const displayCandidates = currentLearner && !learnersList.some((it) => it.id === currentLearner.id)
-              ? [currentLearner, ...learnersList]
-              : learnersList;
+            const candidateMatchesSearch = (c, q) => {
+              if (!q) return true;
+              if (!c) return false;
+              const lowerQ = q.toLowerCase().trim();
+              const name = (c.full_name || c.name || "").toLowerCase();
+              const id = (c.id || "").toLowerCase();
+              const email = (c.email || "").toLowerCase();
+              const dist = (c.district_name || c.location || "").toLowerCase();
+              const trade = (c.trade || c.program || c.role || "").toLowerCase();
+              return (
+                name.includes(lowerQ) ||
+                id.includes(lowerQ) ||
+                email.includes(lowerQ) ||
+                dist.includes(lowerQ) ||
+                trade.includes(lowerQ)
+              );
+            };
+
+            const displayCandidates =
+              currentLearner &&
+              candidateMatchesSearch(currentLearner, debouncedSearch) &&
+              !learnersList.some((it) => it.id === currentLearner.id)
+                ? [currentLearner, ...learnersList]
+                : learnersList;
 
             if (listLoading) {
               return Array.from({ length: 6 }).map((_, idx) => (
@@ -1127,10 +1159,22 @@ export default function LearnerIntelligence() {
 
             if (displayCandidates.length === 0) {
               return (
-                <div className="w-full py-6 text-center font-mono text-xs text-slate-400">
-                  {searchQuery
-                    ? `No beneficiary records found matching "${searchQuery}".`
-                    : "No registered candidate records found in registry. New candidates will appear here as soon as they register or complete assessments."}
+                <div className="w-full py-8 text-center font-mono text-xs text-slate-400">
+                  <p>
+                    {searchQuery
+                      ? `No candidate records found matching "${searchQuery}".`
+                      : "No registered candidate records found in registry. New candidates will appear here as soon as they register or complete assessments."}
+                  </p>
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-sky-400/30 bg-sky-500/10 px-3 py-1 font-mono text-[11px] font-semibold text-sky-400 hover:bg-sky-500/20 cursor-pointer"
+                    >
+                      <X size={12} />
+                      <span>Clear Search Filter</span>
+                    </button>
+                  )}
                 </div>
               );
             }

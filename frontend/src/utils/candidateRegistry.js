@@ -243,6 +243,277 @@ export function formatCandidateRecord(raw = {}) {
   };
 }
 
+export const NATIONAL_SEED_CANDIDATES = [
+  {
+    id: "KN-2026-01001",
+    full_name: "Amlan Chakrabarty",
+    name: "Amlan Chakrabarty",
+    email: "amlan.chakrabarty@kaushalnexus.in",
+    phone: "+91 98765 43210",
+    role: "Cloud Ops & DevOps Engineer",
+    target_role: "Cloud Solutions Architect",
+    trade: "Cloud Computing & DevOps Systems",
+    program: "Cloud Computing & DevOps Systems",
+    institution: "National Skill Development Center, Noida",
+    provider: "National Skill Development Center, Noida",
+    district_name: "Noida",
+    district_id: "UP-NOIDA",
+    location: "Gautam Buddha Nagar (Noida), Uttar Pradesh",
+    state: "Uttar Pradesh",
+    education_level: "B.Tech in Computer Science & Cloud Ops · 2025",
+    nsqf_level: "NSQF Level 6",
+    status: "Interview Ready",
+    readiness_score: 95,
+    ncvet_credential_id: "NCVET-2026-CERT-10002",
+    verified: true,
+    aadhaar_verified: true,
+    overall_progress: 96,
+    skills: [
+      { name: "Kubernetes & Docker", score_percentage: 96, mastery_probability: 0.96, is_verified: true, status: "Mastered" },
+      { name: "AWS Cloud Infrastructure", score_percentage: 94, mastery_probability: 0.94, is_verified: true, status: "Mastered" },
+      { name: "Linux Systems & Bash", score_percentage: 92, mastery_probability: 0.92, is_verified: true, status: "Mastered" },
+      { name: "CI/CD & GitHub Actions", score_percentage: 90, mastery_probability: 0.90, is_verified: true, status: "Mastered" },
+      { name: "Terraform & IaC", score_percentage: 88, mastery_probability: 0.88, is_verified: true, status: "Mastered" },
+      { name: "Python Automation", score_percentage: 85, mastery_probability: 0.85, is_verified: true, status: "Mastered" },
+    ],
+    detected_gaps: [
+      {
+        competency_name: "Multi-Cloud Security & Vault",
+        deficit_pct: 32,
+        level: "Moderate",
+        severity: "Moderate",
+        impact: "Beneficial for enterprise banking and FinTech mandates",
+        suggested_action: "Complete 15-hr specialized secret management and zero-trust bridge module.",
+      },
+    ],
+  },
+  {
+    id: "KN-2026-01000",
+    full_name: "Aarav Sharma",
+    name: "Aarav Sharma",
+    email: "aarav.sharma@kaushalnexus.in",
+    phone: "+91 98765 11000",
+    role: "AI & Data Analytics Specialist",
+    target_role: "Associate AI Engineer",
+    trade: "Data Analytics & Applied AI",
+    program: "Data Analytics & Applied AI",
+    institution: "UP Skill Center of Excellence, Varanasi",
+    provider: "UP Skill Center of Excellence, Varanasi",
+    district_name: "Varanasi",
+    district_id: "UP-VARANASI",
+    location: "Varanasi, Uttar Pradesh",
+    state: "Uttar Pradesh",
+    education_level: "B.Voc in Data Analytics & Applied AI · 2025",
+    nsqf_level: "NSQF Level 6",
+    status: "Interview Ready",
+    readiness_score: 94,
+    ncvet_credential_id: "NCVET-2026-CERT-10001",
+    verified: true,
+    aadhaar_verified: true,
+    overall_progress: 92,
+    skills: [
+      { name: "Python for AI & Data Science", score_percentage: 95, mastery_probability: 0.95, is_verified: true, status: "Mastered" },
+      { name: "SQL & Relational Warehousing", score_percentage: 92, mastery_probability: 0.92, is_verified: true, status: "Mastered" },
+      { name: "Machine Learning Models", score_percentage: 90, mastery_probability: 0.90, is_verified: true, status: "Mastered" },
+      { name: "Prompt Engineering & LLM APIs", score_percentage: 88, mastery_probability: 0.88, is_verified: true, status: "Mastered" },
+      { name: "Data Visualization & Dashboards", score_percentage: 86, mastery_probability: 0.86, is_verified: true, status: "Mastered" },
+    ],
+    detected_gaps: [
+      {
+        competency_name: "Distributed Spark & Big Data",
+        deficit_pct: 35,
+        level: "Moderate",
+        severity: "Moderate",
+        impact: "Required for terabyte-scale enterprise streaming pipelines",
+        suggested_action: "Complete PySpark and Delta Lake practical labs.",
+      },
+    ],
+  },
+  {
+    id: "KN-2026-01002",
+    full_name: "Satyam Jaiswal",
+    name: "Satyam Jaiswal",
+    email: "satyam.jaiswal@kaushalnexus.in",
+    phone: "+91 98765 22000",
+    role: "Data Analytics Associate",
+    target_role: "BI & Operations Analyst",
+    trade: "Data Analytics & Business Intelligence",
+    program: "Data Analytics & Business Intelligence",
+    institution: "PMKK Skill Center, Varanasi",
+    provider: "PMKK Skill Center, Varanasi",
+    district_name: "Varanasi",
+    district_id: "UP-VARANASI",
+    location: "Varanasi, Uttar Pradesh",
+    state: "Uttar Pradesh",
+    education_level: "Bachelor of Vocational Studies (B.Voc Analytics)",
+    nsqf_level: "NSQF Level 5",
+    status: "Placed & Verified",
+    readiness_score: 93,
+    ncvet_credential_id: "NCVET-2026-CERT-10003",
+    verified: true,
+    aadhaar_verified: true,
+    overall_progress: 100,
+    skills: [
+      { name: "Power BI & Tableau", score_percentage: 94, mastery_probability: 0.94, is_verified: true, status: "Mastered" },
+      { name: "Advanced SQL", score_percentage: 92, mastery_probability: 0.92, is_verified: true, status: "Mastered" },
+      { name: "Business Analytics", score_percentage: 90, mastery_probability: 0.90, is_verified: true, status: "Mastered" },
+    ],
+  },
+  {
+    id: "KN-2026-01003",
+    full_name: "Anand Maurya",
+    name: "Anand Maurya",
+    email: "anand.maurya@kaushalnexus.in",
+    phone: "+91 98765 33000",
+    role: "Smart Manufacturing & Robotics Tech",
+    target_role: "Industrial Automation Engineer",
+    trade: "Smart Manufacturing & CNC",
+    program: "Smart Manufacturing & CNC",
+    institution: "Government ITI Centre of Excellence, Lucknow",
+    provider: "Government ITI Centre of Excellence, Lucknow",
+    district_name: "Lucknow",
+    district_id: "UP-LUCKNOW",
+    location: "Lucknow, Uttar Pradesh",
+    state: "Uttar Pradesh",
+    education_level: "Diploma in Smart Manufacturing & Robotics",
+    nsqf_level: "NSQF Level 5",
+    status: "Interview Ready",
+    readiness_score: 89,
+    ncvet_credential_id: "NCVET-2026-CERT-10004",
+    verified: true,
+    aadhaar_verified: true,
+    overall_progress: 90,
+    skills: [
+      { name: "CNC Programming & G-Code", score_percentage: 91, mastery_probability: 0.91, is_verified: true, status: "Mastered" },
+      { name: "PLC & SCADA Basics", score_percentage: 87, mastery_probability: 0.87, is_verified: true, status: "Mastered" },
+      { name: "Industrial IoT Sensors", score_percentage: 85, mastery_probability: 0.85, is_verified: true, status: "Mastered" },
+    ],
+  },
+  {
+    id: "KN-2026-01005",
+    full_name: "Pooja Agarwal",
+    name: "Pooja Agarwal",
+    email: "pooja.agarwal@kaushalnexus.in",
+    phone: "+91 98765 55000",
+    role: "Python Backend Engineer",
+    target_role: "Backend API Engineer",
+    trade: "Python & Data Engineering",
+    program: "Python & Data Engineering",
+    institution: "PMKK Skill Center, Lucknow",
+    provider: "PMKK Skill Center, Lucknow",
+    district_name: "Lucknow",
+    district_id: "UP-LUCKNOW",
+    location: "Lucknow, Uttar Pradesh",
+    state: "Uttar Pradesh",
+    education_level: "B.Sc (Data Science & Programming)",
+    nsqf_level: "NSQF Level 5",
+    status: "Seeking Employment",
+    readiness_score: 85,
+    ncvet_credential_id: "NCVET-2026-CERT-10005",
+    verified: true,
+    aadhaar_verified: true,
+    overall_progress: 86,
+    skills: [
+      { name: "Python FastAPI & Django", score_percentage: 88, mastery_probability: 0.88, is_verified: true, status: "Mastered" },
+      { name: "PostgreSQL & Database Design", score_percentage: 84, mastery_probability: 0.84, is_verified: true, status: "Mastered" },
+    ],
+  },
+  {
+    id: "KN-2026-01006",
+    full_name: "Ananya Verma",
+    name: "Ananya Verma",
+    email: "ananya.verma@kaushalnexus.in",
+    phone: "+91 98765 66000",
+    role: "Full Stack Web Developer",
+    target_role: "Frontend & React Developer",
+    trade: "Full Stack Web Engineering",
+    program: "Full Stack Web Engineering",
+    institution: "UPSDM Training Center, Kanpur",
+    provider: "UPSDM Training Center, Kanpur",
+    district_name: "Kanpur",
+    district_id: "UP-KANPUR",
+    location: "Kanpur, Uttar Pradesh",
+    state: "Uttar Pradesh",
+    education_level: "B.Tech (Information Technology)",
+    nsqf_level: "NSQF Level 5",
+    status: "Interview Ready",
+    readiness_score: 84,
+    ncvet_credential_id: "NCVET-2026-CERT-10006",
+    verified: true,
+    aadhaar_verified: true,
+    overall_progress: 88,
+    skills: [
+      { name: "React.js & Tailwind CSS", score_percentage: 88, mastery_probability: 0.88, is_verified: true, status: "Mastered" },
+      { name: "RESTful APIs & Node.js", score_percentage: 82, mastery_probability: 0.82, is_verified: true, status: "Mastered" },
+    ],
+  },
+  {
+    id: "KN-2026-01007",
+    full_name: "Vikas Singhania",
+    name: "Vikas Singhania",
+    email: "vikas.singhania@kaushalnexus.in",
+    phone: "+91 98765 77000",
+    role: "Cloud Infrastructure Associate",
+    target_role: "Site Reliability Engineer",
+    trade: "Cloud Computing & DevOps Systems",
+    program: "Cloud Computing & DevOps Systems",
+    institution: "UPSDM Center of Excellence, Varanasi",
+    provider: "UPSDM Center of Excellence, Varanasi",
+    district_name: "Varanasi",
+    district_id: "UP-VARANASI",
+    location: "Varanasi, Uttar Pradesh",
+    state: "Uttar Pradesh",
+    education_level: "B.Tech (Computer Science & Engineering)",
+    nsqf_level: "NSQF Level 5",
+    status: "In Training",
+    readiness_score: 82,
+    ncvet_credential_id: "NCVET-2026-CERT-10007",
+    verified: true,
+    aadhaar_verified: true,
+    overall_progress: 80,
+    skills: [
+      { name: "Linux Server Administration", score_percentage: 84, mastery_probability: 0.84, is_verified: true, status: "Mastered" },
+      { name: "Docker Containerization", score_percentage: 80, mastery_probability: 0.80, is_verified: true, status: "Mastered" },
+    ],
+  },
+];
+
+/**
+ * Seeds default national candidates if the persistent storage has no candidates or only a placeholder.
+ * Safe to call on application bootstrap.
+ * @returns {Array<Object>} Seeded or existing candidates
+ */
+export function seedDefaultCandidatesIfEmpty() {
+  if (typeof localStorage === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(CANDIDATE_REGISTRY_STORAGE_KEY);
+    let existing = [];
+    if (raw) {
+      try {
+        existing = JSON.parse(raw);
+      } catch {}
+    }
+
+    const needsSeed =
+      !Array.isArray(existing) ||
+      existing.length === 0 ||
+      (existing.length === 1 && (existing[0]?.full_name || '').startsWith('Candidate ('));
+
+    if (needsSeed) {
+      const formattedSeed = NATIONAL_SEED_CANDIDATES.map(formatCandidateRecord);
+      const combined = Array.isArray(existing) && existing.length > 0
+        ? [...existing.filter((e) => !formattedSeed.some((s) => s.id === e.id)), ...formattedSeed]
+        : formattedSeed;
+      localStorage.setItem(CANDIDATE_REGISTRY_STORAGE_KEY, JSON.stringify(combined));
+      return combined;
+    }
+    return existing;
+  } catch (err) {
+    console.warn('Failed to seed default candidates:', err);
+    return [];
+  }
+}
+
 /**
  * Retrieves all registered candidates from persistent client storage.
  * Synchronizes with active learner if present.
@@ -261,6 +532,14 @@ export function getAllRegisteredCandidates() {
     }
   } catch (err) {
     console.warn('Failed to read candidates registry:', err);
+  }
+
+  // In browser runtime, if registry is empty or only has un-named phone dummy, seed national cohort
+  if (
+    typeof window !== 'undefined' &&
+    (registry.length === 0 || (registry.length === 1 && (registry[0]?.full_name || '').startsWith('Candidate (')))
+  ) {
+    registry = seedDefaultCandidatesIfEmpty();
   }
 
   // Also check kn_current_learner
@@ -365,6 +644,16 @@ export function getCandidateById(learnerId) {
   });
   if (found) return found;
 
+  // Direct check against national seed candidates
+  const seedMatch = NATIONAL_SEED_CANDIDATES.find((c) => {
+    if (!c) return false;
+    const cId = String(c.id || '').trim().toLowerCase();
+    const cEmail = String(c.email || '').trim().toLowerCase();
+    const cCred = String(c.ncvet_credential_id || '').trim().toLowerCase();
+    return cId === lowerTarget || cEmail === lowerTarget || cCred === lowerTarget;
+  });
+  if (seedMatch) return formatCandidateRecord(seedMatch);
+
   // Fallback check in current learner
   try {
     const current = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem(CURRENT_LEARNER_STORAGE_KEY) || '{}') : {};
@@ -394,12 +683,27 @@ export function listCandidatesFromRegistry(params = {}) {
   if (params.search && typeof params.search === 'string') {
     const q = params.search.trim().toLowerCase();
     candidates = candidates.filter((c) => {
-      const nameMatch = (c.full_name || '').toLowerCase().includes(q);
-      const idMatch = (c.id || '').toLowerCase().includes(q);
-      const districtMatch = (c.district_name || '').toLowerCase().includes(q);
-      const tradeMatch = (c.trade || '').toLowerCase().includes(q);
-      const emailMatch = (c.email || '').toLowerCase().includes(q);
-      return nameMatch || idMatch || districtMatch || tradeMatch || emailMatch;
+      const fullName = (c.full_name || c.name || '').toLowerCase();
+      const id = (c.id || '').toLowerCase();
+      const district = (c.district_name || c.district_id || '').toLowerCase();
+      const location = (c.location || '').toLowerCase();
+      const state = (c.state || '').toLowerCase();
+      const trade = (c.trade || c.program || c.role || c.target_role || '').toLowerCase();
+      const email = (c.email || '').toLowerCase();
+      const credential = (c.ncvet_credential_id || '').toLowerCase();
+      const skillsMatch = Array.isArray(c.skills) && c.skills.some((s) => (s.name || s.skill || '').toLowerCase().includes(q));
+
+      return (
+        fullName.includes(q) ||
+        id.includes(q) ||
+        district.includes(q) ||
+        location.includes(q) ||
+        state.includes(q) ||
+        trade.includes(q) ||
+        email.includes(q) ||
+        credential.includes(q) ||
+        skillsMatch
+      );
     });
   }
 

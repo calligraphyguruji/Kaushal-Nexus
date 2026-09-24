@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowUpRight,
+  ArrowRight,
   Download,
   Users,
+  User,
+  MapPin,
   BriefcaseBusiness,
   GraduationCap,
   ShieldCheck,
@@ -323,7 +326,7 @@ export default function ImpactDashboard() {
 
       {/* Active Search / Filter Banner */}
       {searchQuery && (
-        <div className="flex items-center justify-between rounded-xl border border-sky-500/30 bg-sky-950/30 px-4 py-2.5 text-xs text-sky-200">
+        <div className="flex flex-col gap-2 rounded-xl border border-sky-500/30 bg-sky-950/30 px-4 py-2.5 text-xs text-sky-200 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <Search size={14} className="shrink-0 text-sky-400" />
             <span>
@@ -335,14 +338,25 @@ export default function ImpactDashboard() {
               </span>
             </span>
           </div>
-          <button
-            type="button"
-            onClick={handleClearSearch}
-            className="flex items-center gap-1 font-mono text-[11px] font-semibold text-sky-400 hover:text-sky-300 transition cursor-pointer"
-          >
-            <X size={12} />
-            <span>Clear Filter</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            {filteredSectors.length === 0 && (
+              <Link
+                to={`/learner?search=${encodeURIComponent(searchQuery)}&tab=dossier`}
+                className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-sky-300 hover:text-white transition"
+              >
+                <User size={12} />
+                <span>Search in Candidate Registry →</span>
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              className="flex items-center gap-1 font-mono text-[11px] font-semibold text-sky-400 hover:text-sky-300 transition cursor-pointer"
+            >
+              <X size={12} />
+              <span>Clear Filter</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -803,19 +817,37 @@ export default function ImpactDashboard() {
                 ) : (
                   <tr>
                     <td colSpan={6} className="py-8 text-center">
-                      <div className="mx-auto flex flex-col items-center justify-center gap-2">
-                        <p className="font-mono text-xs text-slate-400">
+                      <div className="mx-auto flex flex-col items-center justify-center gap-3">
+                        <p className="font-mono text-xs text-slate-300">
                           No sector or program matches "{searchQuery}"
                           {selectedDemandTier !== "All Tiers" ? ` with ${selectedDemandTier}` : ""}.
                         </p>
-                        <button
-                          type="button"
-                          onClick={handleClearSearch}
-                          className="inline-flex items-center gap-1 rounded-md border border-[#1e293b] bg-[#070d18] px-3 py-1 font-mono text-xs font-semibold text-sky-400 hover:border-sky-400/50 hover:text-white transition cursor-pointer"
-                        >
-                          <X size={12} />
-                          <span>Clear Search Filters</span>
-                        </button>
+                        <div className="flex flex-wrap items-center justify-center gap-2">
+                          <Link
+                            to={`/learner?search=${encodeURIComponent(searchQuery)}&tab=dossier`}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-sky-400/30 bg-sky-500/10 px-3 py-1.5 font-mono text-xs font-semibold text-sky-400 hover:bg-sky-500/20 cursor-pointer"
+                          >
+                            <User size={12} />
+                            <span>Search "{searchQuery}" in Candidate Registry</span>
+                            <ArrowRight size={11} />
+                          </Link>
+                          <Link
+                            to={`/regional?search=${encodeURIComponent(searchQuery)}`}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 font-mono text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 cursor-pointer"
+                          >
+                            <MapPin size={12} />
+                            <span>Search "{searchQuery}" in Regional Districts</span>
+                            <ArrowRight size={11} />
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={handleClearSearch}
+                            className="inline-flex items-center gap-1 rounded-md border border-[#1e293b] bg-[#070d18] px-3 py-1.5 font-mono text-xs font-semibold text-slate-400 hover:border-slate-700 hover:text-white transition cursor-pointer"
+                          >
+                            <X size={12} />
+                            <span>Clear Filter</span>
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>
