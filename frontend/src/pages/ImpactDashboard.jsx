@@ -52,6 +52,13 @@ import { usePermissions } from "../hooks/usePermissions";
 
 import { exportImpactAuditPDF } from "../utils/pdfExport";
 import { exportImpactOutcomesCSV } from "../utils/csvExport";
+import { motion } from "motion/react";
+import {
+  PageTransition,
+  StaggerContainer,
+  StaggerItem,
+} from "../components/motion/MotionSystem";
+import { MetricSkeleton } from "../components/common/Skeletons";
 
 export default function ImpactDashboard() {
   const { resolvedTheme } = useTheme();
@@ -251,7 +258,7 @@ export default function ImpactDashboard() {
   }, [searchQuery]);
 
   return (
-    <div className="space-y-8 font-sans text-[#f1f5f9]">
+    <PageTransition className="space-y-8 font-sans text-[#f1f5f9]">
       {/* =====================================================
           1. PAGE HEADER & EXECUTIVE ACTIONS
       ====================================================== */}
@@ -274,21 +281,31 @@ export default function ImpactDashboard() {
               <span>{isRefreshing ? "Syncing..." : "Sync Live DB"}</span>
             </button>
 
-            <div className="flex items-center rounded-lg border border-[#1e293b] bg-[#0b1528] p-1 font-mono text-xs">
-              {["Q1 2026", "Q2 2026", "YTD 2026"].map((period) => (
-                <button
-                  key={period}
-                  type="button"
-                  onClick={() => setSelectedPeriod(period)}
-                  className={`rounded-md px-3 py-1.5 font-semibold transition-all cursor-pointer ${
-                    selectedPeriod === period
-                      ? "bg-sky-400 text-slate-950 font-bold shadow-xs"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  {period}
-                </button>
-              ))}
+            <div className="relative flex items-center rounded-lg border border-[#1e293b] bg-[#0b1528] p-1 font-mono text-xs">
+              {["Q1 2026", "Q2 2026", "YTD 2026"].map((period) => {
+                const isActive = selectedPeriod === period;
+                return (
+                  <button
+                    key={period}
+                    type="button"
+                    onClick={() => setSelectedPeriod(period)}
+                    className={`relative z-10 rounded-md px-3 py-1.5 font-semibold transition-colors cursor-pointer ${
+                      isActive
+                        ? "text-slate-950 font-bold"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="impactPeriodPill"
+                        className="absolute inset-0 z-[-1] rounded-md bg-sky-400 shadow-xs"
+                        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                    )}
+                    {period}
+                  </button>
+                );
+              })}
             </div>
 
             <button
@@ -385,61 +402,62 @@ export default function ImpactDashboard() {
       {/* =====================================================
           2. CORE LONGITUDINAL KPI METRICS (TechStatCard)
       ====================================================== */}
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section>
         {loading ? (
-          Array.from({ length: 4 }).map((_, idx) => (
-            <div
-              key={idx}
-              className="flex h-40 animate-pulse flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-5"
-            >
-              <div className="h-3 w-28 rounded bg-[#1e293b]" />
-              <div className="h-8 w-24 rounded bg-[#1e293b]" />
-              <div className="h-3 w-40 rounded bg-[#1e293b]" />
-            </div>
-          ))
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <MetricSkeleton count={4} />
+          </div>
         ) : summaryData ? (
-          <>
-            <TechStatCard
-              title="Certified Beneficiaries"
-              value={Number(summaryData.total_certified || 0).toLocaleString()}
-              subtitle={`${Number(summaryData.total_trained || 0).toLocaleString()} trained (${Number(summaryData.total_enrolled || 0).toLocaleString()} enrolled)`}
-              trend={summaryData.deltas?.certified?.value || "+8.7%"}
-              trendDirection="up"
-              icon={GraduationCap}
-              variant="indigo"
-              footerText="NCVET Authenticated Assessment"
-            />
-            <TechStatCard
-              title="Verified Placements"
-              value={Number(summaryData.total_placed || 0).toLocaleString()}
-              subtitle={`${summaryData.placement_percentage || 0}% conversion of certified cohort`}
-              trend={`+${summaryData.placement_percentage || 0}%`}
-              trendDirection="up"
-              icon={BriefcaseBusiness}
-              variant="cyan"
-              footerText="Direct Verification Ready"
-            />
-            <TechStatCard
-              title="Longitudinal Retention"
-              value={`${summaryData.retention_percentage || 0}%`}
-              subtitle="180-day retention tracked"
-              trend={`${Number(summaryData.retention_verified_count || 0).toLocaleString()} active`}
-              trendDirection="up"
-              icon={ShieldCheck}
-              variant="emerald"
-              footerText="EPFO Integration Sandbox Adapter"
-            />
-            <TechStatCard
-              title="Active Mandates"
-              value={Number(summaryData.active_hiring_mandates || 0).toLocaleString()}
-              subtitle="Enterprise & MSME Openings in DB"
-              trend={summaryData.deltas?.mandates?.value || "+22%"}
-              trendDirection="up"
-              icon={Users}
-              variant="amber"
-              footerText="100% Minimum Wage Gated"
-            />
-          </>
+          <StaggerContainer className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StaggerItem>
+              <TechStatCard
+                title="Certified Beneficiaries"
+                value={Number(summaryData.total_certified || 0).toLocaleString()}
+                subtitle={`${Number(summaryData.total_trained || 0).toLocaleString()} trained (${Number(summaryData.total_enrolled || 0).toLocaleString()} enrolled)`}
+                trend={summaryData.deltas?.certified?.value || "+8.7%"}
+                trendDirection="up"
+                icon={GraduationCap}
+                variant="indigo"
+                footerText="NCVET Authenticated Assessment"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <TechStatCard
+                title="Verified Placements"
+                value={Number(summaryData.total_placed || 0).toLocaleString()}
+                subtitle={`${summaryData.placement_percentage || 0}% conversion of certified cohort`}
+                trend={`+${summaryData.placement_percentage || 0}%`}
+                trendDirection="up"
+                icon={BriefcaseBusiness}
+                variant="cyan"
+                footerText="Direct Verification Ready"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <TechStatCard
+                title="Longitudinal Retention"
+                value={`${summaryData.retention_percentage || 0}%`}
+                subtitle="180-day retention tracked"
+                trend={`${Number(summaryData.retention_verified_count || 0).toLocaleString()} active`}
+                trendDirection="up"
+                icon={ShieldCheck}
+                variant="emerald"
+                footerText="EPFO Integration Sandbox Adapter"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <TechStatCard
+                title="Active Mandates"
+                value={Number(summaryData.active_hiring_mandates || 0).toLocaleString()}
+                subtitle="Enterprise & MSME Openings in DB"
+                trend={summaryData.deltas?.mandates?.value || "+22%"}
+                trendDirection="up"
+                icon={Users}
+                variant="amber"
+                footerText="100% Minimum Wage Gated"
+              />
+            </StaggerItem>
+          </StaggerContainer>
         ) : (
           <div className="col-span-full rounded-xl border border-[#1e293b] bg-[#0b1528] p-6 text-center text-xs font-mono text-slate-400">
             No KPI metrics recorded yet. Please run database seeding.
@@ -1303,6 +1321,6 @@ export default function ImpactDashboard() {
           bridge curriculum package for candidate cohorts in the demonstration dataset.
         </p>
       </ActionModal>
-    </div>
+    </PageTransition>
   );
 }

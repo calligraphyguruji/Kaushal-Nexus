@@ -1,5 +1,6 @@
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { motion } from "motion/react";
 import {
   LayoutDashboard,
   UserRound,
@@ -173,13 +174,20 @@ export default function Sidebar({ open, onClose }) {
                   key={item.path}
                   to={item.path}
                   onClick={onClose}
-                  className={`group flex items-center justify-between rounded-lg px-3 py-2 text-xs font-sans transition-all duration-150 ${
+                  className={`group relative flex items-center justify-between rounded-lg px-3 py-2 text-xs font-sans transition-colors duration-150 ${
                     isItemActive
-                      ? "bg-sky-50 dark:bg-[#0b1528] text-sky-900 dark:text-white font-semibold border-l-2 border-sky-500 dark:border-sky-400 shadow-xs"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#0b1528]/60 hover:text-slate-900 dark:hover:text-slate-200 font-medium"
+                      ? "text-sky-900 dark:text-white font-semibold"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
+                  {isItemActive && (
+                    <motion.div
+                      layoutId="sidebarActivePill"
+                      className="absolute inset-0 rounded-lg bg-sky-100/80 dark:bg-white/10 border-l-2 border-sky-600 dark:border-white shadow-2xs"
+                      transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                    />
+                  )}
+                  <div className="relative z-10 flex items-center gap-2.5">
                     <Icon
                       size={16}
                       strokeWidth={isItemActive ? 2.2 : 1.8}
@@ -194,7 +202,7 @@ export default function Sidebar({ open, onClose }) {
 
                   {item.badge && (
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-mono tabular-nums border ${
+                      className={`relative z-10 rounded-full px-2 py-0.5 text-[10px] font-mono tabular-nums border ${
                         item.badgeTone === "danger"
                           ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/70"
                           : item.badgeTone === "warning"
@@ -202,7 +210,7 @@ export default function Sidebar({ open, onClose }) {
                           : item.badgeTone === "info"
                           ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/70"
                           : isItemActive
-                          ? "bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-400/30 font-bold"
+                          ? "bg-sky-200/60 text-sky-900 border-sky-300 dark:bg-sky-500/20 dark:text-sky-200 dark:border-sky-400/40 font-bold"
                           : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-[#0b1528] dark:text-slate-400 dark:border-[#1e293b]"
                       }`}
                     >

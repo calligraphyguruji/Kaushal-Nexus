@@ -57,6 +57,8 @@ import CareerIntelligenceCenter from "../components/CareerIntelligenceCenter";
 import ImpactProgress from "../components/ImpactProgress";
 import ImpactIntelligenceDashboard from "../components/ImpactIntelligenceDashboard";
 import StateView from "../components/StateView";
+import { motion, AnimatePresence } from "motion/react";
+import { PageTransition } from "../components/motion/MotionSystem";
 
 // Deterministic color palette for candidate avatars
 const AVATAR_COLORS = [
@@ -623,7 +625,7 @@ export default function LearnerIntelligence() {
   const activePlacement = placements.length > 0 ? placements[0] : null;
 
   return (
-    <div className="space-y-8 font-sans text-[#f1f5f9]">
+    <PageTransition className="space-y-8 font-sans text-[#f1f5f9]">
       {/* =====================================================
           1. PAGE HEADER & ACTIONS
       ====================================================== */}
@@ -2428,6 +2430,6 @@ export default function LearnerIntelligence() {
       )}
         </>
       )}
-    </div>
+    </PageTransition>
   );
 }

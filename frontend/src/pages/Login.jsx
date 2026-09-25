@@ -25,6 +25,8 @@ import { useTheme } from "../context/ThemeContext";
 import { getErrorMessage } from "../api/client";
 import { authApi } from "../api/auth";
 import { getPostLoginRedirect } from "../utils/permissions";
+import { motion, AnimatePresence } from "motion/react";
+import { PageTransition } from "../components/motion/MotionSystem";
 
 // Pre-seeded Demo Credentials for Institutional Testing (6 Authoritative Backend Roles)
 const DEMO_PRESETS = [
@@ -423,7 +425,7 @@ export default function Login({ defaultMode }) {
   };
 
   return (
-    <div className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 selection:bg-blue-100 selection:text-blue-900 dark:bg-slate-950 dark:text-slate-100 dark:selection:bg-blue-950 dark:selection:text-blue-200">
+    <PageTransition className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 selection:bg-blue-100 selection:text-blue-900 dark:bg-slate-950 dark:text-slate-100 dark:selection:bg-blue-950 dark:selection:text-blue-200">
       {/* Top Ministry Header */}
       <header className="border-b border-slate-200/80 bg-white/90 px-6 py-3.5 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/90">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
@@ -526,19 +528,26 @@ export default function Login({ defaultMode }) {
             </div>
 
             {/* Login Mode Selector Tabs */}
-            <div className="mt-4 grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800/80">
+            <div className="relative mt-4 grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800/80">
               <button
                 type="button"
                 onClick={() => {
                   setLoginMode("email");
                   setError(null);
                 }}
-                className={`flex items-center justify-center gap-2 rounded-lg py-2 text-xs font-semibold transition ${
+                className={`relative z-10 flex items-center justify-center gap-2 rounded-lg py-2 text-xs font-semibold transition-colors cursor-pointer ${
                   loginMode === "email"
-                    ? "bg-white text-blue-600 shadow-xs dark:bg-slate-700 dark:text-blue-400"
+                    ? "text-blue-600 dark:text-blue-400 font-bold"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
+                {loginMode === "email" && (
+                  <motion.div
+                    layoutId="loginTabPill"
+                    className="absolute inset-0 z-[-1] rounded-lg bg-white shadow-xs dark:bg-slate-700"
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                )}
                 <Mail size={14} />
                 <span>Email & Password</span>
               </button>
@@ -548,12 +557,19 @@ export default function Login({ defaultMode }) {
                   setLoginMode("phone");
                   setError(null);
                 }}
-                className={`flex items-center justify-center gap-2 rounded-lg py-2 text-xs font-semibold transition ${
+                className={`relative z-10 flex items-center justify-center gap-2 rounded-lg py-2 text-xs font-semibold transition-colors cursor-pointer ${
                   loginMode === "phone"
-                    ? "bg-white text-blue-600 shadow-xs dark:bg-slate-700 dark:text-blue-400"
+                    ? "text-blue-600 dark:text-blue-400 font-bold"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
+                {loginMode === "phone" && (
+                  <motion.div
+                    layoutId="loginTabPill"
+                    className="absolute inset-0 z-[-1] rounded-lg bg-white shadow-xs dark:bg-slate-700"
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                )}
                 <Smartphone size={14} />
                 <span>Phone Number</span>
                 <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
@@ -923,6 +939,6 @@ export default function Login({ defaultMode }) {
           of Skill Development & Entrepreneurship (MSDE)
         </p>
       </footer>
-    </div>
+    </PageTransition>
   );
 }

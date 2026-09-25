@@ -38,6 +38,12 @@ import InstitutionalBadge from "../components/InstitutionalBadge";
 import PipelineVisualizer from "../components/PipelineVisualizer";
 import PlatformSuitePreview from "../components/PlatformSuitePreview";
 import TechStatCard from "../components/TechStatCard";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  PageTransition,
+  FadeIn,
+  AnimatedButton,
+} from "../components/motion/MotionSystem";
 
 export default function LearnerHome() {
   const navigate = useNavigate();
@@ -111,7 +117,7 @@ export default function LearnerHome() {
   const currentSkill = demoSkills[selectedDemoSkill] || demoSkills.powerbi;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070d18] text-slate-900 dark:text-[#f1f5f9] selection:bg-sky-500/20 selection:text-sky-500 font-sans antialiased transition-colors duration-150">
+    <PageTransition className="min-h-screen bg-slate-50 dark:bg-[#070d18] text-slate-900 dark:text-[#f1f5f9] selection:bg-sky-500/20 selection:text-sky-500 font-sans antialiased transition-colors duration-150">
       {/* ========================================================================= */}
       {/* 1. FIXED INSTITUTIONAL HEADER NAVIGATION                                  */}
       {/* ========================================================================= */}
@@ -413,7 +419,7 @@ export default function LearnerHome() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end mb-12">
               {/* Left Column: Headline & Value Proposition */}
-              <div className="lg:col-span-8 space-y-6">
+              <FadeIn direction="up" delay={0.04} className="lg:col-span-8 space-y-6">
                 <h1 className="font-heading text-4xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.08]">
                   Bridging Skills to <br className="hidden sm:inline" />
                   <span className="bg-gradient-to-r from-sky-600 via-sky-500 to-indigo-600 dark:from-sky-400 dark:via-sky-300 dark:to-indigo-400 bg-clip-text text-transparent">
@@ -488,10 +494,10 @@ export default function LearnerHome() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </FadeIn>
 
               {/* Right Column: High-Density Candidate Telemetry Card */}
-              <div className="lg:col-span-4">
+              <FadeIn direction="up" delay={0.12} className="lg:col-span-4">
                 <div className="relative rounded-2xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-5 shadow-xl dark:shadow-2xl glow-cyan">
                   {/* Simulation Disclaimer Label */}
                   <div className="mb-3.5 flex items-center justify-between border-b border-slate-200 dark:border-[#1e293b]/80 pb-2.5">
@@ -586,7 +592,7 @@ export default function LearnerHome() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </FadeIn>
             </div>
           </div>
         </section>
@@ -758,91 +764,112 @@ export default function LearnerHome() {
             {/* Simulator Interactive Box */}
             <div className="rounded-2xl border border-[#1e293b] bg-[#0b1528] p-6 lg:p-8 shadow-2xl">
               {/* Domain Switcher Pills */}
-              <div className="flex flex-wrap items-center justify-center gap-2 pb-6 border-b border-[#1e293b]">
-                {Object.entries(demoSkills).map(([key, skill]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setSelectedDemoSkill(key)}
-                    className={`rounded-xl px-3.5 py-2 font-mono text-xs font-semibold transition-all cursor-pointer ${
-                      selectedDemoSkill === key
-                        ? "bg-sky-400 text-slate-950 shadow-md glow-cyan"
-                        : "border border-[#1e293b] bg-[#070d18] text-slate-300 hover:border-slate-600"
-                    }`}
-                  >
-                    {skill.name}
-                  </button>
-                ))}
+              <div className="relative flex flex-wrap items-center justify-center gap-2 pb-6 border-b border-[#1e293b]">
+                {Object.entries(demoSkills).map(([key, skill]) => {
+                  const isActive = selectedDemoSkill === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setSelectedDemoSkill(key)}
+                      className={`relative rounded-xl px-3.5 py-2 font-mono text-xs font-semibold transition-colors cursor-pointer ${
+                        isActive
+                          ? "text-slate-950 font-bold"
+                          : "border border-[#1e293b] bg-[#070d18] text-slate-300 hover:border-slate-600 hover:text-white"
+                      }`}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="simulatorSkillPill"
+                          className="absolute inset-0 rounded-xl bg-sky-400 shadow-md glow-cyan"
+                          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                        />
+                      )}
+                      <span className="relative z-10">{skill.name}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Simulator Metrics Display */}
-              <div className="grid grid-cols-1 gap-6 pt-6 lg:grid-cols-12 items-center">
-                <div className="lg:col-span-7 space-y-4">
-                  <div className="flex items-center gap-2 font-mono text-xs">
-                    <span className="rounded bg-sky-500/10 border border-sky-400/20 px-2 py-0.5 text-sky-400">
-                      {currentSkill.code}
-                    </span>
-                    <span className="text-slate-500">•</span>
-                    <span className="text-[#cbd5e1]">{currentSkill.level}</span>
-                  </div>
-
-                  <h3 className="font-heading text-2xl font-bold text-[#f8fafc]">
-                    {currentSkill.name}
-                  </h3>
-
-                  <div className="rounded-xl border border-[#1e293b] bg-[#070d18] p-4 space-y-3">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono text-[#cbd5e1]">Detected Skill Gap:</span>
-                      <span className="font-mono font-bold text-amber-400">
-                        {currentSkill.missingGap}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedDemoSkill}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  className="grid grid-cols-1 gap-6 pt-6 lg:grid-cols-12 items-center"
+                >
+                  <div className="lg:col-span-7 space-y-4">
+                    <div className="flex items-center gap-2 font-mono text-xs">
+                      <span className="rounded bg-sky-500/10 border border-sky-400/20 px-2 py-0.5 text-sky-400">
+                        {currentSkill.code}
                       </span>
+                      <span className="text-slate-500">•</span>
+                      <span className="text-[#cbd5e1]">{currentSkill.level}</span>
                     </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono text-[#cbd5e1]">Prescribed Bridge:</span>
-                      <span className="font-mono font-bold text-sky-400">
-                        {currentSkill.prescribedBridge}
-                      </span>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="lg:col-span-5 rounded-xl border border-[#1e293b] bg-[#070d18] p-5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs uppercase text-[#cbd5e1]">
-                      Simulated Readiness Score
-                    </span>
-                    <span className="font-mono text-lg font-extrabold text-emerald-400">
-                      {currentSkill.readiness}%
-                    </span>
-                  </div>
+                    <h3 className="font-heading text-2xl font-bold text-[#f8fafc]">
+                      {currentSkill.name}
+                    </h3>
 
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-[#1e293b]">
-                    <div
-                      className="h-full rounded-full bg-emerald-400 transition-all duration-700"
-                      style={{ width: `${currentSkill.readiness}%` }}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#1e293b]">
-                    <div>
-                      <span className="font-mono text-[10px] uppercase text-[#94a3b8]">
-                        Baseline Placement
-                      </span>
-                      <p className="font-mono text-sm font-bold text-[#f8fafc]">
-                        {currentSkill.startingSalary}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="font-mono text-[10px] uppercase text-[#94a3b8]">
-                        6M Retention Wage
-                      </span>
-                      <p className="font-mono text-sm font-bold text-emerald-400">
-                        {currentSkill.sixMonthProjection}
-                      </p>
+                    <div className="rounded-xl border border-[#1e293b] bg-[#070d18] p-4 space-y-3">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-mono text-[#cbd5e1]">Detected Skill Gap:</span>
+                        <span className="font-mono font-bold text-amber-400">
+                          {currentSkill.missingGap}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-mono text-[#cbd5e1]">Prescribed Bridge:</span>
+                        <span className="font-mono font-bold text-sky-400">
+                          {currentSkill.prescribedBridge}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
+
+                  <div className="lg:col-span-5 rounded-xl border border-[#1e293b] bg-[#070d18] p-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs uppercase text-[#cbd5e1]">
+                        Simulated Readiness Score
+                      </span>
+                      <span className="font-mono text-lg font-extrabold text-emerald-400">
+                        {currentSkill.readiness}%
+                      </span>
+                    </div>
+
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-[#1e293b]">
+                      <motion.div
+                        className="h-full rounded-full bg-emerald-400"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${currentSkill.readiness}%` }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#1e293b]">
+                      <div>
+                        <span className="font-mono text-[10px] uppercase text-[#94a3b8]">
+                          Baseline Placement
+                        </span>
+                        <p className="font-mono text-sm font-bold text-[#f8fafc]">
+                          {currentSkill.startingSalary}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="font-mono text-[10px] uppercase text-[#94a3b8]">
+                          6M Retention Wage
+                        </span>
+                        <p className="font-mono text-sm font-bold text-emerald-400">
+                          {currentSkill.sixMonthProjection}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
         </section>
@@ -1209,6 +1236,6 @@ export default function LearnerHome() {
           />
         </div>
       )}
-    </div>
+    </PageTransition>
   );
 }

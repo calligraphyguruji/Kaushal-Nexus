@@ -27,7 +27,18 @@ import {
   Filter,
 } from "lucide-react";
 import { internshipsApi } from "../api/internships";
-import { INTERNSHIP_DOMAINS } from "../data/internshipsData";
+import { INTERNSHIP_DOMAINS, ALL_INTERNSHIPS } from "../data/internshipsData";
+import {
+  PageTransition,
+  AnimatedCard,
+  AnimatedButton,
+  AnimatedBadge,
+  AnimatedModal,
+  StaggerContainer,
+  StaggerItem,
+} from "../components/motion/MotionSystem";
+import { CardSkeleton } from "../components/common/Skeletons";
+import EmptyState from "../components/common/EmptyState";
 
 export default function AvailableInternships() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -198,7 +209,7 @@ export default function AvailableInternships() {
   }, [selectedInterest]);
 
   return (
-    <div className="space-y-6">
+    <PageTransition className="space-y-6">
       {/* 1. TOP CANDIDATE INTELLIGENCE BANNER */}
       <div className="relative overflow-hidden rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50/80 via-white to-indigo-50/40 p-6 shadow-xs dark:border-sky-900/50 dark:from-slate-900 dark:via-slate-900/90 dark:to-sky-950/30">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -475,183 +486,178 @@ export default function AvailableInternships() {
 
           {/* 5. INTERNSHIP CARDS GRID */}
           {loading ? (
-            <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
-              <Briefcase size={28} className="animate-pulse text-sky-500" />
-              <p className="mt-3 text-xs font-bold text-slate-700 dark:text-slate-300">
-                Calculating Dynamic Skill Matches...
-              </p>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <CardSkeleton key={idx} rows={3} />
+              ))}
             </div>
           ) : internships.length === 0 ? (
-            <div className="flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-8 text-center dark:border-slate-800 dark:bg-slate-900/40">
-              <Briefcase size={32} className="text-slate-400" />
-              <h3 className="mt-3 text-sm font-bold text-slate-800 dark:text-slate-200">
-                No internships found matching your filters
-              </h3>
-              <p className="mt-1 text-xs text-slate-500 max-w-sm">
-                Try adjusting your search criteria, reducing the minimum stipend, or selecting another track.
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setWorkMode("all");
-                  setMinStipend(0);
-                  setSelectedInterest("fullstack");
-                }}
-                className="mt-4 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-              >
-                Reset All Filters
-              </button>
-            </div>
+            <EmptyState
+              icon={Briefcase}
+              title="No internships found matching your filters"
+              message="No opportunities matched your active criteria. Try adjusting your search query, reducing the minimum stipend, or selecting another career track."
+              actionLabel="Reset All Filters"
+              onAction={() => {
+                setSearchQuery("");
+                setWorkMode("all");
+                setMinStipend(0);
+                setSelectedInterest("fullstack");
+              }}
+            />
           ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <StaggerContainer
+              staggerDelay={0.03}
+              className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+            >
               {internships.map((internship) => {
                 const isApplied = !!appliedMap[internship.id];
                 const matchScore = internship.matchScore || 70;
                 const isPrimary = internship.isPrimaryInterest;
 
                 return (
-                  <div
-                    key={internship.id}
-                    className={`relative flex flex-col justify-between rounded-2xl border p-5 transition-all duration-200 hover:shadow-md ${
-                      isPrimary
-                        ? "border-sky-300 bg-gradient-to-b from-sky-50/40 via-white to-white dark:border-sky-900/60 dark:from-sky-950/20 dark:via-slate-900 dark:to-slate-900"
-                        : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
-                    }`}
-                  >
-                    <div>
-                      {/* Top Header: Company Avatar + Match Score Pill */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-xs font-extrabold text-white dark:bg-sky-950 dark:text-sky-300 shadow-2xs">
-                            {internship.logoText || "IN"}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                {internship.company}
-                              </span>
-                              {internship.verifiedBadge && (
-                                <ShieldCheck
-                                  size={13}
-                                  className="text-sky-600 dark:text-sky-400 shrink-0"
-                                  title="MSDE Verified Employer Mandate"
-                                />
-                              )}
+                  <StaggerItem key={internship.id}>
+                    <AnimatedCard
+                      hoverable={true}
+                      className={`relative flex flex-col justify-between h-full rounded-2xl border p-5 transition-shadow ${
+                        isPrimary
+                          ? "border-sky-300 bg-gradient-to-b from-sky-50/40 via-white to-white dark:border-sky-900/60 dark:from-sky-950/20 dark:via-slate-900 dark:to-slate-900"
+                          : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
+                      }`}
+                    >
+                      <div>
+                        {/* Top Header: Company Avatar + Match Score Pill */}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-xs font-extrabold text-white dark:bg-sky-950 dark:text-sky-300 shadow-2xs">
+                              {internship.logoText || "IN"}
                             </div>
-                            <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                              <MapPin size={11} className="shrink-0" />
-                              <span className="truncate max-w-[140px]">{internship.location}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Match Score Badge */}
-                        <div className="text-right shrink-0">
-                          <div
-                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-extrabold ${
-                              matchScore >= 80
-                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300"
-                                : matchScore >= 65
-                                ? "bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300"
-                                : "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300"
-                            }`}
-                          >
-                            <Flame size={12} />
-                            <span>{matchScore}% Match</span>
-                          </div>
-                          <div className="mt-0.5 text-[9px] font-mono text-slate-400">
-                            {internship.tier || "Skill Match"}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Role Title */}
-                      <h3 className="mt-3 text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
-                        {internship.title}
-                      </h3>
-
-                      {/* Quick Details Chips */}
-                      <div className="mt-2.5 flex flex-wrap items-center gap-2 text-[11px] font-medium text-slate-600 dark:text-slate-400">
-                        <span className="rounded-md bg-slate-100 px-2 py-0.5 dark:bg-slate-800">
-                          ₹{internship.stipendInr?.toLocaleString("en-IN")}/mo
-                        </span>
-                        <span className="rounded-md bg-slate-100 px-2 py-0.5 dark:bg-slate-800">
-                          {internship.workMode}
-                        </span>
-                        <span className="rounded-md bg-slate-100 px-2 py-0.5 dark:bg-slate-800">
-                          {internship.duration}
-                        </span>
-                        <span className="rounded-md bg-indigo-50 px-2 py-0.5 font-mono text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
-                          {internship.openings} Openings
-                        </span>
-                      </div>
-
-                      {/* Competency Alignment */}
-                      <div className="mt-3 space-y-1.5 border-t border-slate-100 pt-3 dark:border-slate-800">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                          Competencies &amp; Skill Verification
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {internship.requiredSkills?.map((skill, idx) => {
-                            const isMatched = internship.matchedSkills?.includes(skill);
-                            return (
-                              <span
-                                key={idx}
-                                className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
-                                  isMatched
-                                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-300"
-                                    : "bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-900 dark:text-amber-300"
-                                }`}
-                              >
-                                {isMatched ? (
-                                  <Check size={10} className="text-emerald-600 dark:text-emerald-400" />
-                                ) : (
-                                  <AlertCircle size={10} className="text-amber-600 dark:text-amber-400" />
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                  {internship.company}
+                                </span>
+                                {internship.verifiedBadge && (
+                                  <ShieldCheck
+                                    size={13}
+                                    className="text-sky-600 dark:text-sky-400 shrink-0"
+                                    title="MSDE Verified Employer Mandate"
+                                  />
                                 )}
-                                <span>{skill}</span>
-                              </span>
-                            );
-                          })}
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                <MapPin size={11} className="shrink-0" />
+                                <span className="truncate max-w-[140px]">{internship.location}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Match Score Badge */}
+                          <div className="text-right shrink-0">
+                            <AnimatedBadge
+                              className={`rounded-full px-2.5 py-0.5 text-xs font-extrabold gap-1 ${
+                                matchScore >= 80
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300/50"
+                                  : matchScore >= 65
+                                  ? "bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300 border border-sky-300/50"
+                                  : "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300/50"
+                              }`}
+                            >
+                              <Flame size={12} />
+                              <span>{matchScore}% Match</span>
+                            </AnimatedBadge>
+                            <div className="mt-0.5 text-[9px] font-mono text-slate-400">
+                              {internship.tier || "Skill Match"}
+                            </div>
+                          </div>
                         </div>
+
+                        {/* Role Title */}
+                        <h3 className="mt-3 text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
+                          {internship.title}
+                        </h3>
+
+                        {/* Quick Details Chips */}
+                        <div className="mt-2.5 flex flex-wrap items-center gap-2 text-[11px] font-medium text-slate-600 dark:text-slate-400">
+                          <span className="rounded-md bg-slate-100 px-2 py-0.5 dark:bg-slate-800 font-mono">
+                            ₹{internship.stipendInr?.toLocaleString("en-IN")}/mo
+                          </span>
+                          <span className="rounded-md bg-slate-100 px-2 py-0.5 dark:bg-slate-800">
+                            {internship.workMode}
+                          </span>
+                          <span className="rounded-md bg-slate-100 px-2 py-0.5 dark:bg-slate-800">
+                            {internship.duration}
+                          </span>
+                          <span className="rounded-md bg-indigo-50 px-2 py-0.5 font-mono text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+                            {internship.openings} Openings
+                          </span>
+                        </div>
+
+                        {/* Competency Alignment */}
+                        <div className="mt-3 space-y-1.5 border-t border-slate-100 pt-3 dark:border-slate-800">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            Competencies &amp; Skill Verification
+                          </span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {internship.requiredSkills?.map((skill, idx) => {
+                              const isMatched = internship.matchedSkills?.includes(skill);
+                              return (
+                                <span
+                                  key={idx}
+                                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
+                                    isMatched
+                                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-300"
+                                      : "bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-900 dark:text-amber-300"
+                                  }`}
+                                >
+                                  {isMatched ? (
+                                    <Check size={10} className="text-emerald-600 dark:text-emerald-400" />
+                                  ) : (
+                                    <AlertCircle size={10} className="text-amber-600 dark:text-amber-400" />
+                                  )}
+                                  <span>{skill}</span>
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Brief description snippet */}
+                        <p className="mt-3 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 line-clamp-2">
+                          {internship.description}
+                        </p>
                       </div>
 
-                      {/* Brief description snippet */}
-                      <p className="mt-3 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 line-clamp-2">
-                        {internship.description}
-                      </p>
-                    </div>
-
-                    {/* Bottom Action Footer */}
-                    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedInternship(internship)}
-                        className="text-xs font-semibold text-slate-600 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 cursor-pointer"
-                      >
-                        View Details
-                      </button>
-
-                      {isApplied ? (
-                        <div className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-                          <CheckCircle2 size={13} />
-                          <span>Applied</span>
-                        </div>
-                      ) : (
+                      {/* Bottom Action Footer */}
+                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
                         <button
                           type="button"
-                          onClick={() => setApplicationModal(internship)}
-                          className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-sky-500 cursor-pointer transition"
+                          onClick={() => setSelectedInternship(internship)}
+                          className="text-xs font-semibold text-slate-600 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 cursor-pointer transition-colors"
                         >
-                          <Send size={12} />
-                          <span>Quick Apply</span>
+                          View Details
                         </button>
-                      )}
-                    </div>
-                  </div>
+
+                        {isApplied ? (
+                          <div className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                            <CheckCircle2 size={13} />
+                            <span>Applied</span>
+                          </div>
+                        ) : (
+                          <AnimatedButton
+                            onClick={() => setApplicationModal(internship)}
+                            className="rounded-xl bg-sky-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-sky-500"
+                            icon={Send}
+                            iconPosition="left"
+                          >
+                            Quick Apply
+                          </AnimatedButton>
+                        )}
+                      </div>
+                    </AnimatedCard>
+                  </StaggerItem>
                 );
               })}
-            </div>
+            </StaggerContainer>
           )}
         </>
       ) : (
@@ -723,19 +729,24 @@ export default function AvailableInternships() {
       )}
 
       {/* 7. INTERNSHIP DETAILS MODAL */}
-      {selectedInternship && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs">
-          <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+      <AnimatedModal
+        isOpen={Boolean(selectedInternship)}
+        onClose={() => setSelectedInternship(null)}
+        maxWidth="max-w-2xl"
+        className="max-h-[90vh] overflow-y-auto p-6"
+      >
+        {selectedInternship && (
+          <div className="relative">
             <button
               type="button"
               onClick={() => setSelectedInternship(null)}
-              className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+              className="absolute right-0 top-0 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
             >
               <X size={18} />
             </button>
 
             {/* Modal Header */}
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-4 pr-8">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-sm font-extrabold text-white dark:bg-sky-950 dark:text-sky-300">
                 {selectedInternship.logoText || "IN"}
               </div>
@@ -836,13 +847,13 @@ export default function AvailableInternships() {
 
             {/* Modal Actions */}
             <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
-              <button
+              <AnimatedButton
                 type="button"
                 onClick={() => setSelectedInternship(null)}
                 className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Close
-              </button>
+              </AnimatedButton>
 
               {appliedMap[selectedInternship.id] ? (
                 <div className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
@@ -850,7 +861,7 @@ export default function AvailableInternships() {
                   <span>Application Submitted</span>
                 </div>
               ) : (
-                <button
+                <AnimatedButton
                   type="button"
                   onClick={() => {
                     const int = selectedInternship;
@@ -861,23 +872,30 @@ export default function AvailableInternships() {
                 >
                   <Send size={13} />
                   <span>Apply with Verified Dossier</span>
-                </button>
+                </AnimatedButton>
               )}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatedModal>
 
       {/* 8. APPLICATION CONFIRMATION MODAL */}
-      {applicationModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs">
-          <div className="relative w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+      <AnimatedModal
+        isOpen={Boolean(applicationModal)}
+        onClose={() => {
+          if (!applying) setApplicationModal(null);
+        }}
+        maxWidth="max-w-lg"
+        className="p-6"
+      >
+        {applicationModal && (
+          <div className="relative">
             <button
               type="button"
               onClick={() => {
                 if (!applying) setApplicationModal(null);
               }}
-              className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+              className="absolute right-0 top-0 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
             >
               <X size={18} />
             </button>
@@ -899,7 +917,7 @@ export default function AvailableInternships() {
               </div>
             ) : (
               <div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 pr-8">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100 text-sky-600 dark:bg-sky-950 dark:text-sky-400">
                     <Send size={18} />
                   </div>
@@ -945,16 +963,16 @@ export default function AvailableInternships() {
                 </div>
 
                 <div className="mt-6 flex items-center justify-end gap-3">
-                  <button
+                  <AnimatedButton
                     type="button"
                     onClick={() => setApplicationModal(null)}
                     disabled={applying}
                     className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                   >
                     Cancel
-                  </button>
+                  </AnimatedButton>
 
-                  <button
+                  <AnimatedButton
                     type="button"
                     onClick={() => {
                       const noteEl = document.getElementById("applicant-cover-note");
@@ -971,13 +989,13 @@ export default function AvailableInternships() {
                         <span>Submit Application</span>
                       </>
                     )}
-                  </button>
+                  </AnimatedButton>
                 </div>
               </div>
             )}
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </AnimatedModal>
+    </PageTransition>
   );
 }

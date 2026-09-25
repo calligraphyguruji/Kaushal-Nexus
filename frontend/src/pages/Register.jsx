@@ -33,6 +33,8 @@ import { UserRole, ROLE_LABELS, ROLE_DESCRIPTIONS } from "../utils/permissions";
 import { ASSESSMENT_DOMAINS } from "../data/assessmentQuestionBank";
 import DiagnosticMCQAssessment from "../components/DiagnosticMCQAssessment";
 import { upsertCandidateInRegistry } from "../utils/candidateRegistry";
+import { motion } from "motion/react";
+import { PageTransition } from "../components/motion/MotionSystem";
 
 const FORM_INPUT_CLASSES =
   "h-9 w-full rounded-lg border border-slate-200 bg-slate-50/80 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 transition-colors focus:border-sky-500 focus:bg-white focus:text-slate-900 focus:outline-none dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-sky-500 dark:focus:bg-slate-800 dark:focus:text-white";
@@ -364,7 +366,7 @@ export default function Register() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 selection:bg-sky-500/20 selection:text-sky-600 dark:bg-slate-950 dark:text-slate-100 font-sans">
+    <PageTransition className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 selection:bg-sky-500/20 selection:text-sky-600 dark:bg-slate-950 dark:text-slate-100 font-sans">
       {/* Top Header */}
       <header className="border-b border-slate-200/80 bg-white/90 px-6 py-3.5 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/90">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
@@ -468,19 +470,26 @@ export default function Register() {
           {/* Right Form Card */}
           <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8 lg:col-span-7">
             {/* Account Type Toggle Tabs */}
-            <div className="flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800 mb-5">
+            <div className="relative flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800 mb-5">
               <button
                 type="button"
                 onClick={() => {
                   setAccountType("learner");
                   setError(null);
                 }}
-                className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${
+                className={`relative z-10 flex-1 rounded-lg py-2 text-xs font-bold transition-colors cursor-pointer ${
                   accountType === "learner"
-                    ? "bg-white text-sky-600 shadow-xs dark:bg-slate-900 dark:text-sky-400"
+                    ? "text-sky-600 dark:text-sky-400"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
+                {accountType === "learner" && (
+                  <motion.div
+                    layoutId="registerAccountPill"
+                    className="absolute inset-0 z-[-1] rounded-lg bg-white shadow-xs dark:bg-slate-900"
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                )}
                 🎓 Candidate / Learner Profile
               </button>
               <button
@@ -489,12 +498,19 @@ export default function Register() {
                   setAccountType("institutional");
                   setError(null);
                 }}
-                className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${
+                className={`relative z-10 flex-1 rounded-lg py-2 text-xs font-bold transition-colors cursor-pointer ${
                   accountType === "institutional"
-                    ? "bg-white text-sky-600 shadow-xs dark:bg-slate-900 dark:text-sky-400"
+                    ? "text-sky-600 dark:text-sky-400"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
+                {accountType === "institutional" && (
+                  <motion.div
+                    layoutId="registerAccountPill"
+                    className="absolute inset-0 z-[-1] rounded-lg bg-white shadow-xs dark:bg-slate-900"
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                )}
                 🏛️ Institutional Stakeholder
               </button>
             </div>
@@ -833,7 +849,7 @@ export default function Register() {
       <footer className="border-t border-slate-200/80 bg-white/70 py-4 text-center text-xs text-slate-500 dark:border-slate-800/80 dark:bg-slate-900/60 dark:text-slate-400">
         © 2026 Ministry of Skill Development &amp; Entrepreneurship (MSDE). KaushalNexus Skilling Intelligence Platform.
       </footer>
-    </div>
+    </PageTransition>
   );
 }
 

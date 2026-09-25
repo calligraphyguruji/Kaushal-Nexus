@@ -22,6 +22,7 @@ import { regionalApi } from "../api/regional";
 import { programPerformance, schemeBreakdown } from "../data/dashboardData";
 import { ROLE_LABELS } from "../utils/permissions";
 import { listCandidatesFromRegistry } from "../utils/candidateRegistry";
+import { motion, AnimatePresence } from "motion/react";
 
 export default function Topbar({ onMenuClick }) {
   const navigate = useNavigate();
@@ -594,36 +595,44 @@ export default function Topbar({ onMenuClick }) {
             </span>
           </button>
 
-          {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-3 shadow-xl dark:shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 text-slate-800 dark:text-slate-200">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1e293b] pb-2">
-                <span className="font-heading text-xs font-bold text-slate-900 dark:text-white">
-                  System Alerts
-                </span>
-                <span className="rounded border border-sky-400/20 bg-sky-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-sky-600 dark:text-sky-300">
-                  3 Active
-                </span>
-              </div>
-
-              <div className="mt-2 divide-y divide-slate-100 dark:divide-[#1e293b]">
-                {notifications.map((n) => (
-                  <div key={n.id} className="py-2 text-xs">
-                    <p className="font-semibold text-slate-800 dark:text-slate-100">{n.title}</p>
-                    <p className="mt-0.5 text-slate-500 dark:text-slate-400 text-[11px] leading-tight">{n.desc}</p>
-                    <span className="mt-1 block font-mono text-[10px] text-slate-400 dark:text-slate-500">{n.time}</span>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowNotifications(false)}
-                className="mt-2 w-full rounded-lg bg-slate-100 dark:bg-[#070d18] border border-slate-200 dark:border-[#1e293b] py-1.5 text-center font-mono text-xs text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition"
+          <AnimatePresence>
+            {showNotifications && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute right-0 mt-2 w-80 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-3 shadow-xl dark:shadow-2xl z-50 text-slate-800 dark:text-slate-200"
               >
-                Acknowledge All Alerts
-              </button>
-            </div>
-          )}
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1e293b] pb-2">
+                  <span className="font-heading text-xs font-bold text-slate-900 dark:text-white">
+                    System Alerts
+                  </span>
+                  <span className="rounded border border-sky-400/20 bg-sky-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-sky-600 dark:text-sky-300">
+                    3 Active
+                  </span>
+                </div>
+
+                <div className="mt-2 divide-y divide-slate-100 dark:divide-[#1e293b]">
+                  {notifications.map((n) => (
+                    <div key={n.id} className="py-2 text-xs">
+                      <p className="font-semibold text-slate-800 dark:text-slate-100">{n.title}</p>
+                      <p className="mt-0.5 text-slate-500 dark:text-slate-400 text-[11px] leading-tight">{n.desc}</p>
+                      <span className="mt-1 block font-mono text-[10px] text-slate-400 dark:text-slate-500">{n.time}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowNotifications(false)}
+                  className="mt-2 w-full rounded-lg bg-slate-100 dark:bg-[#070d18] border border-slate-200 dark:border-[#1e293b] py-1.5 text-center font-mono text-xs text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
+                >
+                  Acknowledge All Alerts
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="hidden h-5 w-px bg-slate-200 dark:bg-[#1e293b] sm:block" />
@@ -633,7 +642,7 @@ export default function Topbar({ onMenuClick }) {
           <button
             type="button"
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center gap-2 rounded-lg p-1 transition hover:bg-slate-100 dark:hover:bg-[#0b1528]"
+            className="flex items-center gap-2 rounded-lg p-1 transition hover:bg-slate-100 dark:hover:bg-[#0b1528] cursor-pointer"
             title="Institutional Profile & Settings"
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-sky-400/30 bg-gradient-to-br from-sky-500 to-indigo-600 font-mono text-xs font-bold text-slate-950 shadow-xs">
@@ -653,44 +662,52 @@ export default function Topbar({ onMenuClick }) {
           </button>
 
           {/* Profile Dropdown */}
-          {showProfileMenu && (
-            <div className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-3 shadow-xl dark:shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 text-slate-800 dark:text-slate-200">
-              <div className="border-b border-slate-100 dark:border-[#1e293b] pb-2.5">
-                <p className="font-heading text-xs font-bold text-slate-900 dark:text-white">
-                  {user?.full_name || "Aman Mishra"}
-                </p>
-                <p className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
-                  {user?.email || "aman.mishra@msde.gov.in"}
-                </p>
-                <span className="mt-1.5 inline-block rounded border border-sky-400/20 bg-sky-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-sky-700 dark:text-sky-300">
-                  {user?.role ? formatRole(user.role) : "National MSDE Officer"}
-                </span>
-              </div>
+          <AnimatePresence>
+            {showProfileMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-3 shadow-xl dark:shadow-2xl z-50 text-slate-800 dark:text-slate-200"
+              >
+                <div className="border-b border-slate-100 dark:border-[#1e293b] pb-2.5">
+                  <p className="font-heading text-xs font-bold text-slate-900 dark:text-white">
+                    {user?.full_name || "Aman Mishra"}
+                  </p>
+                  <p className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                    {user?.email || "aman.mishra@msde.gov.in"}
+                  </p>
+                  <span className="mt-1.5 inline-block rounded border border-sky-400/20 bg-sky-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-sky-700 dark:text-sky-300">
+                    {user?.role ? formatRole(user.role) : "National MSDE Officer"}
+                  </span>
+                </div>
 
-              <div className="mt-2 space-y-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowProfileMenu(false);
-                    navigate("/settings");
-                  }}
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#0f1c33] hover:text-slate-900 dark:hover:text-white transition"
-                >
-                  <Shield size={14} className="text-sky-500 dark:text-sky-400" />
-                  <span>Platform Settings</span>
-                </button>
+                <div className="mt-2 space-y-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      navigate("/settings");
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#0f1c33] hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
+                  >
+                    <Shield size={14} className="text-sky-500 dark:text-sky-400" />
+                    <span>Platform Settings</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-950/40 transition"
-                >
-                  <LogOut size={14} />
-                  <span>Sign Out Session</span>
-                </button>
-              </div>
-            </div>
-          )}
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-950/40 transition cursor-pointer"
+                  >
+                    <LogOut size={14} />
+                    <span>Sign Out Session</span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </header>
