@@ -9,6 +9,7 @@ import {
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
+import { UserRole } from "./utils/permissions";
 
 // Statically imported critical entry routes
 import LearnerHome from "./pages/LearnerHome";
@@ -66,11 +67,14 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
 
-            {/* Protected Application Routes */}
+            {/* Institutional Officer & Administration Routes */}
             <Route
-              path="/dashboard"
+              path="/msde"
               element={
-                <ProtectedRoute disallowedRoles={["LEARNER"]}>
+                <ProtectedRoute
+                  requiredRoles={[UserRole.MSDE_OFFICER]}
+                  disallowedRoles={[UserRole.LEARNER]}
+                >
                   <DashboardLayout>
                     <ImpactDashboard />
                   </DashboardLayout>
@@ -79,9 +83,58 @@ function App() {
             />
 
             <Route
+              path="/admin"
+              element={
+                <ProtectedRoute
+                  requiredRoles={[UserRole.SYSTEM_ADMIN, UserRole.STATE_ADMIN, UserRole.MSDE_OFFICER]}
+                  disallowedRoles={[UserRole.LEARNER]}
+                >
+                  <DashboardLayout>
+                    <ImpactDashboard />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* General Overview Route */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute disallowedRoles={[UserRole.LEARNER]}>
+                  <DashboardLayout>
+                    <ImpactDashboard />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Candidate Learner Only Portal */}
+            <Route
               path="/learner"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute
+                  requiredRoles={[UserRole.LEARNER]}
+                  disallowedRoles={[
+                    UserRole.MSDE_OFFICER,
+                    UserRole.SYSTEM_ADMIN,
+                    UserRole.STATE_ADMIN,
+                    UserRole.TRAINING_PROVIDER,
+                    UserRole.EMPLOYER,
+                    UserRole.EVALUATOR,
+                  ]}
+                >
+                  <DashboardLayout>
+                    <LearnerIntelligence />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Officer / Administrator Candidate 360 Registry */}
+            <Route
+              path="/learner-intelligence"
+              element={
+                <ProtectedRoute disallowedRoles={[UserRole.LEARNER]}>
                   <DashboardLayout>
                     <LearnerIntelligence />
                   </DashboardLayout>
@@ -92,7 +145,7 @@ function App() {
             <Route
               path="/learner/:learnerId"
               element={
-                <ProtectedRoute disallowedRoles={["LEARNER"]}>
+                <ProtectedRoute disallowedRoles={[UserRole.LEARNER]}>
                   <DashboardLayout>
                     <LearnerIntelligence />
                   </DashboardLayout>

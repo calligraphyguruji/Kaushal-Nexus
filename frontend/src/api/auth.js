@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient } from './client.js';
 
 /**
  * Pre-configured RBAC demo accounts using the exact 6 backend UserRole values:
@@ -10,6 +10,17 @@ export const DEMO_FALLBACK_USERS = [
     user: {
       id: '233de416-b87b-4d0b-8e0b-1f82cc0bbb29',
       email: 'aman.mishra@msde.gov.in',
+      full_name: 'Aman Mishra',
+      role: 'MSDE_OFFICER',
+      is_active: true,
+      is_superuser: true,
+    },
+  },
+  {
+    email: 'amanmishra@msde.gov.in',
+    user: {
+      id: '233de416-b87b-4d0b-8e0b-1f82cc0bbb29',
+      email: 'amanmishra@msde.gov.in',
       full_name: 'Aman Mishra',
       role: 'MSDE_OFFICER',
       is_active: true,
@@ -107,20 +118,48 @@ export const authApi = {
     } catch (err) {
       // If backend is offline (Network Error), check if credentials match a preset demo user or newly registered learner
       if (!err.response) {
-        const demoMatch = DEMO_FALLBACK_USERS.find(
-          (u) => u.email.toLowerCase() === credentials.email?.trim().toLowerCase()
-        );
+        const inputEmail = (credentials.email || '').trim().toLowerCase();
+        const inputClean = inputEmail.replace(/[^a-z0-9@]/g, '');
+
+        const demoMatch = DEMO_FALLBACK_USERS.find((u) => {
+          const uEmail = u.email.toLowerCase();
+          return uEmail === inputEmail || uEmail.replace(/[^a-z0-9@]/g, '') === inputClean;
+        });
+
         let userToLogin = demoMatch?.user;
         if (!userToLogin) {
-          const storedLearner = JSON.parse(localStorage.getItem('kn_current_learner') || '{}');
-          userToLogin = {
-            id: storedLearner.id || `usr-${Date.now()}`,
-            email: credentials.email,
-            full_name: storedLearner.full_name || credentials.email.split('@')[0],
-            role: 'LEARNER',
-            is_active: true,
-            is_superuser: false,
-          };
+          if (inputEmail.endsWith('@msde.gov.in')) {
+            const namePart = inputEmail.split('@')[0].replace(/[._-]/g, ' ');
+            const formattedName =
+              namePart.replace(/\b\w/g, (l) => l.toUpperCase()) || 'MSDE Officer';
+            userToLogin = {
+              id: `msde-${Date.now()}`,
+              email: credentials.email,
+              full_name: formattedName,
+              role: 'MSDE_OFFICER',
+              is_active: true,
+              is_superuser: true,
+            };
+          } else if (inputEmail.includes('admin@') || inputEmail.includes('sysadmin@')) {
+            userToLogin = {
+              id: `admin-${Date.now()}`,
+              email: credentials.email,
+              full_name: 'System Administrator',
+              role: 'SYSTEM_ADMIN',
+              is_active: true,
+              is_superuser: true,
+            };
+          } else {
+            const storedLearner = JSON.parse(localStorage.getItem('kn_current_learner') || '{}');
+            userToLogin = {
+              id: storedLearner.id || `usr-${Date.now()}`,
+              email: credentials.email,
+              full_name: storedLearner.full_name || credentials.email.split('@')[0],
+              role: 'LEARNER',
+              is_active: true,
+              is_superuser: false,
+            };
+          }
         }
 
         console.warn('Backend offline; using client-side demo session for', userToLogin.role);

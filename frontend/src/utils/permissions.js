@@ -128,6 +128,100 @@ export const ROLE_PERMISSIONS = Object.freeze({
 });
 
 /**
+ * Normalizes user role strings (case-insensitive, aliases) to official UserRole enum.
+ * @param {string} role - e.g. "MSDE_OFFICER", "msde_officer", "admin", "learner"
+ * @returns {string|null}
+ */
+export function normalizeRole(role) {
+  if (!role || typeof role !== "string") return null;
+  const upper = role.trim().toUpperCase();
+  if (upper === "MSDE_OFFICER" || upper === "MSDE" || upper === "OFFICER") return UserRole.MSDE_OFFICER;
+  if (upper === "STATE_ADMIN" || upper === "STATE" || upper === "SSDM") return UserRole.STATE_ADMIN;
+  if (upper === "TRAINING_PROVIDER" || upper === "PROVIDER" || upper === "PMKK") return UserRole.TRAINING_PROVIDER;
+  if (upper === "EMPLOYER" || upper === "CORPORATE") return UserRole.EMPLOYER;
+  if (upper === "EVALUATOR" || upper === "NCVET") return UserRole.EVALUATOR;
+  if (upper === "SYSTEM_ADMIN" || upper === "ADMIN" || upper === "SYSADMIN" || upper === "SUPERUSER") return UserRole.SYSTEM_ADMIN;
+  if (upper === "LEARNER" || upper === "STUDENT" || upper === "CANDIDATE" || upper === "INTERN") return UserRole.LEARNER;
+  return upper;
+}
+
+/**
+ * Returns default dashboard route according to authenticated role.
+ * @param {string} role - User role
+ * @param {boolean} isSuperuser - Whether user has superuser privileges
+ * @returns {string}
+ */
+export function getRoleDashboardPath(role, isSuperuser = false) {
+  const normalized = normalizeRole(role);
+  if (normalized === UserRole.MSDE_OFFICER) {
+    return "/msde";
+  }
+  if (normalized === UserRole.SYSTEM_ADMIN || normalized === UserRole.STATE_ADMIN) {
+    return "/admin";
+  }
+  if (isSuperuser && normalized !== UserRole.LEARNER) {
+    return "/msde";
+  }
+  if (normalized === UserRole.EMPLOYER) {
+    return "/matching";
+  }
+  if (normalized === UserRole.TRAINING_PROVIDER) {
+    return "/skill-gap";
+  }
+  return "/learner";
+}
+
+/**
+ * Computes safe post-login destination, preventing cross-role route leaks
+ * (e.g. MSDE Officer landing on /learner or Learner accessing /msde).
+ * @param {Object} user - User object with role & is_superuser
+ * @param {string} requestedPath - Requested path from navigation state
+ * @returns {string}
+ */
+export function getPostLoginRedirect(user, requestedPath) {
+  if (!user) return "/login";
+  const normalizedRole = normalizeRole(user.role);
+  const defaultPath = getRoleDashboardPath(normalizedRole, Boolean(user.is_superuser));
+
+  if (!requestedPath || requestedPath === "/" || requestedPath === "/login" || requestedPath === "/register") {
+    return defaultPath;
+  }
+
+  // Restrict Learners from administrative and governance routes
+  if (normalizedRole === UserRole.LEARNER && !user.is_superuser) {
+    if (
+      requestedPath.startsWith("/msde") ||
+      requestedPath.startsWith("/admin") ||
+      requestedPath.startsWith("/dashboard") ||
+      requestedPath.startsWith("/regional") ||
+      requestedPath.startsWith("/skill-gap") ||
+      requestedPath.startsWith("/matching")
+    ) {
+      return "/learner";
+    }
+    return requestedPath;
+  }
+
+  // Restrict Administrators from candidate learner profile
+  if (normalizedRole === UserRole.SYSTEM_ADMIN || normalizedRole === UserRole.STATE_ADMIN) {
+    if (requestedPath === "/learner" || requestedPath === "/learner/") {
+      return "/admin";
+    }
+    return requestedPath;
+  }
+
+  // Restrict MSDE Officers from candidate learner profile
+  if (normalizedRole === UserRole.MSDE_OFFICER || user.is_superuser) {
+    if (requestedPath === "/learner" || requestedPath === "/learner/") {
+      return "/msde";
+    }
+    return requestedPath;
+  }
+
+  return defaultPath;
+}
+
+/**
  * Checks if a user object holds a specific UI permission.
  * Superusers bypass all permission checks.
  * @param {Object} user - User object with { role, is_superuser }
@@ -141,7 +235,8 @@ export function hasPermission(user, permissionKey) {
   const allowedRoles = ROLE_PERMISSIONS[permissionKey];
   if (!allowedRoles) return false;
 
-  return allowedRoles.includes(user.role);
+  const userRole = normalizeRole(user.role);
+  return allowedRoles.includes(userRole);
 }
 
 /**
@@ -149,6 +244,9 @@ export function hasPermission(user, permissionKey) {
  * @param {Object} user - User object
  */
 export function computePermissions(user) {
+  const normalizedRole = normalizeRole(user?.role);
+  const isSuperuser = Boolean(user?.is_superuser);
+
   const permissions = {
     canViewLearners: hasPermission(user, "canViewLearners"),
     canCreateLearner: hasPermission(user, "canCreateLearner"),
@@ -164,17 +262,17 @@ export function computePermissions(user) {
     canGenerateReports: hasPermission(user, "canGenerateReports"),
     canViewMLModels: hasPermission(user, "canViewMLModels"),
     canRunMLTools: hasPermission(user, "canRunMLTools"),
-    // Role checks
-    isMSDEOfficer: user?.role === UserRole.MSDE_OFFICER || user?.is_superuser === true,
-    isStateAdmin: user?.role === UserRole.STATE_ADMIN,
-    isTrainingProvider: user?.role === UserRole.TRAINING_PROVIDER,
-    isEmployer: user?.role === UserRole.EMPLOYER,
-    isEvaluator: user?.role === UserRole.EVALUATOR,
-    isSystemAdmin: user?.role === UserRole.SYSTEM_ADMIN || user?.is_superuser === true,
-    isLearner: user?.role === UserRole.LEARNER,
-    isSuperuser: Boolean(user?.is_superuser),
-    role: user?.role,
-    roleLabel: user?.role ? (ROLE_LABELS[user.role] || user.role) : "Unauthenticated",
+    // Role checks (normalized and robust against casing differences)
+    isMSDEOfficer: normalizedRole === UserRole.MSDE_OFFICER || isSuperuser,
+    isStateAdmin: normalizedRole === UserRole.STATE_ADMIN,
+    isTrainingProvider: normalizedRole === UserRole.TRAINING_PROVIDER,
+    isEmployer: normalizedRole === UserRole.EMPLOYER,
+    isEvaluator: normalizedRole === UserRole.EVALUATOR,
+    isSystemAdmin: normalizedRole === UserRole.SYSTEM_ADMIN || isSuperuser,
+    isLearner: normalizedRole === UserRole.LEARNER && !isSuperuser,
+    isSuperuser,
+    role: normalizedRole || user?.role,
+    roleLabel: normalizedRole ? (ROLE_LABELS[normalizedRole] || normalizedRole) : "Unauthenticated",
   };
 
   const check = (permissionKey) => hasPermission(user, permissionKey);

@@ -24,6 +24,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { getErrorMessage } from "../api/client";
 import { authApi } from "../api/auth";
+import { getPostLoginRedirect } from "../utils/permissions";
 
 // Pre-seeded Demo Credentials for Institutional Testing (6 Authoritative Backend Roles)
 const DEMO_PRESETS = [
@@ -122,10 +123,8 @@ export default function Login({ defaultMode }) {
   const [notRegistered, setNotRegistered] = useState(false);
 
   // If already authenticated, redirect to appropriate portal
-  if (!isLoading && isAuthenticated) {
-    const isLearner = user?.role === "LEARNER";
-    const defaultDest = isLearner ? "/learner" : "/dashboard";
-    const destination = location.state?.from?.pathname || defaultDest;
+  if (!isLoading && isAuthenticated && user) {
+    const destination = getPostLoginRedirect(user, location.state?.from?.pathname);
     return <Navigate to={destination} replace />;
   }
 
@@ -354,9 +353,10 @@ export default function Login({ defaultMode }) {
       localStorage.removeItem("kn_current_learner");
       window.dispatchEvent(new Event("kn-profile-updated"));
 
-      const isLearner = authData?.user?.role === "LEARNER";
-      const defaultDest = isLearner ? "/learner" : "/dashboard";
-      const destination = location.state?.from?.pathname || defaultDest;
+      const destination = getPostLoginRedirect(
+        authData?.user || user,
+        location.state?.from?.pathname
+      );
       navigate(destination, { replace: true });
     } catch (err) {
       console.error("OTP Verification failed:", err);
@@ -393,9 +393,10 @@ export default function Login({ defaultMode }) {
       localStorage.removeItem("kn_current_learner");
       const authData = await login({ email: email.trim(), password });
       window.dispatchEvent(new Event("kn-profile-updated"));
-      const isLearner = authData?.user?.role === "LEARNER";
-      const defaultDest = isLearner ? "/learner" : "/dashboard";
-      const destination = location.state?.from?.pathname || defaultDest;
+      const destination = getPostLoginRedirect(
+        authData?.user || user,
+        location.state?.from?.pathname
+      );
       navigate(destination, { replace: true });
     } catch (err) {
       console.error("Login attempt failed:", err);

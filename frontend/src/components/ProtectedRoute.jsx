@@ -1,12 +1,12 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { hasPermission } from "../utils/permissions";
+import { normalizeRole, UserRole, hasPermission, getRoleDashboardPath } from "../utils/permissions";
 import { Loader2 } from "lucide-react";
 import StateView from "./StateView";
 import DashboardLayout from "../layouts/DashboardLayout";
 
 /**
- * Enterprise protected route verifying session authenticity and optional UI permission gating.
+ * Enterprise protected route verifying session authenticity and role-based gating.
  */
 export default function ProtectedRoute({
   children,
@@ -35,32 +35,59 @@ export default function ProtectedRoute({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 2. Superuser bypasses all UI permission constraints
+  const userRole = normalizeRole(user.role);
+  const homeDest = getRoleDashboardPath(userRole, user.is_superuser);
+
+  // 2. Disallowed Roles Check (e.g. MSDE Officer prevented from Learner portal, Learner from Officer consoles)
+  if (disallowedRoles && Array.isArray(disallowedRoles)) {
+    const normDisallowed = disallowedRoles.map((r) => normalizeRole(r));
+    if (normDisallowed.includes(userRole)) {
+      return <Navigate to={homeDest} replace />;
+    }
+  }
+
+  // 3. Required Roles Check
+  if (requiredRoles && Array.isArray(requiredRoles)) {
+    const normRequired = requiredRoles.map((r) => normalizeRole(r));
+    const isAllowed =
+      normRequired.includes(userRole) || (user.is_superuser && userRole !== UserRole.LEARNER);
+
+    if (!isAllowed) {
+      // If user is a Learner trying to access MSDE or Admin route, redirect them to /learner
+      if (userRole === UserRole.LEARNER) {
+        return <Navigate to="/learner" replace />;
+      }
+      // If user is an MSDE Officer trying to access Learner route, redirect them to /msde
+      if (userRole === UserRole.MSDE_OFFICER) {
+        return <Navigate to="/msde" replace />;
+      }
+      // If user is an Admin trying to access Learner route, redirect them to /admin
+      if (userRole === UserRole.SYSTEM_ADMIN || userRole === UserRole.STATE_ADMIN) {
+        return <Navigate to="/admin" replace />;
+      }
+
+      return (
+        <DashboardLayout>
+          <div className="py-8">
+            <StateView
+              variant="forbidden"
+              title="Role-Restricted Administration"
+              message={`This portal module is restricted to ${requiredRoles.join(", ")}. Your current role is ${user.role}.`}
+              backLink={homeDest}
+              backLabel={`Return to ${userRole === UserRole.MSDE_OFFICER ? "MSDE Overview" : "Dashboard"}`}
+            />
+          </div>
+        </DashboardLayout>
+      );
+    }
+  }
+
+  // 4. Superuser bypasses granular permissions (unless role-gated above)
   if (user.is_superuser === true) {
     return children;
   }
 
-  // 3. Disallowed Roles Check (e.g. Candidate Learner restricted from Officer screens)
-  if (disallowedRoles && Array.isArray(disallowedRoles) && disallowedRoles.includes(user.role)) {
-    if (user.role === "LEARNER") {
-      return <Navigate to="/learner" replace />;
-    }
-    return (
-      <DashboardLayout>
-        <div className="py-8">
-          <StateView
-            variant="forbidden"
-            title="Institutional Module Restricted"
-            message={`Your role (${user.role}) is restricted from accessing this administrative governance module.`}
-            backLink={user.role === "LEARNER" ? "/learner" : "/dashboard"}
-            backLabel={user.role === "LEARNER" ? "Return to My Learning Portal" : "Return to Overview"}
-          />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  // 4. Optional Permission Check
+  // 5. Optional Permission Check
   if (requiredPermission && !hasPermission(user, requiredPermission)) {
     return (
       <DashboardLayout>
@@ -69,25 +96,8 @@ export default function ProtectedRoute({
             variant="forbidden"
             title="Institutional Module Restricted"
             message={`Your role (${user.role}) does not have permission to access this module. If you require access, contact your MSDE or State System Administrator.`}
-            backLink={user.role === "LEARNER" ? "/learner" : "/dashboard"}
-            backLabel={user.role === "LEARNER" ? "Return to My Learning Portal" : "Return to Overview"}
-          />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  // 5. Optional Role Array Check
-  if (requiredRoles && Array.isArray(requiredRoles) && !requiredRoles.includes(user.role)) {
-    return (
-      <DashboardLayout>
-        <div className="py-8">
-          <StateView
-            variant="forbidden"
-            title="Role-Restricted Administration"
-            message={`This administrative console is restricted to ${requiredRoles.join(", ")}. Your current role is ${user.role}.`}
-            backLink={user.role === "LEARNER" ? "/learner" : "/dashboard"}
-            backLabel={user.role === "LEARNER" ? "Return to My Learning Portal" : "Return to Overview"}
+            backLink={homeDest}
+            backLabel="Return to Overview"
           />
         </div>
       </DashboardLayout>

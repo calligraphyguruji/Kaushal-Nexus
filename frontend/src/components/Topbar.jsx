@@ -58,7 +58,10 @@ export default function Topbar({ onMenuClick }) {
         section: isRemediation ? "Recommended Learning Path" : "Assessment & Skill Gaps",
       };
     }
-    if (pathname.startsWith("/learner")) return { group: "Intelligence", section: "Learner Intelligence" };
+    if (pathname.startsWith("/msde")) return { group: "Governance", section: "MSDE Policy & Overview" };
+    if (pathname.startsWith("/admin")) return { group: "Governance", section: "Platform Administration" };
+    if (pathname.startsWith("/learner-intelligence") || pathname.startsWith("/learner"))
+      return { group: "Intelligence", section: "Learner Intelligence" };
     if (pathname.startsWith("/skill-gap")) return { group: "Intelligence", section: "Skill Gap Matrix" };
     if (pathname.startsWith("/regional")) return { group: "Intelligence", section: "Regional Intelligence" };
     if (pathname.startsWith("/matching")) return { group: "Intelligence", section: "Employer Network" };

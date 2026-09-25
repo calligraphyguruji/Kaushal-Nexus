@@ -51,20 +51,33 @@ export default function Sidebar({ open, onClose }) {
     },
   ];
 
+  const overviewPath = permissions.isMSDEOfficer
+    ? "/msde"
+    : permissions.isSystemAdmin
+    ? "/admin"
+    : "/dashboard";
+
   const intelligenceNav = [
     {
       name: "Overview & Impact",
-      path: "/dashboard",
+      path: overviewPath,
       icon: LayoutDashboard,
       badge: stats.overview.badge,
       badgeTone: stats.overview.tone,
+      isActive: (loc) =>
+        loc.pathname === "/msde" ||
+        loc.pathname === "/admin" ||
+        loc.pathname === "/dashboard",
     },
     {
       name: "Learner Intelligence",
-      path: "/learner",
+      path: "/learner-intelligence",
       icon: UserRound,
       badge: stats.learner360.badge,
       badgeTone: stats.learner360.tone,
+      isActive: (loc) =>
+        loc.pathname === "/learner-intelligence" ||
+        loc.pathname.startsWith("/learner/"),
     },
     {
       name: "Skill Gap Matrix",

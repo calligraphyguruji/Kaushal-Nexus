@@ -1,10 +1,20 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { authApi } from "../api/auth";
+import { normalizeRole } from "../utils/permissions";
 
 const AuthContext = createContext(null);
 
+function formatUser(rawUser) {
+  if (!rawUser) return null;
+  const normRole = normalizeRole(rawUser.role) || rawUser.role;
+  return {
+    ...rawUser,
+    role: normRole,
+  };
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => authApi.getCurrentUser());
+  const [user, setUser] = useState(() => formatUser(authApi.getCurrentUser()));
   const [token, setToken] = useState(() => localStorage.getItem("kn_access_token"));
   const [isLoading, setIsLoading] = useState(true);
 
@@ -20,9 +30,10 @@ export function AuthProvider({ children }) {
 
     try {
       const me = await authApi.getMe();
-      setUser(me);
+      const formattedMe = formatUser(me);
+      setUser(formattedMe);
       setToken(storedToken);
-      localStorage.setItem("kn_user", JSON.stringify(me));
+      localStorage.setItem("kn_user", JSON.stringify(formattedMe));
     } catch (err) {
       console.warn("Session validation failed:", err);
       // If validation fails and refresh token is absent or invalid, clear
@@ -43,17 +54,19 @@ export function AuthProvider({ children }) {
   // Login handler
   const login = async (credentials) => {
     const data = await authApi.login(credentials);
+    const formattedUser = formatUser(data.user);
     setToken(data.access_token);
-    setUser(data.user);
-    return data;
+    setUser(formattedUser);
+    return { ...data, user: formattedUser };
   };
 
   // Phone OTP Login handler
   const phoneLogin = async (payload) => {
     const data = await authApi.phoneLogin(payload);
+    const formattedUser = formatUser(data.user);
     setToken(data.access_token);
-    setUser(data.user);
-    return data;
+    setUser(formattedUser);
+    return { ...data, user: formattedUser };
   };
 
   // Logout handler

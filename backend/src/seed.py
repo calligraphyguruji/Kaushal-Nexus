@@ -42,6 +42,7 @@ SEED_VAL = 2026
 USERS_DATA = [
     # MSDE Central Officers
     ("aman.mishra@msde.gov.in", "Aman Mishra", UserRole.MSDE_OFFICER.value, True),
+    ("amanmishra@msde.gov.in", "Aman Mishra", UserRole.MSDE_OFFICER.value, True),
     ("anita.deshmukh@msde.gov.in", "Dr. Anita Deshmukh (Joint Secretary)", UserRole.MSDE_OFFICER.value, False),
     # State SSDM Administrators
     ("director.upssdm@up.gov.in", "Suresh Patel (Mission Director UPSSDM)", UserRole.STATE_ADMIN.value, False),
