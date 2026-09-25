@@ -1,7 +1,8 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { transitions } from "./transitions.js";
 
-export { transitions } from "./transitions.js";
+export { transitions };
 
 /**
  * PageTransition: Snappy, subtle vertical fade for route changes
