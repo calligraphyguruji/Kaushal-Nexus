@@ -125,7 +125,7 @@ export default function LearnerHome() {
         <div className="mx-auto flex h-full max-w-[1728px] items-center justify-between px-6 lg:px-12">
           {/* Brand Emblem & Title */}
           <Link to="/" className="flex items-center gap-3.5 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 p-1 group-hover:border-sky-400 transition-colors">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 p-1 group-hover:border-sky-400 transition-colors glow-cyan">
               <ShieldCheck size={24} />
             </div>
             <div className="flex flex-col">
@@ -228,7 +228,7 @@ export default function LearnerHome() {
               <button
                 type="button"
                 onClick={() => navigate(user?.role === "LEARNER" ? "/learner" : "/dashboard")}
-                className="inline-flex items-center gap-2 rounded-lg bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950 px-4 py-2 text-xs font-bold font-sans uppercase tracking-wider transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-lg bg-sky-400 hover:bg-sky-300 text-slate-950 px-4 py-2 text-xs font-bold font-sans uppercase tracking-wider transition-all glow-cyan cursor-pointer"
               >
                 <span>{user?.role === "LEARNER" ? "My Portal" : "Dashboard"}</span>
                 <ArrowRight size={14} />
@@ -252,7 +252,7 @@ export default function LearnerHome() {
                 </Link>
                 <Link
                   to="/register"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950 px-4 py-2 rounded-lg transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-sky-400 hover:bg-sky-300 text-slate-950 px-4 py-2 rounded-lg shadow-sm transition-all glow-cyan"
                 >
                   <span>Explore Platform</span>
                   <ArrowRight size={14} />
@@ -438,7 +438,7 @@ export default function LearnerHome() {
                 <div className="flex flex-wrap items-center gap-3.5 pt-2">
                   <Link
                     to="/register"
-                    className="inline-flex items-center gap-2 rounded-xl bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950 px-6 py-3.5 text-xs sm:text-sm font-heading font-bold uppercase tracking-wider transition-colors"
+                    className="inline-flex items-center gap-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 px-6 py-3.5 text-xs sm:text-sm font-heading font-bold uppercase tracking-wider transition-all glow-cyan"
                   >
                     <span>Get Started</span>
                     <ArrowRight size={16} />
@@ -498,9 +498,9 @@ export default function LearnerHome() {
 
               {/* Right Column: High-Density Candidate Telemetry Card */}
               <FadeIn direction="up" delay={0.12} className="lg:col-span-4">
-                <div className="relative rounded-xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#131210] p-5">
+                <div className="relative rounded-2xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-5 shadow-xl dark:shadow-2xl glow-cyan">
                   {/* Simulation Disclaimer Label */}
-                  <div className="mb-3.5 flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-2.5">
+                  <div className="mb-3.5 flex items-center justify-between border-b border-slate-200 dark:border-[#1e293b]/80 pb-2.5">
                     <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-400/20 px-2 py-0.5 rounded">
                       SAMPLE CANDIDATE DOSSIER · SIMULATION
                     </span>
@@ -510,9 +510,9 @@ export default function LearnerHome() {
                   </div>
 
                   {/* Top Learner Profile Bar */}
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3.5">
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-[#1e293b] pb-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-sky-600 font-mono font-bold text-sm text-white">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 font-mono font-bold text-sm text-slate-950 shadow-sm">
                         RS
                       </div>
                       <div>
@@ -542,7 +542,7 @@ export default function LearnerHome() {
 
                   {/* Core Readiness Gauge & Milestone Overview */}
                   <div className="mt-4 grid grid-cols-2 gap-3">
-                    <div className="rounded-lg bg-slate-50/80 dark:bg-white/[0.03] p-3 border border-slate-100 dark:border-white/5">
+                    <div className="rounded-xl border border-slate-200 dark:border-[#1e293b] bg-slate-50 dark:bg-[#070d18] p-3">
                       <div className="flex items-center justify-between">
                         <span className="font-mono text-[10px] font-semibold uppercase text-slate-500 dark:text-slate-400">
                           Job Fit Score
@@ -552,7 +552,7 @@ export default function LearnerHome() {
                       <p className="mt-1 font-heading text-sm font-extrabold text-slate-900 dark:text-white">
                         Tier 1 High-Fit
                       </p>
-                      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+                      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-[#1e293b]">
                         <div
                           className="h-full rounded-full bg-sky-500 dark:bg-sky-400"
                           style={{ width: "94%" }}
@@ -560,7 +560,7 @@ export default function LearnerHome() {
                       </div>
                     </div>
 
-                    <div className="rounded-lg bg-slate-50/80 dark:bg-white/[0.03] p-3 border border-slate-100 dark:border-white/5">
+                    <div className="rounded-xl border border-slate-200 dark:border-[#1e293b] bg-slate-50 dark:bg-[#070d18] p-3">
                       <div className="flex items-center justify-between">
                         <span className="font-mono text-[10px] font-semibold uppercase text-slate-500 dark:text-slate-400">
                           Retention Check
@@ -577,7 +577,7 @@ export default function LearnerHome() {
                   </div>
 
                   {/* Skills Snapshot */}
-                  <div className="mt-4 space-y-2 border-t border-slate-100 dark:border-white/5 pt-3">
+                  <div className="mt-4 space-y-2 border-t border-slate-200 dark:border-[#1e293b] pt-3">
                     <div className="flex items-center justify-between text-xs font-mono">
                       <span className="text-slate-600 dark:text-slate-400">Power BI &amp; SQL</span>
                       <span className="text-sky-600 dark:text-sky-400 font-semibold">96% Competency</span>
@@ -600,7 +600,7 @@ export default function LearnerHome() {
         {/* ========================================================================= */}
         {/* 3. HERO DATA & AI FLOW VISUALIZATION (PipelineVisualizer)                 */}
         {/* ========================================================================= */}
-        <section id="pipeline" className="py-16 sm:py-20 px-6 lg:px-12 border-t border-slate-200/70 dark:border-white/5 relative">
+        <section id="pipeline" className="py-16 px-6 lg:px-12 border-t border-[#1e293b] bg-[#060c18] relative">
           <div className="max-w-[1516px] mx-auto">
             <div className="text-center max-w-3xl mx-auto mb-10">
               <InstitutionalBadge
@@ -608,10 +608,10 @@ export default function LearnerHome() {
                 secondaryText="END-TO-END TELEMETRY PIPELINE"
                 variant="cyan"
               />
-              <h2 className="mt-4 font-heading text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              <h2 className="mt-4 font-heading text-2xl sm:text-4xl font-extrabold text-[#f8fafc] tracking-tight">
                 Live National Skill Intelligence Flow
               </h2>
-              <p className="mt-2 font-body text-slate-600 dark:text-slate-400 text-sm sm:text-base">
+              <p className="mt-2 font-body text-[#cbd5e1] text-sm sm:text-base">
                 Click across the 5 processing phases below to inspect data ingestion protocols,
                 ontological alignment, and verifiable outcome auditing.
               </p>
@@ -622,127 +622,94 @@ export default function LearnerHome() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 4. THE NATIONAL SKILL INTELLIGENCE PLATFORM (Connected Workflow)          */}
+        {/* 4. THE NATIONAL SKILL INTELLIGENCE PLATFORM (How It Works)                */}
         {/* ========================================================================= */}
-        <section id="how-it-works" className="py-16 sm:py-20 px-6 lg:px-12 border-t border-slate-200/70 dark:border-white/5 relative">
+        <section id="how-it-works" className="py-20 px-6 lg:px-12 border-t border-[#1e293b] bg-[#070d18]">
           <div className="max-w-[1516px] mx-auto">
-            <div className="mb-10">
-              <div className="inline-flex items-center gap-2 font-mono text-xs text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-2">
+            <div className="mb-12">
+              <div className="inline-flex items-center gap-2 font-mono text-xs text-sky-400 uppercase tracking-wider mb-2">
                 <Layers size={14} />
-                <span>Standardized Architecture</span>
+                <span>Intelligence Workflow</span>
               </div>
-              <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#f8fafc] tracking-tight">
                 The National Skill Intelligence Platform
               </h2>
-              <p className="mt-2 text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-2xl leading-relaxed">
+              <p className="mt-2 text-[#cbd5e1] text-sm sm:text-base max-w-2xl">
                 A structured, outcome-oriented workflow connecting raw vocational enrollment records
                 to verifiable long-term employment.
               </p>
             </div>
 
-            {/* Connected Single-Surface Workflow Instrument */}
-            <div className="rounded-xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#131210] overflow-hidden">
-              {/* Continuous Horizontal Milestone Rail (Desktop) */}
-              <div className="hidden lg:grid grid-cols-5 border-b border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02]">
-                {[
-                  { step: "01", name: "Ingestion" },
-                  { step: "02", name: "Analysis" },
-                  { step: "03", name: "Gap Detection" },
-                  { step: "04", name: "Matching" },
-                  { step: "05", name: "Tracking" },
-                ].map((s, idx) => (
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {[
+                {
+                  step: "01",
+                  title: "Learner Ingestion",
+                  icon: Database,
+                  desc: "Automated ingestion from Skill India Digital (SID), ITIs, polytechnics, and State Missions with DPDP consent masking.",
+                  tag: "Federated Ingestion",
+                },
+                {
+                  step: "02",
+                  title: "Skill Analysis",
+                  icon: Network,
+                  desc: "Taxonomy normalization mapping regional curricula directly to NCVET National Occupational Standards (NOS).",
+                  tag: "NCVET Alignment",
+                },
+                {
+                  step: "03",
+                  title: "Skill Gap Detection",
+                  icon: BrainCircuit,
+                  desc: "Machine learning models detect localized skill shortages, prescribing tailored bridge modules before placement.",
+                  tag: "Bottleneck Analysis",
+                },
+                {
+                  step: "04",
+                  title: "Employment Match",
+                  icon: Briefcase,
+                  desc: "Explainable multi-objective matching routes job-ready candidates to verified corporate & MSME hiring mandates.",
+                  tag: "High-Fit Routing",
+                },
+                {
+                  step: "05",
+                  title: "Outcome Tracking",
+                  icon: ShieldCheck,
+                  desc: "Longitudinal 3M, 6M, and 12M employment verification via EPFO/UAN sandbox adapters and wage tracking.",
+                  tag: "Longitudinal Check",
+                },
+              ].map((item) => {
+                const ItemIcon = item.icon;
+                return (
                   <div
-                    key={s.step}
-                    className="flex items-center gap-2.5 px-6 py-3 border-r border-slate-100 last:border-r-0 dark:border-white/5"
+                    key={item.step}
+                    className="flex flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 transition-all hover:border-slate-700 hover:bg-[#0f1c33]"
                   >
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-600 font-mono text-[10px] font-bold text-white">
-                      {s.step}
-                    </span>
-                    <span className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      {s.name}
-                    </span>
-                    {idx < 4 && (
-                      <ChevronRight size={13} className="ml-auto text-slate-400 dark:text-slate-600 shrink-0" />
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* 5 Connected Step Columns with Hairline Dividers */}
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-white/5">
-                {[
-                  {
-                    step: "01",
-                    title: "Learner Ingestion",
-                    icon: Database,
-                    desc: "Automated ingestion from Skill India Digital (SID), ITIs, polytechnics, and State Missions with DPDP consent masking.",
-                    tag: "Federated Ingestion",
-                  },
-                  {
-                    step: "02",
-                    title: "Skill Analysis",
-                    icon: Network,
-                    desc: "Taxonomy normalization mapping regional curricula directly to NCVET National Occupational Standards (NOS).",
-                    tag: "NCVET Alignment",
-                  },
-                  {
-                    step: "03",
-                    title: "Skill Gap Detection",
-                    icon: BrainCircuit,
-                    desc: "Machine learning models detect localized skill shortages, prescribing tailored bridge modules before placement.",
-                    tag: "Bottleneck Analysis",
-                  },
-                  {
-                    step: "04",
-                    title: "Employment Match",
-                    icon: Briefcase,
-                    desc: "Explainable multi-objective matching routes job-ready candidates to verified corporate & MSME hiring mandates.",
-                    tag: "High-Fit Routing",
-                  },
-                  {
-                    step: "05",
-                    title: "Outcome Tracking",
-                    icon: ShieldCheck,
-                    desc: "Longitudinal 3M, 6M, and 12M employment verification via EPFO/UAN sandbox adapters and wage tracking.",
-                    tag: "Longitudinal Check",
-                  },
-                ].map((item) => {
-                  const ItemIcon = item.icon;
-                  return (
-                    <div
-                      key={item.step}
-                      className="flex flex-col justify-between p-6 transition-colors hover:bg-slate-50/50 dark:hover:bg-white/[0.02]"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <span className="font-mono text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
-                            Phase {item.step}
-                          </span>
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 dark:bg-white/5 text-sky-600 dark:text-sky-400 border border-sky-100 dark:border-white/10">
-                            <ItemIcon size={16} />
-                          </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-mono text-2xl font-black text-sky-400/40">
+                          {item.step}
+                        </span>
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400 border border-sky-400/20">
+                          <ItemIcon size={16} />
                         </div>
-
-                        <h3 className="font-heading text-base font-bold text-slate-900 dark:text-white mb-2 leading-snug">
-                          {item.title}
-                        </h3>
-                        <p className="font-body text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                          {item.desc}
-                        </p>
                       </div>
 
-                      <div className="mt-6 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
-                        <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                          {item.tag}
-                        </span>
-                        <span className="font-mono text-[10px] text-sky-600 dark:text-sky-400">
-                          Verified
-                        </span>
-                      </div>
+                      <h3 className="font-heading text-base font-bold text-[#f8fafc] mb-1.5">
+                        {item.title}
+                      </h3>
+                      <p className="text-xs text-[#cbd5e1] leading-relaxed">
+                        {item.desc}
+                      </p>
                     </div>
-                  );
-                })}
-              </div>
+
+                    <div className="mt-4 pt-3 border-t border-[#1e293b]">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-sky-400">
+                        {item.tag}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -750,7 +717,7 @@ export default function LearnerHome() {
         {/* ========================================================================= */}
         {/* 5. CORE PLATFORM SUITES (PlatformSuitePreview)                            */}
         {/* ========================================================================= */}
-        <section id="learner-intelligence" className="py-16 sm:py-20 px-6 lg:px-12 border-t border-slate-200/70 dark:border-white/5 relative">
+        <section id="learner-intelligence" className="py-20 px-6 lg:px-12 border-t border-[#1e293b] bg-[#060c18] relative">
           <span id="regional" className="absolute -top-20" />
           <span id="skill-gap" className="absolute -top-20" />
           <span id="employers" className="absolute -top-20" />
@@ -761,10 +728,10 @@ export default function LearnerHome() {
                 secondaryText="ACCESSIBLE VIA AUTHORIZED PORTAL"
                 variant="cyan"
               />
-              <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-extrabold text-[#f8fafc] tracking-tight">
                 Core Platform Suites
               </h2>
-              <p className="mt-2 text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-2xl">
+              <p className="mt-2 text-[#cbd5e1] text-sm sm:text-base max-w-2xl">
                 Explore dedicated analytical workspaces for government administrators, training
                 providers, and enterprise employers.
               </p>
@@ -777,7 +744,7 @@ export default function LearnerHome() {
         {/* ========================================================================= */}
         {/* 6. INTERACTIVE CANDIDATE READINESS & GAP SIMULATOR (Preserved Functional) */}
         {/* ========================================================================= */}
-        <section id="interactive-preview" className="py-16 sm:py-20 px-6 lg:px-12 border-t border-slate-200/70 dark:border-white/5 relative">
+        <section id="interactive-preview" className="py-20 px-6 lg:px-12 border-t border-[#1e293b] bg-[#070d18]">
           <div className="max-w-[1516px] mx-auto">
             <div className="text-center max-w-3xl mx-auto mb-10">
               <InstitutionalBadge
@@ -785,19 +752,19 @@ export default function LearnerHome() {
                 secondaryText="TEST CANDIDATE READINESS & GAP DIAGNOSTICS"
                 variant="emerald"
               />
-              <h2 className="mt-3 font-heading text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              <h2 className="mt-3 font-heading text-2xl sm:text-4xl font-extrabold text-[#f8fafc] tracking-tight">
                 Experience the Candidate Diagnostic Engine
               </h2>
-              <p className="mt-2 text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
+              <p className="mt-2 text-[#cbd5e1] text-xs sm:text-sm">
                 Select a vocation below to simulate real-time readiness scoring, gap detection,
                 prescribed bridge modules, and post-training salary trajectory.
               </p>
             </div>
 
             {/* Simulator Interactive Box */}
-            <div className="rounded-xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#131210] p-6 lg:p-8">
+            <div className="rounded-2xl border border-[#1e293b] bg-[#0b1528] p-6 lg:p-8 shadow-2xl">
               {/* Domain Switcher Pills */}
-              <div className="relative flex flex-wrap items-center justify-center gap-2 pb-6 border-b border-slate-100 dark:border-white/5">
+              <div className="relative flex flex-wrap items-center justify-center gap-2 pb-6 border-b border-[#1e293b]">
                 {Object.entries(demoSkills).map(([key, skill]) => {
                   const isActive = selectedDemoSkill === key;
                   return (
@@ -805,16 +772,16 @@ export default function LearnerHome() {
                       key={key}
                       type="button"
                       onClick={() => setSelectedDemoSkill(key)}
-                      className={`relative rounded-lg px-3.5 py-2 font-mono text-xs font-semibold transition-colors cursor-pointer ${
+                      className={`relative rounded-xl px-3.5 py-2 font-mono text-xs font-semibold transition-colors cursor-pointer ${
                         isActive
                           ? "text-slate-950 font-bold"
-                          : "border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-900 dark:hover:text-white"
+                          : "border border-[#1e293b] bg-[#070d18] text-slate-300 hover:border-slate-600 hover:text-white"
                       }`}
                     >
                       {isActive && (
                         <motion.div
                           layoutId="simulatorSkillPill"
-                          className="absolute inset-0 rounded-lg bg-sky-400 shadow-xs"
+                          className="absolute inset-0 rounded-xl bg-sky-400 shadow-md glow-cyan"
                           transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
                         />
                       )}
@@ -836,66 +803,66 @@ export default function LearnerHome() {
                 >
                   <div className="lg:col-span-7 space-y-4">
                     <div className="flex items-center gap-2 font-mono text-xs">
-                      <span className="rounded bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-400/20 px-2 py-0.5 text-sky-700 dark:text-sky-400 font-semibold">
+                      <span className="rounded bg-sky-500/10 border border-sky-400/20 px-2 py-0.5 text-sky-400">
                         {currentSkill.code}
                       </span>
-                      <span className="text-slate-400">•</span>
-                      <span className="text-slate-600 dark:text-slate-300">{currentSkill.level}</span>
+                      <span className="text-slate-500">•</span>
+                      <span className="text-[#cbd5e1]">{currentSkill.level}</span>
                     </div>
 
-                    <h3 className="font-heading text-2xl font-bold text-slate-900 dark:text-white">
+                    <h3 className="font-heading text-2xl font-bold text-[#f8fafc]">
                       {currentSkill.name}
                     </h3>
 
-                    <div className="rounded-lg bg-slate-50/80 dark:bg-white/[0.03] p-4 space-y-3 border border-slate-100 dark:border-white/5">
+                    <div className="rounded-xl border border-[#1e293b] bg-[#070d18] p-4 space-y-3">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-mono text-slate-600 dark:text-slate-400">Detected Skill Gap:</span>
-                        <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
+                        <span className="font-mono text-[#cbd5e1]">Detected Skill Gap:</span>
+                        <span className="font-mono font-bold text-amber-400">
                           {currentSkill.missingGap}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-mono text-slate-600 dark:text-slate-400">Prescribed Bridge:</span>
-                        <span className="font-mono font-bold text-sky-600 dark:text-sky-400">
+                        <span className="font-mono text-[#cbd5e1]">Prescribed Bridge:</span>
+                        <span className="font-mono font-bold text-sky-400">
                           {currentSkill.prescribedBridge}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="lg:col-span-5 rounded-lg bg-slate-50/80 dark:bg-white/[0.03] p-5 space-y-3 border border-slate-100 dark:border-white/5">
+                  <div className="lg:col-span-5 rounded-xl border border-[#1e293b] bg-[#070d18] p-5 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs uppercase text-slate-600 dark:text-slate-400">
+                      <span className="font-mono text-xs uppercase text-[#cbd5e1]">
                         Simulated Readiness Score
                       </span>
-                      <span className="font-mono text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
+                      <span className="font-mono text-lg font-extrabold text-emerald-400">
                         {currentSkill.readiness}%
                       </span>
                     </div>
 
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-[#1e293b]">
                       <motion.div
-                        className="h-full rounded-full bg-emerald-500 dark:bg-emerald-400"
+                        className="h-full rounded-full bg-emerald-400"
                         initial={{ width: 0 }}
                         animate={{ width: `${currentSkill.readiness}%` }}
                         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-white/5">
+                    <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#1e293b]">
                       <div>
-                        <span className="font-mono text-[10px] uppercase text-slate-500 dark:text-slate-400">
+                        <span className="font-mono text-[10px] uppercase text-[#94a3b8]">
                           Baseline Placement
                         </span>
-                        <p className="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                        <p className="font-mono text-sm font-bold text-[#f8fafc]">
                           {currentSkill.startingSalary}
                         </p>
                       </div>
                       <div>
-                        <span className="font-mono text-[10px] uppercase text-slate-500 dark:text-slate-400">
+                        <span className="font-mono text-[10px] uppercase text-[#94a3b8]">
                           6M Retention Wage
                         </span>
-                        <p className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                        <p className="font-mono text-sm font-bold text-emerald-400">
                           {currentSkill.sixMonthProjection}
                         </p>
                       </div>
@@ -910,7 +877,7 @@ export default function LearnerHome() {
         {/* ========================================================================= */}
         {/* 7. AI INTELLIGENCE ARCHITECTURE SECTION                                   */}
         {/* ========================================================================= */}
-        <section id="architecture" className="py-16 sm:py-20 px-6 lg:px-12 border-t border-slate-200/70 dark:border-white/5 relative">
+        <section id="architecture" className="py-20 px-6 lg:px-12 border-t border-[#1e293b] bg-[#060c18]">
           <div className="max-w-[1516px] mx-auto">
             <div className="text-center max-w-3xl mx-auto mb-12">
               <InstitutionalBadge
@@ -918,10 +885,10 @@ export default function LearnerHome() {
                 secondaryText="INFERENCE &amp; CRYPTOGRAPHIC VERIFICATION"
                 variant="indigo"
               />
-              <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-extrabold text-[#f8fafc] tracking-tight">
                 How KaushalNexus AI Transforms Raw Data into National Impact
               </h2>
-              <p className="mt-2 text-slate-600 dark:text-slate-400 text-sm sm:text-base">
+              <p className="mt-2 text-[#cbd5e1] text-sm sm:text-base">
                 State-of-the-art representation learning, verifiable cryptography, and real-time
                 inference built for sovereign scale.
               </p>
@@ -955,21 +922,21 @@ export default function LearnerHome() {
                 return (
                   <div
                     key={arch.title}
-                    className="flex flex-col justify-between rounded-xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#131210] p-6 hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                    className="flex flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-6 hover:border-slate-700 hover:bg-[#0f1c33] transition-all"
                   >
                     <div>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-50 dark:bg-white/5 border border-sky-100 dark:border-white/10 text-sky-600 dark:text-sky-400 mb-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-500/10 border border-sky-400/20 text-sky-400 mb-4">
                         <ArchIcon size={20} />
                       </div>
-                      <h3 className="font-heading text-lg font-bold text-slate-900 dark:text-white mb-2">
+                      <h3 className="font-heading text-lg font-bold text-[#f8fafc] mb-2">
                         {arch.title}
                       </h3>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                      <p className="text-xs text-[#cbd5e1] leading-relaxed mb-4">
                         {arch.desc}
                       </p>
                     </div>
 
-                    <div className="rounded-lg bg-slate-50 dark:bg-white/[0.04] p-2.5 font-mono text-[11px] text-sky-700 dark:text-sky-300 border border-slate-100 dark:border-white/5 truncate">
+                    <div className="rounded-lg border border-[#1e293b] bg-[#070d18] p-2.5 font-mono text-[11px] text-sky-400/90 truncate">
                       {arch.codeSnippet}
                     </div>
                   </div>
@@ -982,7 +949,7 @@ export default function LearnerHome() {
         {/* ========================================================================= */}
         {/* 8. IMPACT METRICS GRID                                                    */}
         {/* ========================================================================= */}
-        <section id="impact" className="py-16 sm:py-20 px-6 lg:px-12 border-t border-slate-200/70 dark:border-white/5 relative">
+        <section id="impact" className="py-20 px-6 lg:px-12 border-t border-[#1e293b] bg-[#080e1a]">
           <div className="max-w-[1516px] mx-auto">
             <div className="mb-10">
               <InstitutionalBadge
@@ -990,10 +957,10 @@ export default function LearnerHome() {
                 secondaryText="AUDITED BENCHMARK DATASET"
                 variant="emerald"
               />
-              <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-extrabold text-[#f8fafc] tracking-tight">
                 Demonstration Cohort Outcomes
               </h2>
-              <p className="mt-2 text-slate-600 dark:text-slate-400 text-sm max-w-2xl">
+              <p className="mt-2 text-[#cbd5e1] text-sm max-w-2xl">
                 Real longitudinal indicators tracking post-placement retention, wage growth, and
                 verified employment outcomes from the KaushalNexus database.
               </p>
@@ -1047,7 +1014,7 @@ export default function LearnerHome() {
         {/* ========================================================================= */}
         {/* 9. STAKEHOLDER PERSONAS & FEEDBACK SCENARIOS                              */}
         {/* ========================================================================= */}
-        <section id="testimonials" className="py-16 sm:py-20 px-6 lg:px-12 border-t border-slate-200/70 dark:border-white/5 relative">
+        <section id="testimonials" className="py-20 px-6 lg:px-12 border-t border-[#1e293b] bg-[#060c18]">
           <div className="max-w-[1516px] mx-auto">
             <div className="mb-10">
               <InstitutionalBadge
@@ -1056,10 +1023,10 @@ export default function LearnerHome() {
                 variant="outline"
                 pulse={false}
               />
-              <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-extrabold text-[#f8fafc] tracking-tight">
                 Stakeholder Feedback &amp; Usage Scenarios
               </h2>
-              <p className="mt-2 text-slate-600 dark:text-slate-400 text-sm max-w-2xl">
+              <p className="mt-2 text-[#cbd5e1] text-sm max-w-2xl">
                 Illustrative user feedback models representing government administrators, corporate employers,
                 and evaluation officers interacting with KaushalNexus.
               </p>
@@ -1091,22 +1058,22 @@ export default function LearnerHome() {
               ].map((t, idx) => (
                 <div
                   key={idx}
-                  className="flex flex-col justify-between rounded-xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#131210] p-6 hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                  className="flex flex-col justify-between rounded-xl border border-[#1e293b] bg-[#0b1528] p-6 hover:border-slate-700 transition-colors"
                 >
                   <div>
-                    <span className="font-mono text-[10px] uppercase text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-400/20 px-2 py-0.5 rounded">
+                    <span className="font-mono text-[10px] uppercase text-sky-400 bg-sky-500/10 border border-sky-400/20 px-2 py-0.5 rounded">
                       {t.tag}
                     </span>
-                    <p className="mt-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">
+                    <p className="mt-4 text-xs sm:text-sm text-[#cbd5e1] leading-relaxed italic">
                       "{t.quote}"
                     </p>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/5">
-                    <div className="font-heading font-bold text-sm text-slate-900 dark:text-white">
+                  <div className="mt-6 pt-4 border-t border-[#1e293b]">
+                    <div className="font-heading font-bold text-sm text-[#f8fafc]">
                       {t.author}
                     </div>
-                    <div className="font-mono text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    <div className="font-mono text-[11px] text-[#94a3b8] mt-0.5">
                       {t.scenario}
                     </div>
                   </div>
@@ -1119,18 +1086,18 @@ export default function LearnerHome() {
         {/* ========================================================================= */}
         {/* 10. FINAL CALL TO ACTION                                                  */}
         {/* ========================================================================= */}
-        <section id="explore" className="py-20 sm:py-24 px-6 lg:px-12 border-t border-slate-200/70 dark:border-white/5 text-center relative overflow-hidden transition-colors duration-150">
+        <section id="explore" className="py-24 px-6 lg:px-12 border-t border-slate-200 dark:border-[#1e293b] bg-gradient-to-b from-slate-100 via-white to-slate-100 dark:from-[#070d18] dark:via-[#09152b] dark:to-[#070d18] text-center relative overflow-hidden transition-colors duration-150">
           <div className="max-w-4xl mx-auto relative z-10 space-y-6">
             <InstitutionalBadge
               label="SOVEREIGN SCALE • NATIONAL IMPACT"
               variant="cyan"
             />
 
-            <h2 className="font-heading text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+            <h2 className="font-heading text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-[#f8fafc] tracking-tight leading-tight">
               Empowering India's Demographic Dividend. Built for Scale.
             </h2>
 
-            <p className="font-body text-slate-600 dark:text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            <p className="font-body text-slate-600 dark:text-[#cbd5e1] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
               Equip your state skill mission, training center, or corporate hiring network with
               sovereign skill analytics, real-time demand matching, and verifiable retention tracking.
             </p>
@@ -1138,21 +1105,21 @@ export default function LearnerHome() {
             <div className="flex flex-wrap justify-center gap-4 pt-4">
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-500 text-white px-8 py-4 rounded-xl font-heading font-bold text-sm transition-all"
+                className="inline-flex items-center gap-2 bg-sky-500 hover:bg-sky-400 text-slate-950 px-8 py-4 rounded-xl font-heading font-bold text-sm transition-all glow-cyan"
               >
                 <span>Access National Platform</span>
                 <ArrowRight size={16} />
               </Link>
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-300 dark:border-white/15 text-slate-800 dark:text-white px-8 py-4 rounded-xl font-heading font-semibold text-sm transition-all"
+                className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 dark:bg-[#0b1528] dark:hover:bg-[#162238] border border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 text-slate-800 dark:text-white px-8 py-4 rounded-xl font-heading font-semibold text-sm transition-all shadow-xs dark:shadow-none"
               >
                 <Lock size={16} className="text-sky-600 dark:text-sky-400" />
                 <span>Institutional Portal Sign In</span>
               </Link>
             </div>
 
-            <div className="mt-8 font-mono text-xs text-slate-500 dark:text-slate-400 flex items-center justify-center gap-2">
+            <div className="mt-8 font-mono text-xs text-slate-500 dark:text-[#94a3b8] flex items-center justify-center gap-2">
               <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
               <span>
                 Ready-to-deploy platform aligned with NCVET &amp; Digital Personal Data Protection Act 2023

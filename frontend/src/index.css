@@ -79,32 +79,12 @@
   --ring: #0284c7;
 
   /* Surface mapping tokens */
-  --surface-page: #f8fafc;
-  --surface-card: #ffffff;
-  --surface-subtle: #f1f5f9;
-  --surface-elevated: #ffffff;
-  --surface-panel: #ffffff;
-  --surface-footer: #f1f5f9;
   --canvas-bg: #f8fafc;
-
-  /* Border tokens */
-  --border-subtle: #e2e8f0;
-  --border-strong: #cbd5e1;
+  --surface-panel: #ffffff;
+  --surface-card: #ffffff;
+  --surface-elevated: #f1f5f9;
+  --surface-footer: #f1f5f9;
   --border-color: #e2e8f0;
-
-  /* Shadow Hierarchy: NONE, SUBTLE, ELEVATED, OVERLAY */
-  --shadow-none: none;
-  --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-  --shadow-elevated: 0 6px 16px -4px rgba(0, 0, 0, 0.08);
-  --shadow-overlay: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  --shadow-card: var(--shadow-subtle);
-
-  /* Radius & Spacing tokens */
-  --radius-card: 0.75rem;
-  --radius-section: 1rem;
-  --radius-control: 0.5rem;
-  --section-gap: 5rem;
-
   --text-primary: #0f172a;
   --text-secondary: #334155;
   --text-body: #475569;
@@ -146,32 +126,12 @@
   --ring: #d6d3d1;
 
   /* Surface mapping tokens */
-  --surface-page: #0b0a08;
-  --surface-card: #131210;
-  --surface-subtle: #171513;
-  --surface-elevated: #1a1816;
-  --surface-panel: #131210;
-  --surface-footer: #080706;
   --canvas-bg: #0b0a08;
-
-  /* Border tokens */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
+  --surface-panel: #141210;
+  --surface-card: #141210;
+  --surface-elevated: #191613;
+  --surface-footer: #080706;
   --border-color: #262320;
-
-  /* Shadow Hierarchy in Dark Mode (no halos, soft elevation only when needed) */
-  --shadow-none: none;
-  --shadow-subtle: none;
-  --shadow-elevated: 0 8px 24px -4px rgba(0, 0, 0, 0.5);
-  --shadow-overlay: 0 24px 36px -6px rgba(0, 0, 0, 0.8);
-  --shadow-card: var(--shadow-none);
-
-  /* Radius & Spacing tokens */
-  --radius-card: 0.75rem;
-  --radius-section: 1rem;
-  --radius-control: 0.5rem;
-  --section-gap: 5rem;
-
   --text-primary: #ffffff;
   --text-secondary: #ffffff;
   --text-body: #d6d3d1;
@@ -286,97 +246,25 @@ html:not(.dark) .radar-grid {
   border: 1px solid var(--border);
 }
 
-/* Restrained sovereign enterprise border accents (No artificial neon glow/halo) */
-.glow-cyan,
-html:not(.dark) .glow-cyan,
-.dark .glow-cyan {
-  box-shadow: none !important;
+.glow-cyan {
+  box-shadow: 0 0 24px -4px rgba(56, 189, 248, 0.25);
 }
 
-.glow-indigo,
-html:not(.dark) .glow-indigo,
+.dark .glow-cyan,
 .dark .glow-indigo {
   box-shadow: none !important;
 }
 
-/* ==============================================================================
-   COHESIVE ENTERPRISE VISUAL SYSTEM PRIMITIVES (.kn-*)
-   Unified hierarchy: PAGE -> SECTION -> CONTENT GROUP -> CARD (when needed)
-   ============================================================================== */
-
-/* 1. Page Canvas */
-.kn-page {
-  background-color: var(--surface-page);
-  color: var(--foreground);
-  min-height: 100vh;
+html:not(.dark) .glow-cyan {
+  box-shadow: 0 4px 14px -2px rgba(2, 132, 199, 0.12);
 }
 
-/* 2. Seamless Section Flow (Shares page canvas, no zebra stripes) */
-.kn-section {
-  position: relative;
-  background-color: transparent;
-  border-top: 1px solid var(--border-subtle);
-  padding-top: clamp(3rem, 6vw, 5rem);
-  padding-bottom: clamp(3rem, 6vw, 5rem);
-  padding-left: clamp(1rem, 3vw, 3rem);
-  padding-right: clamp(1rem, 3vw, 3rem);
+.glow-indigo {
+  box-shadow: 0 0 24px -4px rgba(129, 140, 248, 0.25);
 }
 
-/* 3. Unified Card: Sits naturally on the page without heavy floating box appearance */
-.kn-card {
-  background-color: var(--surface-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-  transition: border-color 0.15s ease;
-}
-
-.kn-card-interactive {
-  background-color: var(--surface-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-}
-
-.kn-card-interactive:hover {
-  border-color: var(--border-strong);
-}
-
-/* 4. Content Panel: Flattens card-in-card nesting into clean grouped content */
-.kn-panel {
-  background-color: transparent;
-  border: none;
-  padding: 0;
-}
-
-/* 5. Flat Metric Row / Tile: Clean typography-first metric without inner bordered card */
-.kn-metric-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.625rem 0;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.kn-metric-row:last-child {
-  border-bottom: none;
-}
-
-/* 6. Global Shadow Restraint: Eliminate aggressive multi-layered elevation on static cards */
-.shadow-2xl:not([role="dialog"]):not([data-overlay="true"]),
-.shadow-xl:not([role="dialog"]):not([data-overlay="true"]) {
-  box-shadow: var(--shadow-subtle) !important;
-}
-
-.dark .shadow-2xl:not([role="dialog"]):not([data-overlay="true"]),
-.dark .shadow-xl:not([role="dialog"]):not([data-overlay="true"]),
-.dark .shadow-lg:not([role="dialog"]):not([data-overlay="true"]):not([role="menu"]),
-.dark .shadow-md:not([role="dialog"]):not([data-overlay="true"]):not([role="menu"]),
-.dark .shadow-sm:not([role="dialog"]):not([data-overlay="true"]):not([role="menu"]),
-.dark .shadow-xs:not([role="dialog"]):not([data-overlay="true"]):not([role="menu"]),
-.dark .shadow-2xs:not([role="dialog"]):not([data-overlay="true"]):not([role="menu"]) {
-  box-shadow: none !important;
+html:not(.dark) .glow-indigo {
+  box-shadow: 0 4px 14px -2px rgba(99, 102, 241, 0.12);
 }
 
 /* ==============================================================================
@@ -398,10 +286,6 @@ html.dark,
 /* 1. Surfaces & Backgrounds in Dark Mode (#0b0a08 canvas, #141210 cards, #191613 elevated) */
 .dark .bg-\[\#070d18\],
 .dark [class*="bg-[#070d18]"],
-.dark .bg-\[\#060c18\],
-.dark [class*="bg-[#060c18]"],
-.dark .bg-\[\#080e1a\],
-.dark [class*="bg-[#080e1a]"],
 .dark .bg-\[\#090d16\],
 .dark [class*="bg-[#090d16]"],
 .dark .bg-slate-950,
@@ -415,6 +299,10 @@ html.dark,
 
 .dark .bg-\[\#0b1528\],
 .dark [class*="bg-[#0b1528]"],
+.dark .bg-\[\#060c18\],
+.dark [class*="bg-[#060c18]"],
+.dark .bg-\[\#080e1a\],
+.dark [class*="bg-[#080e1a]"],
 .dark .bg-slate-900,
 .dark [class*="bg-slate-900"],
 .dark .bg-gray-900,
@@ -523,9 +411,15 @@ html:not(.dark) {
 
 /* 1. Surfaces in Light Mode */
 html:not(.dark) .bg-\[\#070d18\],
-html:not(.dark) [class*="bg-[#070d18]"],
+html:not(.dark) [class*="bg-[#070d18]"] {
+  background-color: #f8fafc !important;
+}
+
 html:not(.dark) .bg-\[\#060c18\],
-html:not(.dark) [class*="bg-[#060c18]"],
+html:not(.dark) [class*="bg-[#060c18]"] {
+  background-color: #ffffff !important;
+}
+
 html:not(.dark) .bg-\[\#080e1a\],
 html:not(.dark) [class*="bg-[#080e1a]"] {
   background-color: #f8fafc !important;
@@ -533,7 +427,7 @@ html:not(.dark) [class*="bg-[#080e1a]"] {
 
 html:not(.dark) .bg-\[\#050a12\],
 html:not(.dark) [class*="bg-[#050a12]"] {
-  background-color: #f8fafc !important;
+  background-color: #f1f5f9 !important;
 }
 
 html:not(.dark) .bg-\[\#0b1528\],

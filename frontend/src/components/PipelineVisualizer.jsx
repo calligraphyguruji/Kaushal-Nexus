@@ -122,31 +122,31 @@ export default function PipelineVisualizer({
 
   return (
     <div
-      className={`kn-card p-5 sm:p-6 lg:p-8 ${className}`}
+      className={`rounded-2xl border border-[#1e293b] bg-[#070d18] p-4 sm:p-6 lg:p-8 shadow-2xl ${className}`}
     >
       {/* Visualizer Top Bar */}
-      <div className="flex flex-col gap-3 pb-5 border-b border-[var(--border-subtle)] sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 pb-6 border-b border-[#1e293b] sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500/10 border border-sky-400/30 text-sky-500 dark:text-sky-400">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500/10 border border-sky-400/30 text-sky-400 glow-cyan">
             <Cpu size={18} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-heading text-sm font-bold text-slate-900 dark:text-white">
+              <span className="font-heading text-sm font-bold text-white">
                 SOVEREIGN PIPELINE ARCHITECTURE
               </span>
-              <span className="rounded bg-sky-500/10 border border-sky-400/20 px-1.5 py-0.5 text-[10px] font-mono text-sky-600 dark:text-sky-400">
+              <span className="rounded bg-sky-500/10 border border-sky-400/20 px-1.5 py-0.5 text-[10px] font-mono text-sky-400">
                 TARGET BENCHMARKS &amp; PROTOCOLS
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+            <p className="text-xs text-slate-400 font-mono">
               Raw Candidate Intake &gt; Algorithmic Alignment &gt; Verified Longitudinal Retention
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-slate-400">
-          <Activity size={14} className="text-emerald-500 dark:text-emerald-400" />
+        <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+          <Activity size={14} className="text-emerald-400 animate-pulse" />
           <span>Stage {selectedIndex + 1} of {stages.length} Selected</span>
         </div>
       </div>
@@ -162,43 +162,43 @@ export default function PipelineVisualizer({
               key={stage.id}
               type="button"
               onClick={() => handleSelect(idx)}
-              className={`group relative flex flex-col items-start rounded-lg border p-3.5 text-left transition-colors cursor-pointer ${
+              className={`group relative flex flex-col items-start rounded-xl border p-3.5 text-left transition-all duration-200 cursor-pointer ${
                 isSelected
-                  ? "border-sky-500/50 bg-sky-50/50 dark:bg-sky-950/20 dark:border-sky-400/40"
-                  : "border-[var(--border-subtle)] bg-transparent hover:bg-slate-50 dark:hover:bg-white/[0.02]"
+                  ? "border-sky-400/80 bg-[#0b1528] shadow-lg shadow-sky-500/10 glow-cyan ring-1 ring-sky-400/40"
+                  : "border-[#1e293b] bg-[#070d18]/70 hover:border-slate-700 hover:bg-[#0b1528]/50"
               }`}
             >
               <div className="flex w-full items-center justify-between mb-2">
                 <span
                   className={`font-mono text-[11px] font-bold ${
-                    isSelected ? "text-sky-600 dark:text-sky-400" : "text-slate-400 dark:text-slate-500"
+                    isSelected ? "text-sky-400" : "text-slate-500 group-hover:text-slate-400"
                   }`}
                 >
                   {stage.step}
                 </span>
                 <div
-                  className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
+                  className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
                     isSelected
-                      ? "bg-sky-500 text-white dark:bg-sky-400 dark:text-slate-950 font-bold"
-                      : "bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400"
+                      ? "bg-sky-400 text-slate-950 font-bold"
+                      : "bg-[#0f1c33] text-slate-400 group-hover:text-white"
                   }`}
                 >
                   <StageIcon size={14} />
                 </div>
               </div>
 
-              <div className="font-heading text-xs font-semibold text-slate-900 dark:text-white leading-tight">
+              <div className="font-heading text-xs font-semibold text-white leading-tight">
                 {stage.shortLabel || stage.title}
               </div>
 
-              <span className="mt-1 text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate w-full">
+              <span className="mt-1 text-[10px] font-mono text-slate-400 truncate w-full">
                 {stage.status}
               </span>
 
               {/* Progress Connector Indicator */}
               <div
                 className={`mt-2.5 h-0.5 w-full rounded-full transition-colors ${
-                  isSelected ? "bg-sky-500 dark:bg-sky-400" : "bg-[var(--border-subtle)]"
+                  isSelected ? "bg-sky-400" : "bg-[#1e293b]"
                 }`}
               />
             </button>
@@ -207,38 +207,38 @@ export default function PipelineVisualizer({
       </div>
 
       {/* Stage Deep Dive Console Panel */}
-      <div className="mt-6 pt-6 border-t border-[var(--border-subtle)]">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+      <div className="mt-6 rounded-xl border border-[#1e293b] bg-[#0b1528] p-5 sm:p-6 relative overflow-hidden">
+        <div className="relative z-10 grid grid-cols-1 gap-6 lg:grid-cols-12">
           {/* Left Summary & Description */}
           <div className="lg:col-span-7 space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-xs text-sky-600 dark:text-sky-400 font-bold tracking-wider">
+              <span className="font-mono text-xs text-sky-400 font-bold tracking-wider">
                 PHASE // {activeStage.step}
               </span>
-              <span className="text-slate-400 dark:text-slate-600">•</span>
-              <h3 className="font-heading text-lg font-bold text-slate-900 dark:text-white">
+              <span className="text-slate-600">•</span>
+              <h3 className="font-heading text-lg font-bold text-white">
                 {activeStage.title}
               </h3>
             </div>
 
-            <p className="text-xs font-mono text-amber-700 dark:text-amber-300 font-medium">
+            <p className="text-xs font-mono text-amber-300/90 font-medium">
               {activeStage.tagline}
             </p>
 
-            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            <p className="text-sm leading-relaxed text-slate-300">
               {activeStage.description}
             </p>
 
             {/* Technical Standard Tags */}
             <div className="space-y-1.5 pt-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500">
                 Protocols &amp; Data Standards
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {activeStage.technicalStandards.map((std) => (
                   <span
                     key={std}
-                    className="rounded border border-[var(--border-subtle)] bg-transparent px-2 py-0.5 font-mono text-[11px] text-slate-700 dark:text-slate-300"
+                    className="rounded-md border border-[#1e293b] bg-[#070d18] px-2 py-1 font-mono text-[11px] text-slate-300"
                   >
                     {std}
                   </span>
@@ -247,34 +247,34 @@ export default function PipelineVisualizer({
             </div>
           </div>
 
-          {/* Right Metrics Grid - Clean column layout with no nested box */}
-          <div className="lg:col-span-5 flex flex-col justify-between rounded-lg border border-[var(--border-subtle)] p-4 bg-slate-50/50 dark:bg-white/[0.02]">
-            <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
-              <span className="font-mono text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
+          {/* Right Metrics Grid */}
+          <div className="lg:col-span-5 flex flex-col justify-between rounded-lg border border-[#1e293b] bg-[#070d18]/80 p-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#1e293b]">
+              <span className="font-mono text-xs uppercase tracking-wider text-slate-400">
                 Benchmark Targets
               </span>
-              <div className="flex items-center gap-1.5 text-[11px] font-mono text-sky-600 dark:text-sky-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-sky-500 dark:bg-sky-400" />
+              <div className="flex items-center gap-1.5 text-[11px] font-mono text-sky-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-sky-400 animate-pulse" />
                 <span>BENCHMARK PROFILE</span>
               </div>
             </div>
 
-            <div className="space-y-2 py-3">
+            <div className="space-y-3 py-3">
               {activeStage.metrics.map((m) => (
                 <div
                   key={m.label}
-                  className="flex items-center justify-between text-xs py-1 border-b border-[var(--border-subtle)] last:border-none"
+                  className="flex items-center justify-between text-xs"
                 >
-                  <span className="text-slate-600 dark:text-slate-400">{m.label}</span>
-                  <span className="font-mono font-bold text-sky-600 dark:text-sky-400">
+                  <span className="text-slate-400">{m.label}</span>
+                  <span className="font-mono font-bold text-sky-400">
                     {m.value}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] font-mono text-slate-400 dark:text-slate-500">
-              <span>Simulated Sandbox Flow</span>
+            <div className="pt-3 border-t border-[#1e293b] flex items-center justify-between text-[11px] font-mono text-slate-500">
+              <span>Simulated Sandbox Flow · Production Benchmark Profile</span>
               <span>DPDP Section 4(1) Compliant</span>
             </div>
           </div>

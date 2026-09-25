@@ -492,7 +492,7 @@ export default function AdaptiveLearningWorkspace({ onProgressUpdated }) {
                     setPracticeResult(null);
                     loadLearningPlan();
                   }}
-                  className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950 text-xs font-bold transition cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-sky-400 text-slate-950 text-xs font-bold hover:bg-sky-300 transition glow-cyan cursor-pointer"
                 >
                   Return to Roadmap
                 </button>
@@ -580,7 +580,7 @@ export default function AdaptiveLearningWorkspace({ onProgressUpdated }) {
                     type="button"
                     disabled={isSubmittingPractice}
                     onClick={handleSubmitPractice}
-                    className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950 text-xs font-bold transition disabled:opacity-50 cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-sky-400 text-slate-950 text-xs font-bold hover:bg-sky-300 transition glow-cyan disabled:opacity-50 cursor-pointer"
                   >
                     {isSubmittingPractice ? (
                       <>
@@ -741,7 +741,7 @@ export default function AdaptiveLearningWorkspace({ onProgressUpdated }) {
                         className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                           isMastered
                             ? "bg-[#070d18] border border-emerald-500/40 text-emerald-300 hover:bg-emerald-950/40"
-                            : "bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950"
+                            : "bg-sky-400 text-slate-950 hover:bg-sky-300 glow-cyan"
                         }`}
                       >
                         <Play size={12} fill="currentColor" />

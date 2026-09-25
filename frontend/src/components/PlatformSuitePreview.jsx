@@ -130,32 +130,32 @@ export default function PlatformSuitePreview({
               key={suite.id}
               type="button"
               onClick={() => setActiveSuiteId(suite.id)}
-              className={`group relative flex flex-col items-start rounded-xl border p-4 text-left transition-colors cursor-pointer ${
+              className={`group relative flex flex-col items-start rounded-xl border p-4 text-left transition-all duration-200 cursor-pointer ${
                 isActive
-                  ? "border-sky-500/50 bg-sky-50/50 dark:bg-sky-950/20 dark:border-sky-400/40"
-                  : "border-[var(--border-subtle)] bg-[var(--surface-card)] hover:border-slate-300 dark:hover:border-white/20"
+                  ? "border-sky-400/80 bg-[#0b1528] shadow-lg shadow-sky-500/10 glow-cyan ring-1 ring-sky-400/30"
+                  : "border-[#1e293b] bg-[#070d18] hover:border-slate-700 hover:bg-[#0b1528]/50"
               }`}
             >
               <div className="flex w-full items-center justify-between mb-3">
                 <div
                   className={`flex h-8 w-8 items-center justify-center rounded-lg ${
                     isActive
-                      ? "bg-sky-500 text-white dark:bg-sky-400 dark:text-slate-950 font-bold"
-                      : "bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white"
+                      ? "bg-sky-400 text-slate-950 font-bold"
+                      : "bg-[#0f1c33] text-slate-400 group-hover:text-white"
                   }`}
                 >
                   <SuiteIcon size={16} />
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-semibold">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400">
                   {suite.badge}
                 </span>
               </div>
 
-              <div className="font-heading text-sm font-bold text-slate-900 dark:text-white mb-1">
+              <div className="font-heading text-sm font-bold text-[#f8fafc] mb-1">
                 {suite.title}
               </div>
 
-              <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+              <p className="text-xs text-[#cbd5e1] line-clamp-2">
                 {suite.tagline}
               </p>
             </button>
@@ -164,32 +164,32 @@ export default function PlatformSuitePreview({
       </div>
 
       {/* Selected Suite Detailed Preview Panel */}
-      <div className="kn-card p-6 lg:p-8">
+      <div className="rounded-2xl border border-[#1e293b] bg-[#0b1528] p-6 lg:p-8 relative overflow-hidden">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-center">
           {/* Left Suite Capabilities */}
           <div className="lg:col-span-7 space-y-4">
             <div className="flex items-center gap-2">
-              <span className="rounded bg-sky-500/10 border border-sky-400/20 px-2 py-0.5 font-mono text-xs font-semibold text-sky-600 dark:text-sky-400">
+              <span className="rounded bg-sky-500/10 border border-sky-400/20 px-2 py-0.5 font-mono text-xs font-semibold text-sky-400">
                 {currentSuite.badge}
               </span>
-              <span className="text-slate-400 dark:text-slate-600">•</span>
-              <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
+              <span className="text-slate-600">•</span>
+              <span className="font-mono text-xs text-[#cbd5e1]">
                 Live Enterprise Interface
               </span>
             </div>
 
-            <h3 className="font-heading text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h3 className="font-heading text-2xl font-bold text-[#f8fafc] tracking-tight">
               {currentSuite.title}
             </h3>
 
-            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            <p className="text-sm leading-relaxed text-[#cbd5e1]">
               {currentSuite.description}
             </p>
 
             <div className="space-y-2 pt-2">
               {currentSuite.previewFeatures.map((feat, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-                  <CheckCircle2 size={14} className="text-emerald-500 dark:text-emerald-400 shrink-0" />
+                <div key={idx} className="flex items-center gap-2 text-xs text-[#cbd5e1]">
+                  <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
                   <span>{feat}</span>
                 </div>
               ))}
@@ -200,7 +200,7 @@ export default function PlatformSuitePreview({
                 <button
                   type="button"
                   onClick={() => handleLaunch(currentSuite.route)}
-                  className="inline-flex items-center gap-2 rounded-lg bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950 px-5 py-2.5 text-xs font-bold font-sans uppercase tracking-wider transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 px-5 py-2.5 text-xs font-bold font-sans uppercase tracking-wider transition-colors glow-cyan cursor-pointer"
                 >
                   <span>Launch {currentSuite.title}</span>
                   <ArrowRight size={14} />
@@ -209,32 +209,32 @@ export default function PlatformSuitePreview({
             )}
           </div>
 
-          {/* Right High-Density Telemetry Card - Clean flat panel without nested boxes */}
-          <div className="lg:col-span-5 rounded-lg border border-[var(--border-subtle)] bg-slate-50/50 dark:bg-white/[0.02] p-5">
-            <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
-              <span className="font-mono text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+          {/* Right High-Density Telemetry Card */}
+          <div className="lg:col-span-5 rounded-xl border border-[#1e293b] bg-[#070d18] p-5 shadow-xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[#1e293b]">
+              <span className="font-mono text-xs font-semibold uppercase text-[#cbd5e1]">
                 Key Performance Telemetry
               </span>
-              <span className="text-[10px] font-mono text-sky-600 dark:text-sky-400 bg-sky-500/10 border border-sky-400/20 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-mono text-sky-400 bg-sky-400/10 border border-sky-400/20 px-1.5 py-0.5 rounded">
                 NATIONAL DB
               </span>
             </div>
 
-            <div className="py-2 divide-y divide-[var(--border-subtle)]">
+            <div className="grid grid-cols-1 gap-3 py-4">
               {currentSuite.keyMetrics.map((km) => (
                 <div
                   key={km.label}
-                  className="flex items-center justify-between py-2.5"
+                  className="flex items-center justify-between rounded-lg border border-[#1e293b]/80 bg-[#0b1528]/80 p-3"
                 >
-                  <span className="text-xs text-slate-600 dark:text-slate-400">{km.label}</span>
-                  <span className="font-mono text-sm font-bold text-sky-600 dark:text-sky-400">
+                  <span className="text-xs text-[#cbd5e1]">{km.label}</span>
+                  <span className="font-mono text-sm font-bold text-sky-400">
                     {km.value}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className="pt-3 border-t border-[var(--border-subtle)] text-[11px] font-mono text-slate-400 dark:text-slate-500 text-center">
+            <div className="pt-2 text-[11px] font-mono text-[#94a3b8] text-center">
               Real-time synchronization with MSDE &amp; SSDM nodes
             </div>
           </div>

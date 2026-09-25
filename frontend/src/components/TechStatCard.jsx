@@ -18,24 +18,28 @@ export default function TechStatCard({
 }) {
   const variantStyles = {
     cyan: {
-      border: "hover:border-sky-500/40 dark:hover:border-sky-400/40",
+      border: "border-sky-500/20 hover:border-sky-500/40 dark:border-sky-500/20 dark:hover:border-sky-400/50",
       valueColor: "text-sky-600 dark:text-sky-400",
       iconBg: "bg-sky-50 text-sky-600 border-sky-200 dark:bg-sky-500/10 dark:text-sky-400 dark:border-sky-400/20",
+      glow: "hover:shadow-sky-500/10 glow-cyan",
     },
     emerald: {
-      border: "hover:border-emerald-500/40 dark:hover:border-emerald-400/40",
+      border: "border-emerald-500/20 hover:border-emerald-500/40 dark:border-emerald-500/20 dark:hover:border-emerald-400/50",
       valueColor: "text-emerald-600 dark:text-emerald-400",
       iconBg: "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-400/20",
+      glow: "hover:shadow-emerald-500/10",
     },
     amber: {
-      border: "hover:border-amber-500/40 dark:hover:border-amber-400/40",
+      border: "border-amber-500/20 hover:border-amber-500/40 dark:border-amber-500/20 dark:hover:border-amber-400/50",
       valueColor: "text-amber-600 dark:text-amber-400",
       iconBg: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-400/20",
+      glow: "hover:shadow-amber-500/10",
     },
     indigo: {
-      border: "hover:border-indigo-500/40 dark:hover:border-indigo-400/40",
+      border: "border-indigo-500/20 hover:border-indigo-500/40 dark:border-indigo-500/20 dark:hover:border-indigo-400/50",
       valueColor: "text-indigo-600 dark:text-indigo-400",
       iconBg: "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-400/20",
+      glow: "hover:shadow-indigo-500/10 glow-indigo",
     },
   };
 
@@ -43,8 +47,10 @@ export default function TechStatCard({
 
   return (
     <div
-      className={`group relative rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 transition-colors ${currentVariant.border} ${className}`}
+      className={`group relative overflow-hidden rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-5 transition-all duration-200 hover:bg-slate-50 dark:hover:bg-[#0f1c33] shadow-xs ${currentVariant.border} ${currentVariant.glow} ${className}`}
     >
+      {/* Background Accent Mesh */}
+      <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-sky-500/5 blur-xl group-hover:bg-sky-500/10 transition-colors" />
 
       <div className="relative z-10 flex items-start justify-between">
         <div className="space-y-1">

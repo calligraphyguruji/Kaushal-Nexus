@@ -211,19 +211,19 @@ export default function AvailableInternships() {
   return (
     <PageTransition className="space-y-6">
       {/* 1. TOP CANDIDATE INTELLIGENCE BANNER */}
-      <div className="kn-card p-6">
+      <div className="relative overflow-hidden rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50/80 via-white to-indigo-50/40 p-6 shadow-xs dark:border-sky-900/50 dark:from-slate-900 dark:via-slate-900/90 dark:to-sky-950/30">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-0.5 text-xs font-semibold text-sky-600 dark:text-sky-400">
-              <Sparkles size={13} className="text-sky-600 dark:text-sky-400" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-sky-300 bg-sky-100/90 px-3 py-1 text-xs font-semibold text-sky-800 dark:border-sky-800 dark:bg-sky-950/70 dark:text-sky-300">
+              <Sparkles size={14} className="text-sky-600 dark:text-sky-400" />
               <span>AI Multi-Signal Competency Matching Engine</span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
               Skill-Matched Internship Opportunities
             </h1>
             <p className="max-w-2xl text-xs leading-relaxed text-slate-600 dark:text-slate-300">
               Personalized for candidate{" "}
-              <strong className="text-slate-900 dark:text-white">
+              <strong className="text-slate-950 dark:text-white">
                 {activeLearner.full_name || "Learner"}
               </strong>{" "}
               ({activeLearner.id || "KN-2026"}). Matches are dynamically computed based on your
@@ -232,9 +232,9 @@ export default function AvailableInternships() {
             </p>
           </div>
 
-          {/* Quick Stat Tiles - Clean flat telemetry layout */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:flex lg:items-center lg:divide-x lg:divide-[var(--border-subtle)]">
-            <div className="text-center lg:px-4">
+          {/* Quick Stat Badges */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:flex lg:items-center">
+            <div className="rounded-xl border border-slate-200/80 bg-white/90 p-3 text-center shadow-2xs dark:border-slate-800 dark:bg-slate-800/80 min-w-[100px]">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
                 Matched Roles
               </span>
@@ -244,17 +244,17 @@ export default function AvailableInternships() {
               <span className="text-[10px] text-slate-500">Live Vacancies</span>
             </div>
 
-            <div className="text-center lg:px-4">
+            <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/60 p-3 text-center shadow-2xs dark:border-emerald-900/60 dark:bg-emerald-950/40 min-w-[105px]">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                 High Match (80%+)
               </span>
-              <div className="mt-0.5 text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
+              <div className="mt-0.5 text-2xl font-extrabold text-emerald-700 dark:text-emerald-300">
                 {metrics.highMatches}
               </div>
-              <span className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80">Ready to Apply</span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400">Ready to Apply</span>
             </div>
 
-            <div className="text-center lg:px-4">
+            <div className="rounded-xl border border-slate-200/80 bg-white/90 p-3 text-center shadow-2xs dark:border-slate-800 dark:bg-slate-800/80 min-w-[110px]">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
                 Avg. Stipend
               </span>
@@ -264,7 +264,7 @@ export default function AvailableInternships() {
               <span className="text-[10px] text-slate-500">Per Month</span>
             </div>
 
-            <div className="text-center lg:px-4">
+            <div className="rounded-xl border border-slate-200/80 bg-white/90 p-3 text-center shadow-2xs dark:border-slate-800 dark:bg-slate-800/80 min-w-[100px]">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
                 Applied
               </span>

@@ -212,7 +212,7 @@ export default function RegionalIntelligence() {
                 setActionSuccessMsg(`✅ Exported ${filteredDistricts.length} districts to CSV.`);
               }}
               disabled={filteredDistricts.length === 0}
-              className="group inline-flex items-center gap-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-white dark:text-slate-950 transition disabled:opacity-50 cursor-pointer"
+              className="group inline-flex items-center gap-1.5 rounded-lg bg-sky-400 hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-slate-950 shadow-xs transition glow-cyan disabled:opacity-50 cursor-pointer"
               title="Export filtered district metrics to CSV"
             >
               <Download size={13} />

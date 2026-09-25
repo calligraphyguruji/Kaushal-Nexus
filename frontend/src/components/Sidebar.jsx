@@ -126,7 +126,7 @@ export default function Sidebar({ open, onClose }) {
         {/* Brand Header */}
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 dark:border-[#1e293b] px-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 shadow-xs glow-cyan">
               <ShieldCheck size={20} strokeWidth={2.2} />
             </div>
 

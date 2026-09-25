@@ -311,7 +311,7 @@ export default function ImpactDashboard() {
             <button
               type="button"
               onClick={() => setIsExportModalOpen(true)}
-              className="group inline-flex items-center gap-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-white dark:text-slate-950 transition cursor-pointer"
+              className="group inline-flex items-center gap-1.5 rounded-lg bg-sky-400 hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-slate-950 shadow-xs transition glow-cyan cursor-pointer"
             >
               <Download size={14} />
               <span>Export Audit Dossier</span>
