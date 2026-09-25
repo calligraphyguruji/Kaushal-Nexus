@@ -15,7 +15,7 @@ export default function InstitutionalBadge({
 }) {
   const variantStyles = {
     cyan: {
-      container: "bg-sky-50 dark:bg-[#0b1528] border-sky-300 dark:border-sky-400/40 text-sky-900 dark:text-slate-200 glow-cyan",
+      container: "bg-sky-50 dark:bg-[#0b1528] border-sky-300 dark:border-sky-400/40 text-sky-900 dark:text-slate-200",
       beacon: "bg-sky-500 dark:bg-sky-400",
       primaryText: "text-sky-700 dark:text-sky-400 font-semibold",
       secondaryText: "text-slate-600 dark:text-slate-300 font-normal",
@@ -33,7 +33,7 @@ export default function InstitutionalBadge({
       secondaryText: "text-slate-600 dark:text-slate-300 font-normal",
     },
     indigo: {
-      container: "bg-indigo-50 dark:bg-[#161b3d]/70 border-indigo-300 dark:border-indigo-500/40 text-indigo-900 dark:text-indigo-200 glow-indigo",
+      container: "bg-indigo-50 dark:bg-[#161b3d]/70 border-indigo-300 dark:border-indigo-500/40 text-indigo-900 dark:text-indigo-200",
       beacon: "bg-indigo-500 dark:bg-indigo-400",
       primaryText: "text-indigo-700 dark:text-indigo-400 font-semibold",
       secondaryText: "text-slate-600 dark:text-slate-300 font-normal",

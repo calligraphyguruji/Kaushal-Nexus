@@ -414,7 +414,10 @@ export default function Topbar({ onMenuClick }) {
 
             {/* Instant Search Suggestions Dropdown */}
             {showDropdown && searchQuery.trim().length >= 2 && (
-              <div className="absolute left-0 right-0 top-full mt-2 w-84 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-2.5 shadow-xl dark:shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div
+                role="menu"
+                className="absolute left-0 right-0 top-full mt-2 w-84 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-2.5 shadow-elevated z-50 animate-in fade-in zoom-in-95 duration-100"
+              >
                 {hasSuggestions ? (
                   <div className="space-y-2">
                     {/* Sectors & Schemes Group */}
@@ -598,11 +601,12 @@ export default function Topbar({ onMenuClick }) {
           <AnimatePresence>
             {showNotifications && (
               <motion.div
+                role="menu"
                 initial={{ opacity: 0, scale: 0.95, y: -4 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -4 }}
                 transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute right-0 mt-2 w-80 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-3 shadow-xl dark:shadow-2xl z-50 text-slate-800 dark:text-slate-200"
+                className="absolute right-0 mt-2 w-80 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-3 shadow-elevated z-50 text-slate-800 dark:text-slate-200"
               >
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1e293b] pb-2">
                   <span className="font-heading text-xs font-bold text-slate-900 dark:text-white">
@@ -665,11 +669,12 @@ export default function Topbar({ onMenuClick }) {
           <AnimatePresence>
             {showProfileMenu && (
               <motion.div
+                role="menu"
                 initial={{ opacity: 0, scale: 0.95, y: -4 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -4 }}
                 transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-3 shadow-xl dark:shadow-2xl z-50 text-slate-800 dark:text-slate-200"
+                className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-3 shadow-elevated z-50 text-slate-800 dark:text-slate-200"
               >
                 <div className="border-b border-slate-100 dark:border-[#1e293b] pb-2.5">
                   <p className="font-heading text-xs font-bold text-slate-900 dark:text-white">

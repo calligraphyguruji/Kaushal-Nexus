@@ -277,7 +277,7 @@ export default function EmployerMatching() {
             <button
               type="button"
               onClick={() => setIsEmployerNetworkModalOpen(true)}
-              className="group inline-flex items-center gap-2 rounded-lg bg-sky-400 hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-slate-950 shadow-xs transition glow-cyan cursor-pointer"
+              className="group inline-flex items-center gap-2 rounded-lg bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-white dark:text-slate-950 transition cursor-pointer"
             >
               <Building2 size={14} />
               <span>{mandates.length} Corporate Mandates</span>

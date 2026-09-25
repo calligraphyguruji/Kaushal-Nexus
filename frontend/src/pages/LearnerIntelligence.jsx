@@ -697,7 +697,7 @@ export default function LearnerIntelligence() {
                   type="button"
                   onClick={() => setIsDossierModalOpen(true)}
                   disabled={!currentLearner}
-                  className="group inline-flex items-center gap-2 rounded-lg bg-sky-400 hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-slate-950 shadow-xs transition glow-cyan disabled:opacity-50 cursor-pointer"
+                  className="group inline-flex items-center gap-2 rounded-lg bg-sky-500 hover:bg-sky-600 dark:bg-sky-400 dark:hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-white dark:text-slate-950 transition disabled:opacity-50 cursor-pointer"
                 >
                   <Award size={14} />
                   <span>Verify NCVET Credential</span>
@@ -1220,8 +1220,8 @@ export default function LearnerIntelligence() {
                   onClick={() => handleSelectCandidate(learner.id)}
                   className={`flex items-center gap-2.5 rounded-lg border p-2 text-left transition-all cursor-pointer ${
                     isSelected
-                      ? "border-sky-400 bg-[#0f1c33] text-white shadow-sm ring-1 ring-sky-400/40 glow-cyan"
-                      : "border-[#1e293b] bg-[#070d18] text-slate-300 hover:border-slate-700 hover:bg-[#0b1528]"
+                      ? "border-sky-500/50 bg-sky-50/50 dark:bg-sky-950/30 dark:border-sky-400/40 text-slate-900 dark:text-white"
+                      : "border-[var(--border-subtle)] bg-[var(--surface-card)] text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/20"
                   }`}
                 >
                   <div
