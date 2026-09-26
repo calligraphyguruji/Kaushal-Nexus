@@ -10,6 +10,7 @@ Allow: /favicon.svg
 Allow: /apple-touch-icon.png
 Allow: /og-image.png
 Allow: /manifest.json
+Allow: /google1cf29498a3612bd6.html
 
 # Disallow Private & Authenticated Consoles
 Disallow: /login
