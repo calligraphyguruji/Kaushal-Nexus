@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Briefcase,
   Search,
@@ -41,6 +41,7 @@ import { CardSkeleton } from "../components/common/Skeletons";
 import EmptyState from "../components/common/EmptyState";
 
 export default function AvailableInternships() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const domainParam = searchParams.get("interest");
 
@@ -516,24 +517,39 @@ export default function AvailableInternships() {
 
                 return (
                   <StaggerItem key={internship.id}>
-                    <AnimatedCard
-                      hoverable={true}
-                      className={`relative flex flex-col justify-between h-full rounded-2xl border p-6 transition-shadow ${
+                    <div
+                      onClick={(e) => {
+                        // Do not navigate if user clicked an interactive control
+                        if (e.target.closest('button, [data-interactive="true"]')) {
+                          return;
+                        }
+                        navigate(`/internships/${internship.id}`);
+                      }}
+                      className={`group relative flex flex-col justify-between h-full rounded-2xl border p-6 transition-all duration-200 cursor-pointer ${
                         isPrimary
-                          ? "border-sky-300 bg-gradient-to-b from-sky-50/40 via-white to-white dark:border-sky-900/60 dark:from-sky-950/20 dark:via-slate-900 dark:to-slate-900 shadow-xs"
-                          : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-xs"
+                          ? "border-sky-300 bg-gradient-to-b from-sky-50/40 via-white to-white dark:border-sky-900/60 dark:from-sky-950/20 dark:via-slate-900 dark:to-slate-900 shadow-xs hover:border-sky-400 dark:hover:border-sky-500 hover:shadow-lg hover:shadow-sky-500/10 hover:-translate-y-1"
+                          : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-xs hover:border-sky-300 dark:hover:border-sky-800/80 hover:shadow-lg hover:shadow-slate-900/5 dark:hover:shadow-sky-950/20 hover:-translate-y-1"
                       }`}
                     >
-                      <div className="space-y-3.5">
+                      {/* Stretched Semantic Link: covers the whole card for keyboard navigation, right-click, middle-click, and screen readers */}
+                      <Link
+                        to={`/internships/${internship.id}`}
+                        className="absolute inset-0 z-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                        aria-label={`View details for ${internship.title} at ${internship.company}`}
+                        tabIndex={0}
+                      />
+
+                      {/* Card Content (pointer-events-none lets clicks smoothly pass to the stretched Link) */}
+                      <div className="space-y-3.5 pointer-events-none relative z-1">
                         {/* Top Header: Company Avatar + Match Score Pill */}
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-center gap-3.5">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-extrabold text-white dark:bg-sky-950 dark:text-sky-300 shadow-2xs">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-extrabold text-white dark:bg-sky-950 dark:text-sky-300 shadow-2xs group-hover:scale-105 transition-transform duration-200">
                               {internship.logoText || "IN"}
                             </div>
                             <div>
                               <div className="flex items-center gap-1.5">
-                                <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+                                <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-slate-950 dark:group-hover:text-white transition-colors">
                                   {internship.company}
                                 </span>
                                 {internship.verifiedBadge && (
@@ -572,7 +588,7 @@ export default function AvailableInternships() {
                         </div>
 
                         {/* Role Title */}
-                        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white line-clamp-1">
+                        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                           {internship.title}
                         </h3>
 
@@ -628,24 +644,29 @@ export default function AvailableInternships() {
                       </div>
 
                       {/* Bottom Action Footer */}
-                      <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
-                        <Link
-                          to={`/internships/${internship.id}`}
-                          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-700 hover:text-sky-600 dark:text-slate-300 dark:hover:text-sky-400 cursor-pointer transition-colors"
-                        >
+                      <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800 relative z-10">
+                        {/* View Details visible indication / trigger */}
+                        <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-700 group-hover:text-sky-600 dark:text-slate-300 dark:group-hover:text-sky-400 cursor-pointer transition-colors">
                           <span>View Details</span>
-                          <ArrowRight size={14} />
-                        </Link>
+                          <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-1" />
+                        </span>
 
                         {isApplied ? (
-                          <div className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-xs sm:text-sm font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                          <div
+                            data-interactive="true"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-xs sm:text-sm font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 pointer-events-auto"
+                          >
                             <CheckCircle2 size={15} />
                             <span>Applied</span>
                           </div>
                         ) : (
                           <AnimatedButton
-                            onClick={() => setApplicationModal(internship)}
-                            className="rounded-xl bg-sky-600 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-2xs hover:bg-sky-500 cursor-pointer"
+                            data-interactive="true"
+                            onClick={(e) => {
+                              e?.stopPropagation?.();
+                              setApplicationModal(internship);
+                            }}
+                            className="rounded-xl bg-sky-600 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-2xs hover:bg-sky-500 cursor-pointer pointer-events-auto relative z-20"
                             icon={Send}
                             iconPosition="left"
                           >
@@ -653,7 +674,7 @@ export default function AvailableInternships() {
                           </AnimatedButton>
                         )}
                       </div>
-                    </AnimatedCard>
+                    </div>
                   </StaggerItem>
                 );
               })}
