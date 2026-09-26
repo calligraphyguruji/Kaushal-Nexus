@@ -29,6 +29,7 @@ const SaasTemplatePage = lazy(() => import("./pages/SaasTemplatePage"));
 const LearnerAssessmentPage = lazy(() => import("./pages/LearnerAssessmentPage"));
 const AvailableInternships = lazy(() => import("./pages/AvailableInternships"));
 const InternshipDetails = lazy(() => import("./pages/InternshipDetails"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Lightweight cyber-navy fallback indicator
 function RouteFallback() {
@@ -210,29 +211,25 @@ function App() {
             <Route
               path="/internships"
               element={
-                <ProtectedRoute>
-                  <DashboardLayout>
-                    <AvailableInternships />
-                  </DashboardLayout>
-                </ProtectedRoute>
+                <DashboardLayout>
+                  <AvailableInternships />
+                </DashboardLayout>
               }
             />
 
             <Route
               path="/internships/:internshipId"
               element={
-                <ProtectedRoute>
-                  <DashboardLayout>
-                    <InternshipDetails />
-                  </DashboardLayout>
-                </ProtectedRoute>
+                <DashboardLayout>
+                  <InternshipDetails />
+                </DashboardLayout>
               }
             />
 
-            {/* Default Fallback Redirect */}
+            {/* 404 Fallback Route */}
             <Route
               path="*"
-              element={<Navigate to="/" replace />}
+              element={<NotFound />}
             />
           </Routes>
         </Suspense>

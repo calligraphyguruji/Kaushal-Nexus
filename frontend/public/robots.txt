@@ -1,0 +1,32 @@
+# KaushalNexus Robots Configuration
+# https://kaushal-nexus.vercel.app
+
+User-agent: *
+Allow: /
+Allow: /internships
+Allow: /internships/*
+Allow: /assets/
+Allow: /favicon.svg
+Allow: /apple-touch-icon.png
+Allow: /og-image.png
+Allow: /manifest.json
+
+# Disallow Private & Authenticated Consoles
+Disallow: /login
+Disallow: /otp-login
+Disallow: /phone-login
+Disallow: /register
+Disallow: /verify-email
+Disallow: /msde
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /learner
+Disallow: /learner-intelligence
+Disallow: /skill-gap
+Disallow: /regional
+Disallow: /matching
+Disallow: /settings
+Disallow: /assessment
+
+# XML Sitemap Index
+Sitemap: https://kaushal-nexus.vercel.app/sitemap.xml

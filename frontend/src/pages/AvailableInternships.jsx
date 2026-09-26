@@ -39,6 +39,7 @@ import {
 } from "../components/motion/MotionSystem";
 import { CardSkeleton } from "../components/common/Skeletons";
 import EmptyState from "../components/common/EmptyState";
+import SEOHead from "../components/SEOHead";
 
 export default function AvailableInternships() {
   const navigate = useNavigate();
@@ -211,6 +212,25 @@ export default function AvailableInternships() {
 
   return (
     <PageTransition className="space-y-6">
+      <SEOHead
+        title="Internships — KaushalNexus"
+        description="Explore skill-matched internship opportunities based on your skills, interests, location and career readiness."
+        canonicalPath="/internships"
+        keywords="internships, vocational training, skill matching, jobs, tech careers, AI matching, NSQF, India"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "name": "Skill-Matched Internships on KaushalNexus",
+          "description": "Directory of verified internship opportunities matched by candidate skill ontology and career readiness.",
+          "numberOfItems": ALL_INTERNSHIPS.length,
+          "itemListElement": ALL_INTERNSHIPS.slice(0, 20).map((item, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "url": `https://kaushal-nexus.vercel.app/internships/${item.id}`,
+            "name": `${item.title} at ${item.company}`
+          }))
+        }}
+      />
       {/* 1. TOP CANDIDATE INTELLIGENCE BANNER */}
       <div className="relative overflow-hidden rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50/80 via-white to-indigo-50/40 p-6 sm:p-7 shadow-xs dark:border-sky-900/50 dark:from-slate-900 dark:via-slate-900/90 dark:to-sky-950/30">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">

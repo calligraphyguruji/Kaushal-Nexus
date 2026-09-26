@@ -27,6 +27,7 @@ import { authApi } from "../api/auth";
 import { getPostLoginRedirect } from "../utils/permissions";
 import { motion, AnimatePresence } from "motion/react";
 import { PageTransition } from "../components/motion/MotionSystem";
+import SEOHead from "../components/SEOHead";
 
 // Pre-seeded Demo Credentials for Institutional Testing (6 Authoritative Backend Roles)
 const DEMO_PRESETS = [
@@ -426,6 +427,12 @@ export default function Login({ defaultMode }) {
 
   return (
     <PageTransition className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 selection:bg-blue-100 selection:text-blue-900 dark:bg-slate-950 dark:text-slate-100 dark:selection:bg-blue-950 dark:selection:text-blue-200">
+      <SEOHead
+        title="Sign In — KaushalNexus"
+        description="Access the KaushalNexus National Skill Intelligence Platform."
+        canonicalPath="/login"
+        noindex={true}
+      />
       {/* Top Ministry Header */}
       <header className="border-b border-slate-200/80 bg-white/90 px-6 py-3.5 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/90">
         <div className="mx-auto flex max-w-6xl items-center justify-between">

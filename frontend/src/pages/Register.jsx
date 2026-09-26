@@ -35,6 +35,7 @@ import DiagnosticMCQAssessment from "../components/DiagnosticMCQAssessment";
 import { upsertCandidateInRegistry } from "../utils/candidateRegistry";
 import { motion } from "motion/react";
 import { PageTransition } from "../components/motion/MotionSystem";
+import SEOHead from "../components/SEOHead";
 
 const FORM_INPUT_CLASSES =
   "h-9 w-full rounded-lg border border-slate-200 bg-slate-50/80 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 transition-colors focus:border-sky-500 focus:bg-white focus:text-slate-900 focus:outline-none dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-sky-500 dark:focus:bg-slate-800 dark:focus:text-white";
@@ -367,6 +368,12 @@ export default function Register() {
 
   return (
     <PageTransition className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 selection:bg-sky-500/20 selection:text-sky-600 dark:bg-slate-950 dark:text-slate-100 font-sans">
+      <SEOHead
+        title="Register — KaushalNexus"
+        description="Register for KaushalNexus National Skill Intelligence Platform."
+        canonicalPath="/register"
+        noindex={true}
+      />
       {/* Top Header */}
       <header className="border-b border-slate-200/80 bg-white/90 px-6 py-3.5 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/90">
         <div className="mx-auto flex max-w-6xl items-center justify-between">

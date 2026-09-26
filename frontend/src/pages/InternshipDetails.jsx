@@ -39,6 +39,7 @@ import {
   AnimatedModal,
 } from "../components/motion/MotionSystem";
 import { Skeleton } from "../components/common/Skeletons";
+import SEOHead from "../components/SEOHead";
 
 export default function InternshipDetails() {
   const { internshipId } = useParams();
@@ -189,6 +190,7 @@ export default function InternshipDetails() {
   if (loading) {
     return (
       <PageTransition className="space-y-6 max-w-6xl mx-auto">
+        <SEOHead title="Loading Internship Opportunity | KaushalNexus" noindex={true} />
         <div className="flex items-center gap-2">
           <Skeleton className="h-5 w-32" />
         </div>
@@ -223,6 +225,11 @@ export default function InternshipDetails() {
   if (error || !internship) {
     return (
       <PageTransition className="max-w-2xl mx-auto py-12">
+        <SEOHead
+          title="Internship Not Found | KaushalNexus"
+          description="The requested internship opening could not be found or has expired."
+          noindex={true}
+        />
         <div className="rounded-2xl border border-rose-200 bg-rose-50/50 dark:border-rose-900/50 dark:bg-rose-950/20 p-8 text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400">
             <AlertTriangle size={28} />
@@ -259,8 +266,55 @@ export default function InternshipDetails() {
   const matchScore = internship.matchScore || 75;
   const isHighMatch = matchScore >= 80;
 
+  const stipendNumeric = parseInt(String(internship.stipend || "").replace(/[^0-9]/g, ""), 10) || 25000;
+  const isRemote = (internship.work_mode || "").toLowerCase().includes("remote");
+
+  const jobPostingSchema = {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    "title": internship.title,
+    "description": internship.description || `${internship.title} internship position at ${internship.company}.`,
+    "datePosted": "2026-03-01",
+    "validThrough": "2026-12-31",
+    "employmentType": "INTERN",
+    "hiringOrganization": {
+      "@type": "Organization",
+      "name": internship.company,
+      "sameAs": "https://kaushal-nexus.vercel.app"
+    },
+    "jobLocation": {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": internship.location || "India",
+        "addressCountry": "IN"
+      }
+    },
+    ...(isRemote ? { "jobLocationType": "TELECOMMUTE" } : {}),
+    "baseSalary": {
+      "@type": "MonetaryAmount",
+      "currency": "INR",
+      "value": {
+        "@type": "QuantitativeValue",
+        "value": stipendNumeric,
+        "unitText": "MONTH"
+      }
+    },
+    "skills": (internship.required_skills || []).join(", ")
+  };
+
   return (
     <PageTransition className="space-y-6 max-w-6xl mx-auto">
+      <SEOHead
+        title={`${internship.title} at ${internship.company} | KaushalNexus`}
+        description={
+          internship.description?.slice(0, 155) ||
+          `Apply for ${internship.title} at ${internship.company}. Verified skill competencies, stipend ${internship.stipend}, located in ${internship.location}.`
+        }
+        canonicalPath={`/internships/${internship.id}`}
+        keywords={`${internship.title}, ${internship.company}, internship, ${internship.location}, ${internship.work_mode}, skill matching, NSQF, KaushalNexus`}
+        structuredData={jobPostingSchema}
+      />
       {/* 1. TOP BREADCRUMB NAVIGATION */}
       <nav className="flex items-center justify-between">
         <Link

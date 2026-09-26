@@ -44,6 +44,7 @@ import {
   FadeIn,
   AnimatedButton,
 } from "../components/motion/MotionSystem";
+import SEOHead from "../components/SEOHead";
 
 export default function LearnerHome() {
   const navigate = useNavigate();
@@ -118,6 +119,27 @@ export default function LearnerHome() {
 
   return (
     <PageTransition className="min-h-screen bg-slate-50 dark:bg-[#070d18] text-slate-900 dark:text-[#f1f5f9] selection:bg-sky-500/20 selection:text-sky-500 font-sans antialiased transition-colors duration-150">
+      <SEOHead
+        title="KaushalNexus — AI-Powered Skill & Employment Intelligence"
+        description="AI-powered skill assessment, skill-gap analysis, internship matching and employment intelligence for learners and workforce development."
+        canonicalPath="/"
+        keywords="skill intelligence, skill gap analysis, AI internship matching, NSQF, vocational training, workforce development, India"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "KaushalNexus",
+          "url": "https://kaushal-nexus.vercel.app/",
+          "description": "AI-Powered Skill & Employment Intelligence Layer",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://kaushal-nexus.vercel.app/internships?search={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        }}
+      />
       {/* ========================================================================= */}
       {/* 1. FIXED INSTITUTIONAL HEADER NAVIGATION                                  */}
       {/* ========================================================================= */}
@@ -145,6 +167,13 @@ export default function LearnerHome() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden xl:flex items-center gap-8 h-full font-sans text-sm">
+            <Link
+              to="/internships"
+              className="text-slate-600 hover:text-sky-600 dark:text-[#cbd5e1] dark:hover:text-sky-400 font-medium py-7 transition-colors flex items-center gap-1.5"
+            >
+              <Briefcase size={16} className="text-sky-600 dark:text-sky-400" />
+              <span>Internships</span>
+            </Link>
             {isAuthenticated && user?.role === "LEARNER" ? (
               <>
                 <Link
@@ -276,6 +305,14 @@ export default function LearnerHome() {
         {mobileMenuOpen && (
           <div className="xl:hidden border-b border-[#1e293b] bg-[#070d18]/95 px-6 py-5 shadow-2xl backdrop-blur-md">
             <nav className="flex flex-col space-y-3 font-mono text-xs">
+              <Link
+                to="/internships"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 py-1.5 text-slate-300 hover:text-sky-400 font-semibold"
+              >
+                <Briefcase size={14} className="text-sky-400" />
+                <span>Available Internships</span>
+              </Link>
               {isAuthenticated && user?.role === "LEARNER" ? (
                 <>
                   <Link
@@ -1156,6 +1193,7 @@ export default function LearnerHome() {
             <div className="space-y-2">
               <span className="text-slate-900 dark:text-[#e2e8f0] font-bold uppercase text-[11px]">Core Suites</span>
               <ul className="space-y-1.5 text-[11px]">
+                <li><Link to="/internships" className="text-slate-600 hover:text-sky-600 dark:text-[#94a3b8] dark:hover:text-sky-400 font-medium transition-colors">Available Internships</Link></li>
                 <li><Link to="/learner" className="text-slate-600 hover:text-sky-600 dark:text-[#94a3b8] dark:hover:text-sky-400 transition-colors">Learner 360°</Link></li>
                 <li><Link to="/skill-gap" className="text-slate-600 hover:text-sky-600 dark:text-[#94a3b8] dark:hover:text-sky-400 transition-colors">Skill Gap Matrix</Link></li>
                 <li><Link to="/regional" className="text-slate-600 hover:text-sky-600 dark:text-[#94a3b8] dark:hover:text-sky-400 transition-colors">Regional Analytics</Link></li>
