@@ -53,35 +53,35 @@ export default function TechStatCard({
       <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-sky-500/5 blur-xl group-hover:bg-sky-500/10 transition-colors" />
 
       <div className="relative z-10 flex items-start justify-between">
-        <div className="space-y-1">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <div className="space-y-1.5">
+          <p className="font-mono text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             {title}
           </p>
-          <div className={`font-mono text-3xl font-extrabold tracking-tight ${currentVariant.valueColor}`}>
+          <div className={`font-mono text-3xl sm:text-4xl font-extrabold tracking-tight ${currentVariant.valueColor}`}>
             {value}
           </div>
         </div>
 
         {Icon && (
           <div
-            className={`flex h-10 w-10 items-center justify-center rounded-lg border ${currentVariant.iconBg}`}
+            className={`flex h-11 w-11 items-center justify-center rounded-xl border ${currentVariant.iconBg}`}
           >
-            <Icon size={20} />
+            <Icon size={22} />
           </div>
         )}
       </div>
 
       {(subtitle || trend) && (
-        <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-[#1e293b] pt-3 text-xs">
+        <div className="mt-3.5 flex items-center justify-between gap-2.5 border-t border-slate-100 dark:border-[#1e293b] pt-3 text-xs sm:text-sm">
           {subtitle && (
-            <span className="text-slate-500 dark:text-slate-400 text-[11px] truncate">
+            <span className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm truncate">
               {subtitle}
             </span>
           )}
 
           {trend && (
             <div
-              className={`flex items-center gap-1 font-mono text-[11px] font-bold ${
+              className={`flex items-center gap-1 font-mono text-xs font-bold ${
                 trendDirection === "up"
                   ? "text-emerald-600 dark:text-emerald-400"
                   : trendDirection === "down"
@@ -90,11 +90,11 @@ export default function TechStatCard({
               }`}
             >
               {trendDirection === "up" ? (
-                <TrendingUp size={13} />
+                <TrendingUp size={14} />
               ) : trendDirection === "down" ? (
-                <TrendingDown size={13} />
+                <TrendingDown size={14} />
               ) : (
-                <Minus size={13} />
+                <Minus size={14} />
               )}
               <span>{trend}</span>
             </div>
@@ -103,7 +103,7 @@ export default function TechStatCard({
       )}
 
       {footerText && (
-        <div className="mt-2.5 border-t border-slate-100 dark:border-[#1e293b] pt-2 font-mono text-[10px] text-slate-500 dark:text-slate-400">
+        <div className="mt-3 border-t border-slate-100 dark:border-[#1e293b] pt-2 font-mono text-xs text-slate-500 dark:text-slate-400">
           {footerText}
         </div>
       )}

@@ -761,19 +761,19 @@ export default function LearnerIntelligence() {
                 setViewMode("pipeline");
                 navigate("/learner?tab=pipeline");
               }}
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition cursor-pointer ${
                 effectiveViewMode === "pipeline"
                   ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#0b1528]"
               }`}
             >
               <BrainCircuit
-                size={15}
+                size={16}
                 className={effectiveViewMode === "pipeline" ? "text-slate-950" : "text-sky-500"}
               />
               <span>My Assessment &amp; Skill Gaps</span>
               <span
-                className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                className={`px-2 py-0.5 rounded text-[11px] font-mono uppercase font-bold ${
                   effectiveViewMode === "pipeline"
                     ? "bg-slate-950/20 text-slate-950"
                     : "bg-sky-500/10 text-sky-600 dark:text-sky-400"
@@ -789,19 +789,19 @@ export default function LearnerIntelligence() {
                 setViewMode("remediation");
                 navigate("/learner?tab=remediation");
               }}
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition cursor-pointer ${
                 effectiveViewMode === "remediation"
                   ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#0b1528]"
               }`}
             >
               <GraduationCap
-                size={15}
+                size={16}
                 className={effectiveViewMode === "remediation" ? "text-slate-950" : "text-emerald-500"}
               />
               <span>Recommended Learning Path</span>
               <span
-                className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                className={`px-2 py-0.5 rounded text-[11px] font-mono uppercase font-bold ${
                   effectiveViewMode === "remediation"
                     ? "bg-slate-950/20 text-slate-950"
                     : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
@@ -814,18 +814,18 @@ export default function LearnerIntelligence() {
             <button
               type="button"
               onClick={() => navigate("/internships")}
-              className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#0b1528] transition cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#0b1528] transition cursor-pointer"
             >
-              <Briefcase size={15} className="text-sky-500" />
+              <Briefcase size={16} className="text-sky-500" />
               <span>Available Internships</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400">
+              <span className="px-2 py-0.5 rounded text-[11px] font-mono uppercase font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400">
                 10+ Matches
               </span>
             </button>
           </div>
 
-          <div className="hidden lg:flex items-center gap-2 pr-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
-            <Sparkles size={13} className="text-sky-500" />
+          <div className="hidden lg:flex items-center gap-2 pr-3 font-mono text-xs text-slate-500 dark:text-slate-400">
+            <Sparkles size={14} className="text-sky-500" />
             <span>AI Diagnostic Engine · BKT Skill Tracing Active</span>
           </div>
         </div>
@@ -838,16 +838,16 @@ export default function LearnerIntelligence() {
                 setViewMode("impact");
                 navigate("/learner?tab=impact");
               }}
-              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition cursor-pointer ${
                 viewMode === "impact"
                   ? "bg-indigo-500 text-slate-950 font-bold shadow-md shadow-indigo-500/20"
                   : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
               }`}
             >
-              <TrendingUp size={14} className={viewMode === "impact" ? "text-slate-950" : "text-indigo-400"} />
+              <TrendingUp size={16} className={viewMode === "impact" ? "text-slate-950" : "text-indigo-400"} />
               <span>Impact &amp; Optimization</span>
               <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                className={`px-2 py-0.5 rounded text-[11px] font-mono uppercase font-bold ${
                   viewMode === "impact" ? "bg-slate-950/20 text-slate-950" : "bg-indigo-500/10 text-indigo-400"
                 }`}
               >
@@ -861,16 +861,16 @@ export default function LearnerIntelligence() {
                 setViewMode("intelligence");
                 navigate("/learner?tab=intelligence");
               }}
-              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition cursor-pointer ${
                 viewMode === "intelligence"
                   ? "bg-cyan-400 text-slate-950 font-bold shadow-md shadow-cyan-400/20"
                   : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
               }`}
             >
-              <Compass size={14} className={viewMode === "intelligence" ? "text-slate-950" : "text-cyan-400"} />
+              <Compass size={16} className={viewMode === "intelligence" ? "text-slate-950" : "text-cyan-400"} />
               <span>Career Intelligence</span>
               <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                className={`px-2 py-0.5 rounded text-[11px] font-mono uppercase font-bold ${
                   viewMode === "intelligence" ? "bg-slate-950/20 text-slate-950" : "bg-cyan-500/10 text-cyan-400"
                 }`}
               >
@@ -884,16 +884,16 @@ export default function LearnerIntelligence() {
                 setViewMode("placement");
                 navigate("/learner?tab=placement");
               }}
-              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition cursor-pointer ${
                 viewMode === "placement"
                   ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
                   : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
               }`}
             >
-              <Activity size={14} className={viewMode === "placement" ? "text-slate-950" : "text-sky-400"} />
+              <Activity size={16} className={viewMode === "placement" ? "text-slate-950" : "text-sky-400"} />
               <span>AI Placement &amp; ML Studio</span>
               <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                className={`px-2 py-0.5 rounded text-[11px] font-mono uppercase font-bold ${
                   viewMode === "placement" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
                 }`}
               >
@@ -907,16 +907,16 @@ export default function LearnerIntelligence() {
                 setViewMode("career");
                 navigate("/learner?tab=career");
               }}
-              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition cursor-pointer ${
                 viewMode === "career"
                   ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
                   : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
               }`}
             >
-              <Compass size={14} className={viewMode === "career" ? "text-slate-950" : "text-sky-400"} />
+              <Compass size={16} className={viewMode === "career" ? "text-slate-950" : "text-sky-400"} />
               <span>Career Journey &amp; Outcomes</span>
               <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                className={`px-2 py-0.5 rounded text-[11px] font-mono uppercase font-bold ${
                   viewMode === "career" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
                 }`}
               >
@@ -930,16 +930,16 @@ export default function LearnerIntelligence() {
                 setViewMode("remediation");
                 navigate("/learner?tab=remediation");
               }}
-              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition cursor-pointer ${
                 viewMode === "remediation"
                   ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
                   : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
               }`}
             >
-              <BrainCircuit size={14} className={viewMode === "remediation" ? "text-slate-950" : "text-sky-400"} />
+              <BrainCircuit size={16} className={viewMode === "remediation" ? "text-slate-950" : "text-sky-400"} />
               <span>Adaptive Learning &amp; Remediation</span>
               <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                className={`px-2 py-0.5 rounded text-[11px] font-mono uppercase font-bold ${
                   viewMode === "remediation" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
                 }`}
               >
@@ -953,16 +953,16 @@ export default function LearnerIntelligence() {
                 setViewMode("pipeline");
                 navigate("/learner?tab=pipeline");
               }}
-              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition cursor-pointer ${
                 viewMode === "pipeline"
                   ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
                   : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
               }`}
             >
-              <Sparkles size={14} className={viewMode === "pipeline" ? "text-slate-950" : "text-sky-400"} />
+              <Sparkles size={16} className={viewMode === "pipeline" ? "text-slate-950" : "text-sky-400"} />
               <span>Learner Pipeline (7 Stages)</span>
               <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                className={`px-2 py-0.5 rounded text-[11px] font-mono uppercase font-bold ${
                   viewMode === "pipeline" ? "bg-slate-950/20 text-slate-950" : "bg-sky-500/10 text-sky-400"
                 }`}
               >
@@ -976,16 +976,16 @@ export default function LearnerIntelligence() {
                 setViewMode("dossier");
                 navigate(selectedLearnerId ? `/learner/${encodeURIComponent(selectedLearnerId)}?tab=dossier` : "/learner?tab=dossier");
               }}
-              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition cursor-pointer ${
                 viewMode === "dossier"
                   ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
                   : "text-slate-400 hover:text-slate-200 hover:bg-[#0b1528]"
               }`}
             >
-              <UserRound size={14} className={viewMode === "dossier" ? "text-slate-950" : "text-sky-400"} />
+              <UserRound size={16} className={viewMode === "dossier" ? "text-slate-950" : "text-sky-400"} />
               <span>Candidate 360° Dossier</span>
               <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
+                className={`px-2 py-0.5 rounded text-[11px] font-mono ${
                   viewMode === "dossier" ? "bg-slate-950/20 text-slate-950" : "bg-slate-800 text-slate-400"
                 }`}
               >
@@ -994,8 +994,8 @@ export default function LearnerIntelligence() {
             </button>
           </div>
 
-          <div className="hidden lg:flex items-center gap-2 pr-3 font-mono text-[11px] text-slate-400">
-            <BrainCircuit size={13} className="text-sky-400" />
+          <div className="hidden lg:flex items-center gap-2 pr-3 font-mono text-xs text-slate-400">
+            <BrainCircuit size={15} className="text-sky-400" />
             <span>BKT Updates · Career Outcomes · Calibrated XGBoost</span>
           </div>
         </div>
@@ -1097,27 +1097,27 @@ export default function LearnerIntelligence() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="relative w-full sm:w-64">
+          <div className="flex items-center gap-2.5">
+            <div className="relative w-full sm:w-72">
               <Search
-                size={13}
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500"
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               />
               <input
                 type="text"
                 placeholder="Search candidate name, ID, district..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 w-full rounded-lg border border-[#1e293b] bg-[#070d18] pl-8 pr-7 font-sans text-xs text-slate-200 placeholder:text-slate-500 transition-all focus:border-sky-400 focus:outline-none"
+                className="h-10 sm:h-10.5 w-full rounded-xl border border-[#1e293b] bg-[#070d18] pl-9.5 pr-8 font-sans text-sm text-slate-200 placeholder:text-slate-500 transition-all focus:border-sky-400 focus:outline-none"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
                   title="Clear candidate search"
                 >
-                  <X size={12} />
+                  <X size={14} />
                 </button>
               )}
             </div>
@@ -1134,17 +1134,17 @@ export default function LearnerIntelligence() {
                 }
               }}
               disabled={learnersList.length === 0}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#070d18] px-2.5 py-1.5 font-mono text-xs font-semibold text-slate-300 hover:border-slate-700 hover:text-white disabled:opacity-50 cursor-pointer"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-[#1e293b] bg-[#070d18] h-10 sm:h-10.5 px-3.5 py-2 font-mono text-xs sm:text-sm font-semibold text-slate-300 hover:border-slate-700 hover:text-white disabled:opacity-50 cursor-pointer shadow-xs"
               title="Export visible candidates to CSV"
             >
-              <Download size={13} />
+              <Download size={15} />
               <span className="hidden sm:inline">Export CSV</span>
             </button>
           </div>
         </div>
 
         {/* Learner Switcher Grid */}
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-2.5">
           {(() => {
             const candidateMatchesSearch = (c, q) => {
               if (!q) return true;
@@ -1175,12 +1175,12 @@ export default function LearnerIntelligence() {
               return Array.from({ length: 6 }).map((_, idx) => (
                 <div
                   key={idx}
-                  className="flex h-12 w-64 animate-pulse items-center gap-2.5 rounded-lg border border-[#1e293b] bg-[#070d18] p-2"
+                  className="flex h-14 w-68 animate-pulse items-center gap-3 rounded-xl border border-[#1e293b] bg-[#070d18] p-2.5"
                 >
-                  <div className="h-7 w-7 rounded-md bg-[#1e293b]" />
-                  <div className="flex-1 space-y-1">
-                    <div className="h-3 w-24 rounded bg-[#1e293b]" />
-                    <div className="h-2 w-32 rounded bg-[#1e293b]" />
+                  <div className="h-8 w-8 rounded-lg bg-[#1e293b]" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3.5 w-28 rounded bg-[#1e293b]" />
+                    <div className="h-2.5 w-36 rounded bg-[#1e293b]" />
                   </div>
                 </div>
               ));
@@ -1198,9 +1198,9 @@ export default function LearnerIntelligence() {
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
-                      className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-sky-400/30 bg-sky-500/10 px-3 py-1 font-mono text-[11px] font-semibold text-sky-400 hover:bg-sky-500/20 cursor-pointer"
+                      className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-sky-400/30 bg-sky-500/10 px-3 py-1 font-mono text-xs font-semibold text-sky-400 hover:bg-sky-500/20 cursor-pointer"
                     >
-                      <X size={12} />
+                      <X size={13} />
                       <span>Clear Search Filter</span>
                     </button>
                   )}
@@ -1218,28 +1218,28 @@ export default function LearnerIntelligence() {
                   key={learner.id}
                   type="button"
                   onClick={() => handleSelectCandidate(learner.id)}
-                  className={`flex items-center gap-2.5 rounded-lg border p-2 text-left transition-all cursor-pointer ${
+                  className={`flex items-center gap-3 rounded-xl border p-2.5 text-left transition-all cursor-pointer ${
                     isSelected
                       ? "border-sky-400 bg-[#0f1c33] text-white shadow-sm ring-1 ring-sky-400/40 glow-cyan"
                       : "border-[#1e293b] bg-[#070d18] text-slate-300 hover:border-slate-700 hover:bg-[#0b1528]"
                   }`}
                 >
                   <div
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md font-mono text-[11px] font-bold text-slate-950 bg-gradient-to-br ${avatarGrad}`}
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold text-slate-950 bg-gradient-to-br ${avatarGrad}`}
                   >
                     {initials}
                   </div>
 
                   <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="max-w-[130px] truncate text-xs font-heading font-bold text-white">
+                    <div className="flex items-center gap-2">
+                      <span className="max-w-[140px] truncate text-xs sm:text-sm font-heading font-bold text-white">
                         {learner.full_name}
                       </span>
-                      <span className="rounded border border-sky-400/20 bg-sky-500/10 px-1.5 py-0.2 font-mono text-[9px] font-bold text-sky-300">
+                      <span className="rounded border border-sky-400/20 bg-sky-500/10 px-1.5 py-0.5 font-mono text-[10px] sm:text-[11px] font-bold text-sky-300">
                         {learner.employment_readiness_score ?? learner.readiness_score ?? 75}%
                       </span>
                     </div>
-                    <p className="max-w-[170px] truncate font-mono text-[10px] text-slate-400">
+                    <p className="max-w-[180px] truncate font-mono text-xs text-slate-400">
                       {learner.district_name || learner.district_id} · {learner.nsqf_level || "NSQF"}
                     </p>
                   </div>

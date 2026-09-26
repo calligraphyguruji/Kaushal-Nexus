@@ -42,32 +42,32 @@ export default function IntelligenceCard({
   return (
     <div className={`rounded-xl border p-5 sm:p-6 transition-all ${current.border}`}>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-start gap-3.5">
-          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${current.iconBg}`}>
+        <div className="flex items-start gap-4">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${current.iconBg}`}>
             {type === "warning" ? (
-              <AlertTriangle size={18} strokeWidth={2} />
+              <AlertTriangle size={20} strokeWidth={2} />
             ) : type === "success" ? (
-              <CheckCircle2 size={18} strokeWidth={2} />
+              <CheckCircle2 size={20} strokeWidth={2} />
             ) : (
-              <BrainCircuit size={18} strokeWidth={2} />
+              <BrainCircuit size={20} strokeWidth={2} />
             )}
           </div>
 
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider border ${current.badge}`}>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className={`inline-flex items-center rounded-lg px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider border ${current.badge}`}>
                 {category}
               </span>
-              <span className={`text-[11px] font-medium ${current.metaText}`}>
+              <span className={`text-xs sm:text-sm font-medium ${current.metaText}`}>
                 {confidence} · {sampleSize}
               </span>
             </div>
 
-            <h3 className="mt-1.5 text-base font-bold sm:text-lg tracking-tight">
+            <h3 className="mt-2 text-lg sm:text-xl font-bold tracking-tight">
               {title}
             </h3>
 
-            <p className={`mt-1 text-xs leading-relaxed sm:text-sm max-w-3xl ${current.bodyText}`}>
+            <p className={`mt-1.5 text-sm sm:text-base leading-relaxed max-w-3xl ${current.bodyText}`}>
               {description}
             </p>
           </div>
@@ -77,10 +77,10 @@ export default function IntelligenceCard({
           <button
             type="button"
             onClick={onAction}
-            className={`group inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold shadow-xs transition-all active:scale-[0.98] ${current.button}`}
+            className={`group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-4.5 py-2.5 text-xs sm:text-sm font-semibold shadow-xs transition-all active:scale-[0.98] cursor-pointer ${current.button}`}
           >
             <span>{actionText}</span>
-            <ArrowUpRight size={13} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <ArrowUpRight size={15} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </button>
         )}
       </div>

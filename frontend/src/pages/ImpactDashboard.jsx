@@ -274,14 +274,14 @@ export default function ImpactDashboard() {
               type="button"
               onClick={() => fetchDashboardData(true)}
               disabled={isRefreshing || loading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#1e293b] bg-[#0b1528] px-3.5 py-2.5 font-mono text-xs sm:text-sm font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
               title="Refresh live data"
             >
-              <RefreshCw size={13} className={isRefreshing ? "animate-spin text-sky-400" : "text-sky-400"} />
+              <RefreshCw size={14} className={isRefreshing ? "animate-spin text-sky-400" : "text-sky-400"} />
               <span>{isRefreshing ? "Syncing..." : "Sync Live DB"}</span>
             </button>
 
-            <div className="relative flex items-center rounded-lg border border-[#1e293b] bg-[#0b1528] p-1 font-mono text-xs">
+            <div className="relative flex items-center rounded-xl border border-[#1e293b] bg-[#0b1528] p-1 font-mono text-xs sm:text-sm">
               {["Q1 2026", "Q2 2026", "YTD 2026"].map((period) => {
                 const isActive = selectedPeriod === period;
                 return (
@@ -289,7 +289,7 @@ export default function ImpactDashboard() {
                     key={period}
                     type="button"
                     onClick={() => setSelectedPeriod(period)}
-                    className={`relative z-10 rounded-md px-3 py-1.5 font-semibold transition-colors cursor-pointer ${
+                    className={`relative z-10 rounded-lg px-3.5 py-2 font-semibold transition-colors cursor-pointer ${
                       isActive
                         ? "text-slate-950 font-bold"
                         : "text-slate-400 hover:text-white"
@@ -298,7 +298,7 @@ export default function ImpactDashboard() {
                     {isActive && (
                       <motion.div
                         layoutId="impactPeriodPill"
-                        className="absolute inset-0 z-[-1] rounded-md bg-sky-400 shadow-xs"
+                        className="absolute inset-0 z-[-1] rounded-lg bg-sky-400 shadow-xs"
                         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                       />
                     )}
@@ -311,12 +311,12 @@ export default function ImpactDashboard() {
             <button
               type="button"
               onClick={() => setIsExportModalOpen(true)}
-              className="group inline-flex items-center gap-1.5 rounded-lg bg-sky-400 hover:bg-sky-300 px-3.5 py-2 font-heading text-xs font-bold text-slate-950 shadow-xs transition glow-cyan cursor-pointer"
+              className="group inline-flex items-center gap-2 rounded-xl bg-sky-400 hover:bg-sky-300 px-4 py-2.5 font-heading text-xs sm:text-sm font-bold text-slate-950 shadow-xs transition glow-cyan cursor-pointer"
             >
-              <Download size={14} />
+              <Download size={16} />
               <span>Export Audit Dossier</span>
               <ArrowUpRight
-                size={12}
+                size={14}
                 className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
               />
             </button>

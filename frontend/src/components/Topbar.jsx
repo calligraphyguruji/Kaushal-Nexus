@@ -313,31 +313,31 @@ export default function Topbar({ onMenuClick }) {
     : "KN";
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 dark:border-[#1e293b] bg-white/90 dark:bg-[#070d18]/90 px-4 backdrop-blur-md transition-colors duration-150 sm:px-6 lg:px-8 text-slate-800 dark:text-[#f1f5f9]">
+    <header className="sticky top-0 z-30 flex h-18 items-center justify-between border-b border-slate-200 dark:border-[#1e293b] bg-white/90 dark:bg-[#070d18]/90 px-4 backdrop-blur-md transition-colors duration-150 sm:px-6 lg:px-8 text-slate-800 dark:text-[#f1f5f9]">
       {/* Left Section: Mobile Menu Toggle, Breadcrumbs, and Role Switcher */}
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3.5">
         <button
           type="button"
           onClick={onMenuClick}
           aria-label="Open navigation menu"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#0f1c33] hover:text-slate-900 dark:hover:text-white lg:hidden"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#0f1c33] hover:text-slate-900 dark:hover:text-white lg:hidden cursor-pointer"
         >
-          <Menu size={18} />
+          <Menu size={20} />
         </button>
 
         {/* Section Breadcrumb */}
-        <div className="hidden sm:flex items-center gap-1.5 font-mono text-xs">
-          <span className="text-slate-400 dark:text-slate-500 uppercase">{breadcrumb.group}</span>
+        <div className="hidden sm:flex items-center gap-2 text-xs sm:text-sm">
+          <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{breadcrumb.group}</span>
           <span className="text-slate-300 dark:text-slate-600">/</span>
-          <span className="text-slate-900 dark:text-white font-semibold">{breadcrumb.section}</span>
+          <span className="font-semibold text-slate-900 dark:text-white">{breadcrumb.section}</span>
         </div>
 
-        <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-[#1e293b]" />
+        <div className="hidden sm:block h-5 w-px bg-slate-200 dark:bg-[#1e293b]" />
 
         {/* Role / Institutional Context Selector */}
         {isLearner ? (
-          <span className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 font-mono text-[11px] font-semibold text-sky-700 dark:text-sky-300">
-            <ShieldCheck size={13} className="text-sky-500" />
+          <span className="inline-flex items-center gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 font-mono text-xs font-semibold text-sky-700 dark:text-sky-300">
+            <ShieldCheck size={14} className="text-sky-500" />
             Candidate Portal
           </span>
         ) : (
@@ -346,7 +346,7 @@ export default function Topbar({ onMenuClick }) {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="h-8 cursor-pointer appearance-none rounded-lg border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] pl-2.5 pr-7 font-mono text-[11px] font-semibold text-slate-800 dark:text-slate-200 transition-colors hover:border-slate-400 dark:hover:border-slate-600 focus:border-sky-500 dark:focus:border-sky-400 focus:outline-none"
+                className="h-9 cursor-pointer appearance-none rounded-xl border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] pl-3 pr-8 font-mono text-xs font-semibold text-slate-800 dark:text-slate-200 transition-colors hover:border-slate-400 dark:hover:border-slate-600 focus:border-sky-500 dark:focus:border-sky-400 focus:outline-none"
               >
                 {roles.map((r) => (
                   <option key={r} value={r} className="bg-white dark:bg-[#0b1528] text-slate-800 dark:text-slate-200">
@@ -355,12 +355,12 @@ export default function Topbar({ onMenuClick }) {
                 ))}
               </select>
               <ChevronDown
-                size={13}
-                className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400"
+                size={14}
+                className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400"
               />
             </div>
 
-            <span className="hidden xl:inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 px-2.5 py-0.5 text-[10px] font-mono">
+            <span className="hidden xl:inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 px-3 py-1 text-xs font-mono">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
               Sandbox Active · NCVET
             </span>
@@ -369,14 +369,14 @@ export default function Topbar({ onMenuClick }) {
       </div>
 
       {/* Right Section: Global Search, Theme Toggle, Alerts, User Profile */}
-      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+      <div className="flex shrink-0 items-center gap-2.5 sm:gap-3.5">
         {/* Global Search Container (Only available to Institutional Staff) */}
         {!isLearner && (
           <div ref={searchContainerRef} className="relative hidden md:block">
             <form onSubmit={handleSearchSubmit}>
               <Search
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
               />
               <input
                 ref={inputRef}
@@ -387,11 +387,11 @@ export default function Topbar({ onMenuClick }) {
                   if (searchQuery.trim().length >= 2) setShowDropdown(true);
                 }}
                 placeholder="Search sector, district, candidate..."
-                className="h-8 w-52 lg:w-64 rounded-lg border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] pl-8 pr-7 font-sans text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:border-sky-500 dark:focus:border-sky-400 focus:bg-white dark:focus:bg-[#070d18] focus:outline-none"
+                className="h-9 sm:h-10 w-56 lg:w-72 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] pl-9 pr-8 font-sans text-xs sm:text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:border-sky-500 dark:focus:border-sky-400 focus:bg-white dark:focus:bg-[#070d18] focus:outline-none"
               />
               {isSearching ? (
                 <Loader2
-                  size={13}
+                  size={14}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 animate-spin text-sky-500 dark:text-sky-400"
                 />
               ) : searchQuery ? (
@@ -401,12 +401,12 @@ export default function Topbar({ onMenuClick }) {
                     setSearchQuery("");
                     setShowDropdown(false);
                   }}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
                 >
-                  <X size={13} />
+                  <X size={14} />
                 </button>
               ) : (
-                <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-slate-200 dark:border-[#1e293b] bg-slate-200 dark:bg-[#070d18] px-1.5 py-0.5 font-mono text-[9px] text-slate-500 dark:text-slate-400">
+                <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-slate-200 dark:border-[#1e293b] bg-slate-200 dark:bg-[#070d18] px-2 py-0.5 font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                   /
                 </kbd>
               )}
@@ -587,11 +587,11 @@ export default function Topbar({ onMenuClick }) {
             type="button"
             onClick={() => setShowNotifications(!showNotifications)}
             aria-label="Notifications"
-            className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] text-slate-600 dark:text-slate-300 transition hover:bg-slate-200 dark:hover:bg-[#0f1c33] hover:text-slate-900 dark:hover:text-white"
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-[#1e293b] bg-slate-100 dark:bg-[#0b1528] text-slate-600 dark:text-slate-300 transition hover:bg-slate-200 dark:hover:bg-[#0f1c33] hover:text-slate-900 dark:hover:text-white cursor-pointer"
           >
-            <Bell size={14} />
-            <span className="absolute right-1.5 top-1.5 flex h-1.5 w-1.5">
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
+            <Bell size={16} />
+            <span className="absolute right-2 top-2 flex h-2 w-2">
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
             </span>
           </button>
 
@@ -602,23 +602,23 @@ export default function Topbar({ onMenuClick }) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -4 }}
                 transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute right-0 mt-2 w-80 rounded-xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-3 shadow-xl dark:shadow-2xl z-50 text-slate-800 dark:text-slate-200"
+                className="absolute right-0 mt-2 w-88 rounded-2xl border border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#0b1528] p-4 shadow-xl dark:shadow-2xl z-50 text-slate-800 dark:text-slate-200"
               >
-                <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1e293b] pb-2">
-                  <span className="font-heading text-xs font-bold text-slate-900 dark:text-white">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1e293b] pb-2.5">
+                  <span className="font-heading text-sm font-bold text-slate-900 dark:text-white">
                     System Alerts
                   </span>
-                  <span className="rounded border border-sky-400/20 bg-sky-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-sky-600 dark:text-sky-300">
+                  <span className="rounded-full border border-sky-400/20 bg-sky-500/10 px-2.5 py-0.5 font-mono text-xs font-bold text-sky-600 dark:text-sky-300">
                     3 Active
                   </span>
                 </div>
 
-                <div className="mt-2 divide-y divide-slate-100 dark:divide-[#1e293b]">
+                <div className="mt-2.5 divide-y divide-slate-100 dark:divide-[#1e293b]">
                   {notifications.map((n) => (
-                    <div key={n.id} className="py-2 text-xs">
+                    <div key={n.id} className="py-2.5 text-xs sm:text-sm">
                       <p className="font-semibold text-slate-800 dark:text-slate-100">{n.title}</p>
-                      <p className="mt-0.5 text-slate-500 dark:text-slate-400 text-[11px] leading-tight">{n.desc}</p>
-                      <span className="mt-1 block font-mono text-[10px] text-slate-400 dark:text-slate-500">{n.time}</span>
+                      <p className="mt-1 text-slate-500 dark:text-slate-400 text-xs leading-relaxed">{n.desc}</p>
+                      <span className="mt-1.5 block font-mono text-[10px] text-slate-400 dark:text-slate-500">{n.time}</span>
                     </div>
                   ))}
                 </div>
@@ -626,7 +626,7 @@ export default function Topbar({ onMenuClick }) {
                 <button
                   type="button"
                   onClick={() => setShowNotifications(false)}
-                  className="mt-2 w-full rounded-lg bg-slate-100 dark:bg-[#070d18] border border-slate-200 dark:border-[#1e293b] py-1.5 text-center font-mono text-xs text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
+                  className="mt-3 w-full rounded-xl bg-slate-100 dark:bg-[#070d18] border border-slate-200 dark:border-[#1e293b] py-2 text-center font-mono text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
                 >
                   Acknowledge All Alerts
                 </button>
@@ -635,30 +635,30 @@ export default function Topbar({ onMenuClick }) {
           </AnimatePresence>
         </div>
 
-        <div className="hidden h-5 w-px bg-slate-200 dark:bg-[#1e293b] sm:block" />
+        <div className="hidden h-6 w-px bg-slate-200 dark:bg-[#1e293b] sm:block" />
 
         {/* User Identity / Profile Menu with Logout */}
         <div ref={profileContainerRef} className="relative">
           <button
             type="button"
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center gap-2 rounded-lg p-1 transition hover:bg-slate-100 dark:hover:bg-[#0b1528] cursor-pointer"
+            className="flex items-center gap-2.5 rounded-xl p-1.5 transition hover:bg-slate-100 dark:hover:bg-[#0b1528] cursor-pointer"
             title="Institutional Profile & Settings"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-sky-400/30 bg-gradient-to-br from-sky-500 to-indigo-600 font-mono text-xs font-bold text-slate-950 shadow-xs">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-sky-400/30 bg-gradient-to-br from-sky-500 to-indigo-600 font-mono text-xs font-extrabold text-slate-950 shadow-xs">
               {initials}
             </div>
 
             <div className="hidden text-left xl:block">
-              <p className="font-heading text-xs font-bold leading-tight text-slate-900 dark:text-white">
+              <p className="font-heading text-xs sm:text-sm font-bold leading-tight text-slate-900 dark:text-white">
                 {user?.full_name || "Aman Mishra"}
               </p>
-              <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+              <p className="font-mono text-xs text-slate-500 dark:text-slate-400 leading-tight">
                 {user?.role ? formatRole(user.role) : "Central Policy Advisor"}
               </p>
             </div>
 
-            <ChevronDown size={13} className="text-slate-400" />
+            <ChevronDown size={14} className="text-slate-400" />
           </button>
 
           {/* Profile Dropdown */}

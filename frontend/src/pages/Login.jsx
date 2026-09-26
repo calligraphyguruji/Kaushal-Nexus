@@ -652,15 +652,15 @@ export default function Login({ defaultMode }) {
 
             {/* Conditional Form: Email Mode vs Phone Mode */}
             {loginMode === "email" ? (
-              <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+              <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
                     Institutional Email / User ID
                   </label>
-                  <div className="relative mt-1.5">
+                  <div className="relative mt-2">
                     <Mail
-                      size={15}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+                      size={18}
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                     />
                     <input
                       type="email"
@@ -668,21 +668,21 @@ export default function Login({ defaultMode }) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@msde.gov.in"
-                      className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/80 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                      className="h-11 sm:h-12 w-full rounded-xl border border-slate-200 bg-slate-50/80 pl-10 pr-3.5 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                     />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
                       Security Password
                     </label>
                   </div>
-                  <div className="relative mt-1.5">
+                  <div className="relative mt-2">
                     <Lock
-                      size={15}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+                      size={18}
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                     />
                     <input
                       type={showPassword ? "text" : "password"}
@@ -690,15 +690,15 @@ export default function Login({ defaultMode }) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••••••"
-                      className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/80 pl-9 pr-10 text-xs text-slate-900 placeholder:text-slate-400 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                      className="h-11 sm:h-12 w-full rounded-xl border border-slate-200 bg-slate-50/80 pl-10 pr-11 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 cursor-pointer"
                       title={showPassword ? "Hide password" : "Show password"}
                     >
-                      {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
                 </div>
@@ -706,18 +706,18 @@ export default function Login({ defaultMode }) {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="group mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 font-semibold text-xs text-white shadow-xs transition hover:bg-blue-700 active:scale-[0.99] disabled:opacity-60"
+                  className="group mt-3 flex h-11 sm:h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 font-bold text-sm text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.99] disabled:opacity-60 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 size={15} className="animate-spin" />
+                      <Loader2 size={17} className="animate-spin" />
                       <span>Verifying Credentials...</span>
                     </>
                   ) : (
                     <>
-                      <span>Authenticate & Access Platform</span>
+                      <span>Authenticate &amp; Access Platform</span>
                       <ArrowRight
-                        size={14}
+                        size={16}
                         className="transition-transform group-hover:translate-x-0.5"
                       />
                     </>
@@ -743,14 +743,14 @@ export default function Login({ defaultMode }) {
               </form>
             ) : !otpSent ? (
               /* Phone Input Form */
-              <form onSubmit={handleSendOtp} className="mt-5 space-y-4">
+              <form onSubmit={handleSendOtp} className="mt-6 space-y-5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
                     Mobile Number (India)
                   </label>
-                  <div className="relative mt-1.5 flex items-center">
-                    <div className="absolute left-3 flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                      <Phone size={14} className="text-slate-400" />
+                  <div className="relative mt-2 flex items-center">
+                    <div className="absolute left-3.5 flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                      <Phone size={16} className="text-slate-400" />
                       <span>+91</span>
                     </div>
                     <input
@@ -760,10 +760,10 @@ export default function Login({ defaultMode }) {
                       value={phoneNumber.replace(/^\+91/, "").replace(/\s/g, "")}
                       onChange={(e) => setPhoneNumber(e.target.value)}
                       placeholder="98765 43210"
-                      className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/80 pl-16 pr-3 font-mono text-xs tracking-wider text-slate-900 placeholder:text-slate-400 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                      className="h-11 sm:h-12 w-full rounded-xl border border-slate-200 bg-slate-50/80 pl-18 pr-3.5 font-mono text-sm tracking-wider text-slate-900 placeholder:text-slate-400 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                     />
                   </div>
-                  <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                     A 6-digit verification code will be dispatched via SMS.
                   </p>
                 </div>
@@ -771,25 +771,25 @@ export default function Login({ defaultMode }) {
                 <button
                   type="submit"
                   disabled={isSubmitting || phoneNumber.replace(/\D/g, "").length < 10}
-                  className="group flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 font-semibold text-xs text-white shadow-xs transition hover:bg-blue-700 active:scale-[0.99] disabled:opacity-60"
+                  className="group flex h-11 sm:h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 font-bold text-sm text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.99] disabled:opacity-60 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 size={15} className="animate-spin" />
+                      <Loader2 size={17} className="animate-spin" />
                       <span>Requesting Verification Code...</span>
                     </>
                   ) : (
                     <>
                       <span>Send Verification OTP</span>
                       <ArrowRight
-                        size={14}
+                        size={16}
                         className="transition-transform group-hover:translate-x-0.5"
                       />
                     </>
                   )}
                 </button>
 
-                <div className="pt-2 flex flex-col items-center gap-1 text-center text-xs text-slate-500 dark:text-slate-400">
+                <div className="pt-2 flex flex-col items-center gap-1.5 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                   <div>
                     New candidate?{" "}
                     <Link
@@ -804,22 +804,22 @@ export default function Login({ defaultMode }) {
                     <button
                       type="button"
                       onClick={() => setLoginMode("email")}
-                      className="font-semibold text-blue-600 underline hover:text-blue-700 dark:text-blue-400"
+                      className="font-semibold text-blue-600 underline hover:text-blue-700 dark:text-blue-400 cursor-pointer"
                     >
-                      Use Email & Password
+                      Use Email &amp; Password
                     </button>
                   </div>
                 </div>
               </form>
             ) : (
               /* OTP Verification Form */
-              <form onSubmit={handleVerifyOtp} className="mt-5 space-y-4">
+              <form onSubmit={handleVerifyOtp} className="mt-6 space-y-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
                       Enter 6-Digit OTP
                     </label>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       Code sent to{" "}
                       <span className="font-semibold text-slate-800 dark:text-slate-200">
                         {normalizePhoneNumber(phoneNumber)}
@@ -829,7 +829,7 @@ export default function Login({ defaultMode }) {
                   <button
                     type="button"
                     onClick={handleChangePhone}
-                    className="text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                    className="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-400 cursor-pointer"
                   >
                     Change
                   </button>
@@ -845,32 +845,32 @@ export default function Login({ defaultMode }) {
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                   placeholder="••••••"
-                  className="h-12 w-full rounded-lg border border-slate-200 bg-slate-50/80 text-center font-mono text-xl font-bold tracking-widest text-slate-900 placeholder:text-slate-300 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:placeholder:text-slate-600 dark:focus:bg-slate-800"
+                  className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/80 text-center font-mono text-2xl font-bold tracking-widest text-slate-900 placeholder:text-slate-300 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:placeholder:text-slate-600 dark:focus:bg-slate-800"
                 />
 
                 <button
                   type="submit"
                   disabled={isSubmitting || otp.length < 6}
-                  className="group flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 font-semibold text-xs text-white shadow-xs transition hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-60"
+                  className="group flex h-11 sm:h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 font-bold text-sm text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-60 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 size={15} className="animate-spin" />
-                      <span>Verifying Code & Logging In...</span>
+                      <Loader2 size={17} className="animate-spin" />
+                      <span>Verifying Code &amp; Logging In...</span>
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 size={15} />
-                      <span>Verify & Sign In</span>
+                      <CheckCircle2 size={17} />
+                      <span>Verify &amp; Sign In</span>
                     </>
                   )}
                 </button>
 
-                <div className="flex items-center justify-between pt-1 text-xs">
+                <div className="flex items-center justify-between pt-1 text-xs sm:text-sm">
                   <button
                     type="button"
                     onClick={handleChangePhone}
-                    className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                    className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
                   >
                     ← Edit Number
                   </button>
@@ -885,9 +885,9 @@ export default function Login({ defaultMode }) {
                       type="button"
                       disabled={isSubmitting}
                       onClick={handleSendOtp}
-                      className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                      className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:underline dark:text-blue-400 cursor-pointer"
                     >
-                      <RotateCcw size={12} />
+                      <RotateCcw size={14} />
                       <span>Resend OTP</span>
                     </button>
                   )}
@@ -897,30 +897,30 @@ export default function Login({ defaultMode }) {
 
             {/* Quick Demo Preset Switcher for Role Evaluation (Only visible in Email mode) */}
             {loginMode === "email" && (
-              <div className="mt-6 border-t border-slate-200/80 pt-4 dark:border-slate-800">
+              <div className="mt-6 border-t border-slate-200/80 pt-5 dark:border-slate-800">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Pre-Loaded RBAC Demo Roles (Click to Autofill):
                   </span>
                 </div>
 
-                <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   {DEMO_PRESETS.map((preset) => (
                     <button
                       key={preset.roleName}
                       type="button"
                       onClick={() => applyPreset(preset)}
-                      className="flex flex-col items-start rounded-lg border border-slate-200/80 bg-slate-50/80 p-2 text-left transition hover:border-blue-300 hover:bg-blue-50/50 dark:border-slate-800 dark:bg-slate-800/60 dark:hover:border-blue-700 dark:hover:bg-blue-950/30"
+                      className="flex flex-col items-start rounded-xl border border-slate-200/80 bg-slate-50/80 p-2.5 text-left transition hover:border-blue-400 hover:bg-blue-50/50 dark:border-slate-800 dark:bg-slate-800/60 dark:hover:border-blue-600 dark:hover:bg-blue-950/30 cursor-pointer"
                     >
-                      <div className="flex w-full items-center justify-between gap-1">
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">
+                      <div className="flex w-full items-center justify-between gap-1.5">
+                        <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                           {preset.roleName}
                         </span>
-                        <span className="shrink-0 rounded border border-slate-200/80 bg-slate-200/80 px-1 py-0.5 text-[9px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                        <span className="shrink-0 rounded-md border border-slate-200/80 bg-slate-200/80 px-1.5 py-0.5 text-[10px] sm:text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
                           {preset.badge}
                         </span>
                       </div>
-                      <span className="mt-0.5 w-full truncate text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                      <span className="mt-1 w-full truncate font-mono text-[11px] font-medium text-slate-600 dark:text-slate-400">
                         {preset.email}
                       </span>
                     </button>

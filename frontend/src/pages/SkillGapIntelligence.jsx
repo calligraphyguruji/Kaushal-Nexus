@@ -217,15 +217,15 @@ export default function SkillGapIntelligence() {
         description="Evidence-based skill supply, demand, and training-gap intelligence."
         breadcrumbs={["National Platform", "Skill Gap Intelligence"]}
         actions={
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             <button
               type="button"
               onClick={() => fetchSkillGapData(true)}
               disabled={isRefreshing || loading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#1e293b] bg-[#0b1528] px-3.5 py-2.5 font-mono text-xs sm:text-sm font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
               title="Sync latest skill gap calculations"
             >
-              <RefreshCw size={13} className={isRefreshing ? "animate-spin text-rose-400" : "text-rose-400"} />
+              <RefreshCw size={14} className={isRefreshing ? "animate-spin text-rose-400" : "text-rose-400"} />
               <span>{isRefreshing ? "Syncing..." : "Sync Live Deficits"}</span>
             </button>
 
@@ -236,22 +236,22 @@ export default function SkillGapIntelligence() {
                 setActionSuccessMsg(`✅ Exported ${filteredSkills.length} skill shortage deficits to CSV.`);
               }}
               disabled={filteredSkills.length === 0}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e293b] bg-[#0b1528] px-3 py-2 font-mono text-xs font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#1e293b] bg-[#0b1528] px-3.5 py-2.5 font-mono text-xs sm:text-sm font-semibold text-slate-300 shadow-xs transition hover:border-slate-700 hover:bg-[#0f1c33] hover:text-white disabled:opacity-50 cursor-pointer"
               title="Export filtered deficit matrix to CSV"
             >
-              <Download size={13} className="text-sky-400" />
+              <Download size={14} className="text-sky-400" />
               <span>Export Matrix (CSV)</span>
             </button>
 
             <button
               type="button"
               onClick={() => handleOpenInterventionModal(null)}
-              className="group inline-flex items-center gap-2 rounded-lg bg-rose-600 hover:bg-rose-500 px-3.5 py-2 font-heading text-xs font-bold text-white shadow-xs transition active:scale-[0.98] cursor-pointer"
+              className="group inline-flex items-center gap-2 rounded-xl bg-rose-600 hover:bg-rose-500 px-4 py-2.5 font-heading text-xs sm:text-sm font-bold text-white shadow-xs transition active:scale-[0.98] cursor-pointer"
             >
-              <BrainCircuit size={14} />
+              <BrainCircuit size={16} />
               <span>Launch National Bridge Program</span>
               <ArrowUpRight
-                size={12}
+                size={14}
                 className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
               />
             </button>
@@ -412,25 +412,25 @@ export default function SkillGapIntelligence() {
               title="Priority Skill Shortages — Demand vs. Supply Delta"
               subtitle="Comparing active employer mandate demand against certified candidate availability"
               actions={
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <div className="relative">
                     <Search
-                      size={13}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500"
+                      size={15}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                     />
                     <input
                       type="text"
                       placeholder="Filter skills or district..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-8 w-44 rounded-lg border border-[#1e293b] bg-[#070d18] pl-8 pr-2.5 font-sans text-xs text-slate-200 placeholder:text-slate-500 transition-all focus:border-sky-400 focus:outline-none"
+                      className="h-10 w-48 sm:w-56 rounded-xl border border-[#1e293b] bg-[#070d18] pl-9 pr-3 font-sans text-xs sm:text-sm text-slate-200 placeholder:text-slate-500 transition-all focus:border-sky-400 focus:outline-none"
                     />
                   </div>
 
                   <select
                     value={selectedSeverity}
                     onChange={(e) => setSelectedSeverity(e.target.value)}
-                    className="h-8 rounded-lg border border-[#1e293b] bg-[#070d18] px-2 font-mono text-xs font-semibold text-slate-300 focus:border-sky-400 focus:outline-none cursor-pointer"
+                    className="h-10 rounded-xl border border-[#1e293b] bg-[#070d18] px-3 font-mono text-xs sm:text-sm font-semibold text-slate-300 focus:border-sky-400 focus:outline-none cursor-pointer"
                   >
                     <option value="All">All Severity</option>
                     <option value="Critical">Critical</option>
@@ -441,12 +441,12 @@ export default function SkillGapIntelligence() {
                   <select
                     value={selectedSector}
                     onChange={(e) => setSelectedSector(e.target.value)}
-                    className="h-8 rounded-lg border border-[#1e293b] bg-[#070d18] px-2 font-mono text-xs font-semibold text-slate-300 focus:border-sky-400 focus:outline-none cursor-pointer"
+                    className="h-10 rounded-xl border border-[#1e293b] bg-[#070d18] px-3 font-mono text-xs sm:text-sm font-semibold text-slate-300 focus:border-sky-400 focus:outline-none cursor-pointer"
                   >
                     <option value="All">All Sectors</option>
                     <option value="IT-ITeS">IT-ITeS</option>
-                    <option value="Analytics">Analytics & BFSI</option>
-                    <option value="Automotive">Automotive & Heavy</option>
+                    <option value="Analytics">Analytics &amp; BFSI</option>
+                    <option value="Automotive">Automotive &amp; Heavy</option>
                     <option value="Digital">Digital Economy</option>
                   </select>
                 </div>
@@ -456,17 +456,17 @@ export default function SkillGapIntelligence() {
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[620px] text-left">
                 <thead>
-                  <tr className="border-b border-[#1e293b] font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    <th className="pb-3">Skill / Sector</th>
-                    <th className="pb-3">District</th>
-                    <th className="pb-3">Employer Demand</th>
-                    <th className="pb-3">Trained Supply</th>
-                    <th className="pb-3 text-right">Shortage Gap</th>
-                    <th className="pb-3 text-right">Affected</th>
-                    <th className="pb-3 text-right">Severity</th>
+                  <tr className="border-b border-[#1e293b] font-mono text-xs font-bold uppercase tracking-wider text-slate-400">
+                    <th className="pb-3.5">Skill / Sector</th>
+                    <th className="pb-3.5">District</th>
+                    <th className="pb-3.5">Employer Demand</th>
+                    <th className="pb-3.5">Trained Supply</th>
+                    <th className="pb-3.5 text-right">Shortage Gap</th>
+                    <th className="pb-3.5 text-right">Affected</th>
+                    <th className="pb-3.5 text-right">Severity</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1e293b] text-xs">
+                <tbody className="divide-y divide-[#1e293b] text-sm">
                   {loading ? (
                     Array.from({ length: 6 }).map((_, idx) => (
                       <tr key={idx}>

@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }) {
       />
 
       {/* Main Layout Area */}
-      <div className="min-w-0 flex-1 flex flex-col min-h-screen lg:ml-64 transition-[margin] duration-200">
+      <div className="min-w-0 flex-1 flex flex-col min-h-screen lg:ml-72 transition-[margin] duration-200">
         <Topbar
           onMenuClick={() => setSidebarOpen(true)}
         />

@@ -119,27 +119,27 @@ export default function Sidebar({ open, onClose }) {
 
       {/* Main Sidebar Aside */}
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col border-r border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#070d18] text-slate-800 dark:text-[#f1f5f9] transition-transform duration-200 ease-in-out lg:z-40 lg:w-64 lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col border-r border-slate-200 dark:border-[#1e293b] bg-white dark:bg-[#070d18] text-slate-800 dark:text-[#f1f5f9] transition-transform duration-200 ease-in-out lg:z-40 lg:w-72 lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand Header */}
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 dark:border-[#1e293b] px-4">
+        <div className="flex h-18 shrink-0 items-center justify-between border-b border-slate-200 dark:border-[#1e293b] px-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 shadow-xs glow-cyan">
-              <ShieldCheck size={20} strokeWidth={2.2} />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 shadow-xs glow-cyan">
+              <ShieldCheck size={22} strokeWidth={2.2} />
             </div>
 
             <div className="flex flex-col">
               <div className="flex items-center tracking-tight">
-                <span className="font-heading text-sm font-extrabold text-slate-900 dark:text-white">
+                <span className="font-heading text-base font-extrabold text-slate-900 dark:text-white">
                   KAUSHAL
                 </span>
-                <span className="font-heading text-sm font-bold text-sky-600 dark:text-sky-400">
+                <span className="font-heading text-base font-bold text-sky-600 dark:text-sky-400">
                   NEXUS
                 </span>
               </div>
-              <p className="font-mono text-[9px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 AI SKILL &amp; EMPLOYMENT INTELLIGENCE
               </p>
             </div>
@@ -149,17 +149,17 @@ export default function Sidebar({ open, onClose }) {
             type="button"
             onClick={onClose}
             aria-label="Close navigation"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-[#0b1528] dark:hover:text-white lg:hidden"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-[#0b1528] dark:hover:text-white lg:hidden cursor-pointer"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Navigation Sections */}
-        <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
+        <nav className="flex-1 space-y-6 overflow-y-auto px-3.5 py-4">
           {/* Main Navigation Group */}
-          <div className="space-y-1">
-            <div className="px-3 pb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400/80">
+          <div className="space-y-1.5">
+            <div className="px-3.5 pb-2 font-mono text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400/80">
               {navGroupTitle}
             </div>
 
@@ -174,27 +174,27 @@ export default function Sidebar({ open, onClose }) {
                   key={item.path}
                   to={item.path}
                   onClick={onClose}
-                  className={`group relative flex items-center justify-between rounded-lg px-3 py-2 text-xs font-sans transition-colors duration-150 ${
+                  className={`group relative flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-sans transition-colors duration-150 ${
                     isItemActive
-                      ? "text-sky-900 dark:text-white font-semibold"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium"
+                      ? "text-sky-950 dark:text-white font-semibold"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-medium"
                   }`}
                 >
                   {isItemActive && (
                     <motion.div
                       layoutId="sidebarActivePill"
-                      className="absolute inset-0 rounded-lg bg-sky-100/80 dark:bg-white/10 border-l-2 border-sky-600 dark:border-white shadow-2xs"
+                      className="absolute inset-0 rounded-xl bg-sky-100/90 dark:bg-white/10 border-l-[3px] border-sky-600 dark:border-white shadow-2xs"
                       transition={{ type: "spring", stiffness: 400, damping: 32 }}
                     />
                   )}
-                  <div className="relative z-10 flex items-center gap-2.5">
+                  <div className="relative z-10 flex items-center gap-3">
                     <Icon
-                      size={16}
+                      size={19}
                       strokeWidth={isItemActive ? 2.2 : 1.8}
                       className={
                         isItemActive
-                          ? "text-sky-600 dark:text-sky-400"
-                          : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300"
+                          ? "text-sky-600 dark:text-sky-400 shrink-0"
+                          : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300 shrink-0"
                       }
                     />
                     <span>{item.name}</span>
@@ -202,7 +202,7 @@ export default function Sidebar({ open, onClose }) {
 
                   {item.badge && (
                     <span
-                      className={`relative z-10 rounded-full px-2 py-0.5 text-[10px] font-mono tabular-nums border ${
+                      className={`relative z-10 rounded-full px-2.5 py-0.5 text-xs font-mono tabular-nums border ${
                         item.badgeTone === "danger"
                           ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/70"
                           : item.badgeTone === "warning"
@@ -210,7 +210,7 @@ export default function Sidebar({ open, onClose }) {
                           : item.badgeTone === "info"
                           ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/70"
                           : isItemActive
-                          ? "bg-sky-200/60 text-sky-900 border-sky-300 dark:bg-sky-500/20 dark:text-sky-200 dark:border-sky-400/40 font-bold"
+                          ? "bg-sky-200/70 text-sky-950 border-sky-300 dark:bg-sky-500/20 dark:text-sky-200 dark:border-sky-400/40 font-bold"
                           : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-[#0b1528] dark:text-slate-400 dark:border-[#1e293b]"
                       }`}
                     >
@@ -223,8 +223,8 @@ export default function Sidebar({ open, onClose }) {
           </div>
 
           {/* System Group */}
-          <div className="space-y-1">
-            <div className="px-3 pb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          <div className="space-y-1.5">
+            <div className="px-3.5 pb-2 font-mono text-xs font-bold uppercase tracking-wider text-slate-500">
               System
             </div>
 
@@ -232,9 +232,9 @@ export default function Sidebar({ open, onClose }) {
               to="/settings"
               onClick={onClose}
               className={({ isActive }) =>
-                `group flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-sans transition-all duration-150 ${
+                `group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-sans transition-all duration-150 ${
                   isActive
-                    ? "bg-sky-50 dark:bg-[#0b1528] text-sky-900 dark:text-white font-semibold border-l-2 border-sky-500 dark:border-sky-400 shadow-xs"
+                    ? "bg-sky-50 dark:bg-[#0b1528] text-sky-950 dark:text-white font-semibold border-l-[3px] border-sky-500 dark:border-sky-400 shadow-xs"
                     : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#0b1528]/60 hover:text-slate-900 dark:hover:text-slate-200 font-medium"
                 }`
               }
@@ -242,12 +242,12 @@ export default function Sidebar({ open, onClose }) {
               {({ isActive }) => (
                 <>
                   <Settings
-                    size={16}
+                    size={19}
                     strokeWidth={isActive ? 2.2 : 1.8}
                     className={
                       isActive
-                        ? "text-sky-600 dark:text-sky-400"
-                        : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300"
+                        ? "text-sky-600 dark:text-sky-400 shrink-0"
+                        : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300 shrink-0"
                     }
                   />
                   <span>Settings</span>
@@ -260,22 +260,22 @@ export default function Sidebar({ open, onClose }) {
                 to="/settings?tab=audit"
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `group flex items-center justify-between rounded-lg px-3 py-2 text-xs font-sans transition-all duration-150 ${
+                  `group flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-sans transition-all duration-150 ${
                     isActive
-                      ? "bg-indigo-50 dark:bg-[#0b1528] text-indigo-900 dark:text-white font-semibold border-l-2 border-indigo-500 dark:border-indigo-400 shadow-xs"
+                      ? "bg-indigo-50 dark:bg-[#0b1528] text-indigo-950 dark:text-white font-semibold border-l-[3px] border-indigo-500 dark:border-indigo-400 shadow-xs"
                       : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#0b1528]/60 hover:text-slate-900 dark:hover:text-slate-200 font-medium"
                   }`
                 }
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-3">
                   <Shield
-                    size={16}
+                    size={19}
                     strokeWidth={1.8}
-                    className="text-indigo-500 dark:text-indigo-400"
+                    className="text-indigo-500 dark:text-indigo-400 shrink-0"
                   />
                   <span>Compliance Audit Logs</span>
                 </div>
-                <span className="rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/50 dark:border-indigo-800 px-1.5 py-0.5 text-[9px] font-mono font-bold dark:text-indigo-300">
+                <span className="rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/50 dark:border-indigo-800 px-2 py-0.5 text-xs font-mono font-bold dark:text-indigo-300">
                   P0
                 </span>
               </NavLink>
@@ -284,32 +284,32 @@ export default function Sidebar({ open, onClose }) {
         </nav>
 
         {/* System Telemetry & Verification Footer */}
-        <div className="shrink-0 border-t border-slate-200 dark:border-[#1e293b] p-3.5">
-          <div className="rounded-xl border border-slate-200 dark:border-[#1e293b] bg-slate-50 dark:bg-[#0b1528] p-3 shadow-xs">
+        <div className="shrink-0 border-t border-slate-200 dark:border-[#1e293b] p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-[#1e293b] bg-slate-50 dark:bg-[#0b1528] p-3.5 shadow-xs">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="relative flex h-2 w-2">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2.5 w-2.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 </span>
-                <span className="font-heading text-[11px] font-bold text-slate-900 dark:text-white">
+                <span className="font-heading text-xs font-bold text-slate-900 dark:text-white">
                   {permissions.isLearner ? "Learner Portal" : "National Engine"}
                 </span>
               </div>
-              <span className="rounded border border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 px-1.5 py-0.5 font-mono text-[9px] font-bold dark:text-emerald-300">
+              <span className="rounded border border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 px-2 py-0.5 font-mono text-xs font-bold dark:text-emerald-300">
                 ACTIVE
               </span>
             </div>
 
-            <p className="mt-1.5 font-sans text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
+            <p className="mt-2 font-sans text-xs leading-relaxed text-slate-600 dark:text-slate-400">
               {permissions.isLearner
                 ? "AI-adaptive diagnostic remediation & targeted career readiness active."
                 : stats.footerSummary}
             </p>
 
-            <div className="mt-2.5 flex items-center justify-between border-t border-slate-200 dark:border-[#1e293b] pt-2 font-mono text-[10px] text-slate-500">
+            <div className="mt-3 flex items-center justify-between border-t border-slate-200 dark:border-[#1e293b] pt-2.5 font-mono text-xs text-slate-500">
               <span>{permissions.isLearner ? "NCVET · BKT Engine" : "Sync: UIDAI / NCVET"}</span>
-              <span className="text-sky-600 dark:text-sky-400/80">
+              <span className="text-sky-600 dark:text-sky-400/80 font-semibold">
                 {permissions.isLearner ? "Adaptive AI" : "Sandbox Active"}
               </span>
             </div>
